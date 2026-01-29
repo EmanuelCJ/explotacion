@@ -18,20 +18,20 @@ def login():
     """
     Login de usuario
     Body: {
-        "email": "usuario@example.com",
+        "username": "usuario",
         "password": "contraseña"
     }
     """
     try:
         data = request.get_json()
-        email = data.get('email')
+        username = data.get('username')
         password = data.get('password')
         
-        if not email or not password:
-            return jsonify({'error': 'Email y contraseña son requeridos'}), 400
+        if not username or not password:
+            return jsonify({'error': 'username y contraseña son requeridos'}), 400
         
         # Autenticar usuario
-        usuario = auth_service.authenticate(email, password)
+        usuario = auth_service.authenticate(username, password)
         
         if not usuario:
             return jsonify({'error': 'Credenciales inválidas'}), 401
@@ -44,7 +44,7 @@ def login():
         access_token = create_access_token(
             identity=usuario['id'],
             additional_claims={
-                'email': usuario['email'],
+                'username': usuario['username'],
                 'rol': usuario['rol']
             }
         )
@@ -55,7 +55,7 @@ def login():
             usuario_id=usuario['id'],
             accion='LOGIN',
             tabla='usuarios',
-            descripcion=f"Usuario {usuario['email']} inició sesión"
+            descripcion=f"Usuario {usuario['username']} inició sesión"
         )
         
         # Crear respuesta con cookies
@@ -64,7 +64,7 @@ def login():
             'usuario': {
                 'id': usuario['id'],
                 'nombre': usuario['nombre'],
-                'email': usuario['email'],
+                'username': usuario['username'],
                 'rol': usuario['rol']
             }
         }), 200)
@@ -110,7 +110,7 @@ def refresh():
         access_token = create_access_token(
             identity=usuario['id'],
             additional_claims={
-                'email': usuario['email'],
+                'username': usuario['username'],
                 'rol': usuario['rol']
             }
         )
@@ -169,7 +169,7 @@ def get_current_user():
             'usuario': {
                 'id': usuario['id'],
                 'nombre': usuario['nombre'],
-                'email': usuario['email'],
+                'username': usuario['username'],
                 'rol': usuario['rol'],
                 'activo': usuario['activo']
             }

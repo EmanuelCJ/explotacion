@@ -30,12 +30,12 @@ def create_app(config_name=None):
     from app.routers.lugar_routers import lugar_bp
     from app.routers.movimiento_routers import movimiento_bp
     
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(usuario_bp, url_prefix='/api/usuarios')
-    app.register_blueprint(producto_bp, url_prefix='/api/productos')
-    app.register_blueprint(categoria_bp, url_prefix='/api/categorias')
-    app.register_blueprint(lugar_bp, url_prefix='/api/lugares')
-    app.register_blueprint(movimiento_bp, url_prefix='/api/movimientos')
+    app.register_blueprint(auth_bp, url_prefix='/inventario/auth')
+    app.register_blueprint(usuario_bp, url_prefix='/inventario/usuarios')
+    app.register_blueprint(producto_bp, url_prefix='/inventario/productos')
+    app.register_blueprint(categoria_bp, url_prefix='/inventario/categorias')
+    app.register_blueprint(lugar_bp, url_prefix='/inventario/lugares')
+    app.register_blueprint(movimiento_bp, url_prefix='/inventario/movimientos')
     
     # Manejadores de errores
     @app.errorhandler(404)
