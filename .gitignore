@@ -6,6 +6,7 @@ frontend/dist/
 __pycache__/
 *.pyc
 backend/.venv/
+backend/.env/
 
 # Ignorar todos los .env
 *.env
