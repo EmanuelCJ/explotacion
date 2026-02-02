@@ -1,0 +1,20 @@
+1. ✅ BASE DE DATOS (Ya está lista)
+   └─ Tablas, relaciones, datos iniciales
+
+2. 🔄 CONEXIÓN A BD (Ya la tienes - conexion_DB.py)
+   └─ get_connection(), get_db_cursor()
+
+3. 📦 DAO (Data Access Objects) ← SIGUIENTE PASO
+   └─ Queries SQL puras
+   └─ usuario_DAO.py, producto_DAO.py, etc.
+
+4. ⚙️ SERVICES (Lógica de Negocio)
+   └─ Validaciones, cálculos
+   └─ Llaman a los DAO
+
+5. 🌐 ROUTERS (Endpoints HTTP) ← Después de los Services
+   └─ Reciben requests
+   └─ Llaman a Services
+
+6. 🎨 FRONTEND (Vue.js)
+   └─ Consume los endpoints
