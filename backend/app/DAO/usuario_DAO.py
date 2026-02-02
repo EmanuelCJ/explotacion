@@ -29,7 +29,7 @@ class UsuarioDAO:
             int: ID del usuario creado o None si falla
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 query = """
                     INSERT INTO usuarios 
                     (nombre, apellido, username, email, password_hash, legajo, id_localidad, activo)
@@ -71,7 +71,7 @@ class UsuarioDAO:
             }
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 # Contar total
                 count_query = "SELECT COUNT(*) as total FROM usuarios WHERE 1=1"
                 params = []
@@ -129,7 +129,7 @@ class UsuarioDAO:
             dict: Datos del usuario o None
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 query = """
                     SELECT u.*, l.nombre as localidad_nombre,
                            GROUP_CONCAT(r.nombre) as roles
@@ -148,39 +148,33 @@ class UsuarioDAO:
     
     @staticmethod
     def get_by_username(username: str) -> dict:
-        """
-        Obtener un usuario por username
-        
-        Args:
-            username (str): Username del usuario
-        
-        Returns:
-            dict: Datos del usuario o None
-        """
-        try:
-            with ConectDB.get_cursor() as cursor:
+        connection = ConectDB.get_connection()
+        with connection.cursor(dictionary=True) as cursor:
+            try:
                 query = """
-                    SELECT u.*, l.nombre as localidad_nombre,
-                           GROUP_CONCAT(r.nombre) as roles,
-                           GROUP_CONCAT(r.id_rol) as roles_ids
-                    FROM usuarios u
-                    LEFT JOIN localidades l ON u.id_localidad = l.id_localidad
-                    LEFT JOIN usuarios_roles ur ON u.id_usuario = ur.id_usuario
-                    LEFT JOIN roles r ON ur.id_rol = r.id_rol
-                    WHERE u.username = %s
-                    GROUP BY u.id_usuario
+                SELECT u.*, l.nombre as localidad_nombre,
+                       GROUP_CONCAT(r.nombre) as roles,
+                       GROUP_CONCAT(r.id_rol) as roles_ids
+                FROM usuarios u
+                LEFT JOIN localidades l ON u.id_localidad = l.id_localidad
+                LEFT JOIN usuarios_roles ur ON u.id_usuario = ur.id_usuario
+                LEFT JOIN roles r ON ur.id_rol = r.id_rol
+                WHERE u.username = %s
+                GROUP BY u.id_usuario
                 """
                 cursor.execute(query, (username,))
                 return cursor.fetchone()
-        except Exception as e:
-            print(f"Error getting usuario by username: {e}")
-            raise
+            except Exception as e:
+                print(f"Error getting usuario by username: {e}")
+                raise
+            finally:
+                connection.close()
     
     @staticmethod
     def get_by_email(email: str) -> dict:
         """Obtener usuario por email"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 query = "SELECT * FROM usuarios WHERE email = %s"
                 cursor.execute(query, (email,))
                 return cursor.fetchone()
@@ -201,7 +195,7 @@ class UsuarioDAO:
             bool: True si se actualizó, False si no
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 # Construir query dinámicamente
                 fields = []
                 values = []
@@ -227,7 +221,7 @@ class UsuarioDAO:
     def update_password(usuario_id: int, password_hash: str) -> bool:
         """Actualizar contraseña de usuario"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 query = "UPDATE usuarios SET password_hash = %s WHERE id_usuario = %s"
                 cursor.execute(query, (password_hash, usuario_id))
                 return cursor.rowcount > 0
@@ -239,7 +233,7 @@ class UsuarioDAO:
     def update_ultimo_login(usuario_id: int) -> bool:
         """Actualizar fecha de último login"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 query = "UPDATE usuarios SET ultimo_login = NOW() WHERE id_usuario = %s"
                 cursor.execute(query, (usuario_id,))
                 return cursor.rowcount > 0
@@ -259,7 +253,7 @@ class UsuarioDAO:
             bool: True si se eliminó, False si no
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 query = "UPDATE usuarios SET activo = 0 WHERE id_usuario = %s"
                 cursor.execute(query, (usuario_id,))
                 return cursor.rowcount > 0
@@ -271,7 +265,7 @@ class UsuarioDAO:
     def exists_username(username: str) -> bool:
         """Verificar si existe un username"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 query = "SELECT COUNT(*) as count FROM usuarios WHERE username = %s"
                 cursor.execute(query, (username,))
                 result = cursor.fetchone()
@@ -284,7 +278,7 @@ class UsuarioDAO:
     def exists_email(email: str) -> bool:
         """Verificar si existe un email"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 query = "SELECT COUNT(*) as count FROM usuarios WHERE email = %s"
                 cursor.execute(query, (email,))
                 result = cursor.fetchone()
@@ -297,7 +291,7 @@ class UsuarioDAO:
     def asignar_rol(usuario_id: int, rol_id: int, asignado_por: int = None) -> bool:
         """Asignar un rol a un usuario"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 query = """
                     INSERT INTO usuarios_roles (id_usuario, id_rol, asignado_por)
                     VALUES (%s, %s, %s)
@@ -312,7 +306,7 @@ class UsuarioDAO:
     def quitar_rol(usuario_id: int, rol_id: int) -> bool:
         """Quitar un rol de un usuario"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 query = "DELETE FROM usuarios_roles WHERE id_usuario = %s AND id_rol = %s"
                 cursor.execute(query, (usuario_id, rol_id))
                 return cursor.rowcount > 0
@@ -324,7 +318,7 @@ class UsuarioDAO:
     def get_permisos(usuario_id: int) -> list:
         """Obtener todos los permisos de un usuario"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 query = """
                     SELECT DISTINCT p.nombre, p.descripcion, p.recurso
                     FROM usuarios_roles ur
@@ -343,7 +337,7 @@ class UsuarioDAO:
     def tiene_permiso(usuario_id: int, nombre_permiso: str) -> bool:
         """Verificar si un usuario tiene un permiso específico"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            with ConectDB.get_connection() as cursor:
                 query = """
                     SELECT COUNT(*) as count
                     FROM usuarios_roles ur

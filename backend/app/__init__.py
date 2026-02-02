@@ -1,4 +1,4 @@
-python"""
+"""
 Aplicación Flask - Aguas Rionegrinas
 Inicialización y registro de routers
 """

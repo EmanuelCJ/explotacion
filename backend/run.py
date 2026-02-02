@@ -1,68 +1,54 @@
+"""
+Archivo principal para ejecutar el servidor
+Aguas Rionegrinas - Sistema de Inventario
+"""
+
 import os
 from app import create_app
+from dotenv import load_dotenv
+
+# Cargar variables de entorno
+load_dotenv()
 
 # Crear aplicación
 app = create_app()
 
 if __name__ == '__main__':
-    # Configuración de desarrollo
+    # Configuración
     debug_mode = os.getenv('FLASK_ENV', 'development') == 'development'
     port = int(os.getenv('PORT', 5000))
+    host = os.getenv('HOST', '0.0.0.0')
     
-    print(f"""
-    ╔══════════════════════════════════════════╗
-    ║  🚀 API REST - Sistema de Inventario    ║
-    ╠══════════════════════════════════════════╣
-    ║  Servidor: http://localhost:{port}       ║
-    ║  Entorno: {os.getenv('FLASK_ENV', 'development')}                   ║
-    ║  Debug: {debug_mode}                            ║
-    ╚══════════════════════════════════════════╝
+    print("\n" + "="*70)
+    print("🌊 AGUAS RIONEGRINAS - SISTEMA DE INVENTARIO")
+    print("="*70)
+    print(f"\n📍 Servidor: http://{host}:{port}")
+    print(f"🔧 Entorno: {os.getenv('FLASK_ENV', 'development')}")
+    print(f"🐛 Debug: {debug_mode}")
+    print("\n📋 ENDPOINTS DISPONIBLES:\n")
+    print("🔐 Autenticación:")
+    print("   POST   /api/auth/login")
+    print("   POST   /api/auth/logout")
+    print("   POST   /api/auth/refresh")
+    print("   GET    /api/auth/me")
+    print("\n📦 Productos:")
+    print("   GET    /api/productos")
+    print("   POST   /api/productos")
+    print("   PUT    /api/productos/:id")
+    print("   DELETE /api/productos/:id")
+    print("\n🔄 Movimientos:")
+    print("   POST   /api/movimientos/entrada")
+    print("   POST   /api/movimientos/salida")
+    print("   POST   /api/movimientos/transferencia")
+    print("\n📤 Envíos:")
+    print("   POST   /api/envios")
+    print("   POST   /api/envios/:id/recibir")
+    print("   POST   /api/envios/:id/cancelar")
+    print("\n" + "="*70 + "\n")
     
-    Endpoints disponibles:
-    
-    🔐 Autenticación:
-    POST   /api/auth/login       - Iniciar sesión
-    POST   /api/auth/logout      - Cerrar sesión
-    POST   /api/auth/refresh     - Renovar token
-    GET    /api/auth/me          - Usuario actual
-    GET    /api/auth/verify      - Verificar token
-    
-    📦 Productos:
-    GET    /api/productos        - Listar productos
-    GET    /api/productos/:id    - Obtener producto
-    POST   /api/productos        - Crear producto
-    PUT    /api/productos/:id    - Actualizar producto
-    DELETE /api/productos/:id    - Eliminar producto
-    GET    /api/productos/:id/stock        - Stock por lugar
-    POST   /api/productos/:id/movimiento   - Crear movimiento
-    GET    /api/productos/:id/historial    - Historial de movimientos
-    
-    👥 Usuarios:
-    GET    /api/usuarios         - Listar usuarios
-    GET    /api/usuarios/:id     - Obtener usuario
-    POST   /api/usuarios         - Crear usuario
-    PUT    /api/usuarios/:id     - Actualizar usuario
-    DELETE /api/usuarios/:id     - Eliminar usuario
-    
-    📁 Categorías:
-    GET    /api/categorias       - Listar categorías
-    POST   /api/categorias       - Crear categoría
-    PUT    /api/categorias/:id   - Actualizar categoría
-    DELETE /api/categorias/:id   - Eliminar categoría
-    
-    📍 Lugares:
-    GET    /api/lugares          - Listar lugares
-    POST   /api/lugares          - Crear lugar
-    PUT    /api/lugares/:id      - Actualizar lugar
-    DELETE /api/lugares/:id      - Eliminar lugar
-    
-    📊 Movimientos:
-    GET    /api/movimientos      - Listar movimientos
-    GET    /api/movimientos/:id  - Obtener movimiento
-    """)
-    
+    # Ejecutar servidor
     app.run(
-        host='0.0.0.0',
+        host=host,
         port=port,
         debug=debug_mode
     )
