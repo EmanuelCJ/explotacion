@@ -15,7 +15,7 @@ app = create_app()
 
 if __name__ == '__main__':
     # Configuración
-    debug_mode = os.getenv('FLASK_ENV', 'development') == 'development'
+    debug_mode = os.getenv('DEBUG', 'False').lower() == 'true'
     port = int(os.getenv('PORT', 5000))
     host = os.getenv('HOST', '0.0.0.0')
     

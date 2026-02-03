@@ -148,6 +148,7 @@ class UsuarioDAO:
     
     @staticmethod
     def get_by_username(username: str) -> dict:
+        
         connection = ConectDB.get_connection()
         with connection.cursor(dictionary=True) as cursor:
             try:
@@ -163,7 +164,8 @@ class UsuarioDAO:
                 GROUP BY u.id_usuario
                 """
                 cursor.execute(query, (username,))
-                return cursor.fetchone()
+                row = cursor.fetchone()
+                return row
             except Exception as e:
                 print(f"Error getting usuario by username: {e}")
                 raise
@@ -232,14 +234,19 @@ class UsuarioDAO:
     @staticmethod
     def update_ultimo_login(usuario_id: int) -> bool:
         """Actualizar fecha de último login"""
-        try:
-            with ConectDB.get_connection() as cursor:
+        connection = ConectDB.get_connection()
+        with connection.cursor() as cursor:
+            try:
                 query = "UPDATE usuarios SET ultimo_login = NOW() WHERE id_usuario = %s"
                 cursor.execute(query, (usuario_id,))
-                return cursor.rowcount > 0
-        except Exception as e:
-            print(f"Error updating ultimo_login: {e}")
-            raise
+                respuesta = cursor.rowcount > 0
+                return respuesta
+            except Exception as e:
+                print(f"Error updating ultimo_login: {e}")
+                connection.rollback()
+                raise
+            finally:
+                connection.close()
     
     @staticmethod
     def delete(usuario_id: int) -> bool:
@@ -318,7 +325,9 @@ class UsuarioDAO:
     def get_permisos(usuario_id: int) -> list:
         """Obtener todos los permisos de un usuario"""
         try:
-            with ConectDB.get_connection() as cursor:
+            
+            connection = ConectDB.get_connection()
+            with connection.cursor(dictionary=True) as cursor:
                 query = """
                     SELECT DISTINCT p.nombre, p.descripcion, p.recurso
                     FROM usuarios_roles ur

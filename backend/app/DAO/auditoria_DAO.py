@@ -29,7 +29,8 @@ class AuditoriaDAO:
             }
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 # Convertir diccionarios a JSON
                 datos_anteriores = json.dumps(data.get('datos_anteriores')) if data.get('datos_anteriores') else None
                 datos_nuevos = json.dumps(data.get('datos_nuevos')) if data.get('datos_nuevos') else None

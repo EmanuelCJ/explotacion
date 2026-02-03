@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class ConectDB():
+    
     @staticmethod
     def get_connection():
         try:
@@ -22,3 +23,4 @@ class ConectDB():
         except Error as e:
             print(f"Error connecting to the database: {e}")
             return None
+ 
