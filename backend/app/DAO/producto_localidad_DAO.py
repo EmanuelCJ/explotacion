@@ -22,7 +22,8 @@ class ProductoLocalidadDAO:
             cantidad: Cantidad inicial (default 0)
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     INSERT INTO productos_localidad 
                     (id_producto, id_localidad, id_lugar, cantidad)
@@ -34,6 +35,8 @@ class ProductoLocalidadDAO:
         except Exception as e:
             print(f"Error init stock: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_stock(producto_id: int, lugar_id: int) -> int:
@@ -41,7 +44,8 @@ class ProductoLocalidadDAO:
         Obtener cantidad de stock de un producto en un lugar específico
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT COALESCE(cantidad, 0) as cantidad
                     FROM productos_localidad
@@ -53,6 +57,8 @@ class ProductoLocalidadDAO:
         except Exception as e:
             print(f"Error getting stock: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def sumar_stock(producto_id: int, lugar_id: int, cantidad: int) -> bool:
@@ -65,7 +71,8 @@ class ProductoLocalidadDAO:
             cantidad: Cantidad a sumar
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 # Verificar si existe el registro
                 query_check = """
                     SELECT id_producto, id_localidad 
@@ -102,7 +109,10 @@ class ProductoLocalidadDAO:
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error sumando stock: {e}")
+            connection.close()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def restar_stock(producto_id: int, lugar_id: int, cantidad: int) -> bool:
@@ -119,7 +129,8 @@ class ProductoLocalidadDAO:
             Exception: Si no hay stock suficiente
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 # Verificar stock actual
                 stock_actual = ProductoLocalidadDAO.get_stock(producto_id, lugar_id)
                 
@@ -136,7 +147,10 @@ class ProductoLocalidadDAO:
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error restando stock: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def transferir_stock(producto_id: int, lugar_origen: int, lugar_destino: int, cantidad: int) -> bool:
@@ -150,7 +164,8 @@ class ProductoLocalidadDAO:
             cantidad: Cantidad a transferir
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 # Validar stock en origen
                 stock_origen = ProductoLocalidadDAO.get_stock(producto_id, lugar_origen)
                 
@@ -166,7 +181,10 @@ class ProductoLocalidadDAO:
                 return True
         except Exception as e:
             print(f"Error transfiriendo stock: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def ajustar_stock(producto_id: int, lugar_id: int, cantidad_nueva: int, motivo: str = '') -> bool:
@@ -180,7 +198,8 @@ class ProductoLocalidadDAO:
             motivo: Motivo del ajuste
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     UPDATE productos_localidad 
                     SET cantidad = %s
@@ -204,13 +223,17 @@ class ProductoLocalidadDAO:
                 return True
         except Exception as e:
             print(f"Error ajustando stock: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_stock_por_producto(producto_id: int) -> list:
         """Obtener stock de un producto en todos los lugares"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT pl.*, 
                            loc.nombre as localidad_nombre,
@@ -227,12 +250,15 @@ class ProductoLocalidadDAO:
         except Exception as e:
             print(f"Error getting stock por producto: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_stock_por_localidad(localidad_id: int) -> list:
         """Obtener stock de todos los productos en una localidad"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT pl.*, 
                            p.nombre as producto_nombre,
@@ -249,12 +275,15 @@ class ProductoLocalidadDAO:
         except Exception as e:
             print(f"Error getting stock por localidad: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_total_por_producto(producto_id: int) -> int:
         """Obtener stock total de un producto (suma de todos los lugares)"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT COALESCE(SUM(cantidad), 0) as total
                     FROM productos_localidad
@@ -266,3 +295,5 @@ class ProductoLocalidadDAO:
         except Exception as e:
             print(f"Error getting total stock: {e}")
             raise
+        finally:
+            connection.close()

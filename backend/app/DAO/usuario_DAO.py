@@ -29,7 +29,8 @@ class UsuarioDAO:
             int: ID del usuario creado o None si falla
         """
         try:
-            with ConectDB.get_connection() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     INSERT INTO usuarios 
                     (nombre, apellido, username, email, password_hash, legajo, id_localidad, activo)
@@ -47,7 +48,10 @@ class UsuarioDAO:
                 return cursor.lastrowid
         except Exception as e:
             print(f"Error creating usuario: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_all(page=1, limit=20, activo=None):
@@ -71,7 +75,8 @@ class UsuarioDAO:
             }
         """
         try:
-            with ConectDB.get_connection() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 # Contar total
                 count_query = "SELECT COUNT(*) as total FROM usuarios WHERE 1=1"
                 params = []
@@ -116,6 +121,8 @@ class UsuarioDAO:
         except Exception as e:
             print(f"Error getting usuarios: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_by_id(usuario_id: int) -> dict:
@@ -129,7 +136,8 @@ class UsuarioDAO:
             dict: Datos del usuario o None
         """
         try:
-            with ConectDB.get_connection() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor(dictionary=True) as cursor:
                 query = """
                     SELECT u.*, l.nombre as localidad_nombre,
                            GROUP_CONCAT(r.nombre) as roles
@@ -145,13 +153,15 @@ class UsuarioDAO:
         except Exception as e:
             print(f"Error getting usuario by id: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_by_username(username: str) -> dict:
-        
-        connection = ConectDB.get_connection()
-        with connection.cursor(dictionary=True) as cursor:
-            try:
+        """Obtener usuario por nombre de usuario"""
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor(dictionary=True) as cursor:
                 query = """
                 SELECT u.*, l.nombre as localidad_nombre,
                        GROUP_CONCAT(r.nombre) as roles,
@@ -166,23 +176,26 @@ class UsuarioDAO:
                 cursor.execute(query, (username,))
                 row = cursor.fetchone()
                 return row
-            except Exception as e:
+        except Exception as e:
                 print(f"Error getting usuario by username: {e}")
                 raise
-            finally:
+        finally:
                 connection.close()
     
     @staticmethod
     def get_by_email(email: str) -> dict:
         """Obtener usuario por email"""
         try:
-            with ConectDB.get_connection() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "SELECT * FROM usuarios WHERE email = %s"
                 cursor.execute(query, (email,))
                 return cursor.fetchone()
         except Exception as e:
             print(f"Error getting usuario by email: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def update(usuario_id: int, data: dict) -> bool:
@@ -197,7 +210,8 @@ class UsuarioDAO:
             bool: True si se actualizó, False si no
         """
         try:
-            with ConectDB.get_connection() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 # Construir query dinámicamente
                 fields = []
                 values = []
@@ -217,35 +231,42 @@ class UsuarioDAO:
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error updating usuario: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def update_password(usuario_id: int, password_hash: str) -> bool:
         """Actualizar contraseña de usuario"""
         try:
-            with ConectDB.get_connection() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "UPDATE usuarios SET password_hash = %s WHERE id_usuario = %s"
                 cursor.execute(query, (password_hash, usuario_id))
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error updating password: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def update_ultimo_login(usuario_id: int) -> bool:
         """Actualizar fecha de último login"""
-        connection = ConectDB.get_connection()
-        with connection.cursor() as cursor:
-            try:
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "UPDATE usuarios SET ultimo_login = NOW() WHERE id_usuario = %s"
                 cursor.execute(query, (usuario_id,))
                 respuesta = cursor.rowcount > 0
                 return respuesta
-            except Exception as e:
+        except Exception as e:
                 print(f"Error updating ultimo_login: {e}")
                 connection.rollback()
                 raise
-            finally:
+        finally:
                 connection.close()
     
     @staticmethod
@@ -260,19 +281,24 @@ class UsuarioDAO:
             bool: True si se eliminó, False si no
         """
         try:
-            with ConectDB.get_connection() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "UPDATE usuarios SET activo = 0 WHERE id_usuario = %s"
                 cursor.execute(query, (usuario_id,))
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error deleting usuario: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def exists_username(username: str) -> bool:
         """Verificar si existe un username"""
         try:
-            with ConectDB.get_connection() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "SELECT COUNT(*) as count FROM usuarios WHERE username = %s"
                 cursor.execute(query, (username,))
                 result = cursor.fetchone()
@@ -280,12 +306,15 @@ class UsuarioDAO:
         except Exception as e:
             print(f"Error checking username: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def exists_email(email: str) -> bool:
         """Verificar si existe un email"""
         try:
-            with ConectDB.get_connection() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "SELECT COUNT(*) as count FROM usuarios WHERE email = %s"
                 cursor.execute(query, (email,))
                 result = cursor.fetchone()
@@ -293,12 +322,15 @@ class UsuarioDAO:
         except Exception as e:
             print(f"Error checking email: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def asignar_rol(usuario_id: int, rol_id: int, asignado_por: int = None) -> bool:
         """Asignar un rol a un usuario"""
         try:
-            with ConectDB.get_connection() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     INSERT INTO usuarios_roles (id_usuario, id_rol, asignado_por)
                     VALUES (%s, %s, %s)
@@ -307,27 +339,34 @@ class UsuarioDAO:
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error asignando rol: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def quitar_rol(usuario_id: int, rol_id: int) -> bool:
         """Quitar un rol de un usuario"""
         try:
-            with ConectDB.get_connection() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "DELETE FROM usuarios_roles WHERE id_usuario = %s AND id_rol = %s"
                 cursor.execute(query, (usuario_id, rol_id))
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error quitando rol: {e}")
+            connection.rollback()
             raise
-    
+        finally:
+            connection.close()
+
     @staticmethod
     def get_permisos(usuario_id: int) -> list:
         """Obtener todos los permisos de un usuario"""
         try:
             
             connection = ConectDB.get_connection()
-            with connection.cursor(dictionary=True) as cursor:
+            with connection.cursor() as cursor:
                 query = """
                     SELECT DISTINCT p.nombre, p.descripcion, p.recurso
                     FROM usuarios_roles ur
@@ -341,12 +380,15 @@ class UsuarioDAO:
         except Exception as e:
             print(f"Error getting permisos: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def tiene_permiso(usuario_id: int, nombre_permiso: str) -> bool:
         """Verificar si un usuario tiene un permiso específico"""
         try:
-            with ConectDB.get_connection() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT COUNT(*) as count
                     FROM usuarios_roles ur
@@ -360,3 +402,5 @@ class UsuarioDAO:
         except Exception as e:
             print(f"Error checking permiso: {e}")
             raise
+        finally:
+            connection.close()

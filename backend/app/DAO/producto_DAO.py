@@ -29,7 +29,8 @@ class ProductoDAO:
             int: ID del producto creado
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     INSERT INTO productos 
                     (nombre, codigo, descripcion, id_categoria, costo, unidad_medida, stock_minimo, activo)
@@ -47,7 +48,10 @@ class ProductoDAO:
                 return cursor.lastrowid
         except Exception as e:
             print(f"Error creating producto: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_all(page=1, limit=20, categoria_id=None, activo=None, search=None):
@@ -65,7 +69,8 @@ class ProductoDAO:
             dict: {'productos': list, 'pagination': dict}
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 # Contar total
                 count_query = """
                     SELECT COUNT(*) as total 
@@ -125,12 +130,15 @@ class ProductoDAO:
         except Exception as e:
             print(f"Error getting productos: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_by_id(producto_id: int) -> dict:
         """Obtener un producto por ID"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor(dictionary=True) as cursor:
                 query = """
                     SELECT p.*, c.nombre as categoria_nombre, c.codigo as categoria_codigo
                     FROM productos p
@@ -142,24 +150,30 @@ class ProductoDAO:
         except Exception as e:
             print(f"Error getting producto by id: {e}")
             raise
-    
+        finally:
+            connection.close()
+
     @staticmethod
     def get_by_codigo(codigo: str) -> dict:
         """Obtener un producto por código"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor(dictionary=True) as cursor:
                 query = "SELECT * FROM productos WHERE codigo = %s"
                 cursor.execute(query, (codigo,))
                 return cursor.fetchone()
         except Exception as e:
             print(f"Error getting producto by codigo: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def update(producto_id: int, data: dict) -> bool:
         """Actualizar un producto"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 # Construir query dinámicamente
                 fields = []
                 values = []
@@ -180,25 +194,33 @@ class ProductoDAO:
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error updating producto: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def delete(producto_id: int) -> bool:
         """Eliminar (soft delete) un producto"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "UPDATE productos SET activo = 0 WHERE id_producto = %s"
                 cursor.execute(query, (producto_id,))
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error deleting producto: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def exists_codigo(codigo: str, exclude_id: int = None) -> bool:
         """Verificar si existe un código de producto"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "SELECT COUNT(*) as count FROM productos WHERE codigo = %s"
                 params = [codigo]
                 
@@ -212,12 +234,15 @@ class ProductoDAO:
         except Exception as e:
             print(f"Error checking codigo: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_stock_total(producto_id: int) -> int:
         """Obtener stock total de un producto (suma de todas las localidades)"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT COALESCE(SUM(cantidad), 0) as stock_total
                     FROM productos_localidad
@@ -229,12 +254,15 @@ class ProductoDAO:
         except Exception as e:
             print(f"Error getting stock total: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_stock_por_localidad(producto_id: int) -> list:
         """Obtener stock de un producto por cada localidad"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT pl.*, 
                            loc.nombre as localidad_nombre,
@@ -251,12 +279,15 @@ class ProductoDAO:
         except Exception as e:
             print(f"Error getting stock por localidad: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_stock_en_lugar(producto_id: int, lugar_id: int) -> int:
         """Obtener stock de un producto en un lugar específico"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT COALESCE(cantidad, 0) as cantidad
                     FROM productos_localidad
@@ -268,12 +299,15 @@ class ProductoDAO:
         except Exception as e:
             print(f"Error getting stock en lugar: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_productos_stock_bajo() -> list:
         """Obtener productos con stock por debajo del mínimo"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT p.*, 
                            COALESCE(SUM(pl.cantidad), 0) as stock_total,
@@ -291,3 +325,5 @@ class ProductoDAO:
         except Exception as e:
             print(f"Error getting productos stock bajo: {e}")
             raise
+        finally:
+            connection.close()

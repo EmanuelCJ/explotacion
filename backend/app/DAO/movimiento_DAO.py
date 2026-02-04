@@ -28,7 +28,8 @@ class MovimientoDAO:
             }
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     INSERT INTO movimientos 
                     (tipo, cantidad, id_producto, id_usuario, id_localidad,
@@ -49,14 +50,18 @@ class MovimientoDAO:
                 return cursor.lastrowid
         except Exception as e:
             print(f"Error creating movimiento: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_all(page=1, limit=20, tipo=None, producto_id=None, usuario_id=None, 
                 localidad_id=None, fecha_desde=None, fecha_hasta=None):
         """Obtener todos los movimientos con filtros y paginación"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 # Contar total
                 count_query = "SELECT COUNT(*) as total FROM movimientos WHERE 1=1"
                 params = []
@@ -144,12 +149,15 @@ class MovimientoDAO:
         except Exception as e:
             print(f"Error getting movimientos: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_by_id(movimiento_id: int) -> dict:
         """Obtener un movimiento por ID"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT m.*,
                            p.nombre as producto_nombre,
@@ -172,6 +180,8 @@ class MovimientoDAO:
         except Exception as e:
             print(f"Error getting movimiento by id: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_by_producto(producto_id: int, page=1, limit=20) -> dict:
@@ -192,7 +202,8 @@ class MovimientoDAO:
     def get_ultimos(limit: int = 10) -> list:
         """Obtener los últimos N movimientos"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT m.*,
                            p.nombre as producto_nombre,
@@ -211,12 +222,15 @@ class MovimientoDAO:
         except Exception as e:
             print(f"Error getting ultimos movimientos: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def count_por_tipo(fecha_desde=None, fecha_hasta=None) -> dict:
         """Contar movimientos por tipo en un rango de fechas"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT tipo, COUNT(*) as count, SUM(cantidad) as total_cantidad
                     FROM movimientos
@@ -240,3 +254,5 @@ class MovimientoDAO:
         except Exception as e:
             print(f"Error counting por tipo: {e}")
             raise
+        finally:
+            connection.close()

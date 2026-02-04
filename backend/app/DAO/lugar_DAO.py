@@ -125,7 +125,8 @@ class LugarDAO:
     def update(lugar_id: int, data: dict) -> bool:
         """Actualizar lugar"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 fields = []
                 values = []
                 
@@ -143,25 +144,33 @@ class LugarDAO:
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error updating lugar: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def delete(lugar_id: int) -> bool:
         """Eliminar (soft delete) lugar"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "UPDATE lugares SET activo = 0 WHERE id_lugar = %s"
                 cursor.execute(query, (lugar_id,))
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error deleting lugar: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_stock_en_lugar(lugar_id: int) -> list:
         """Obtener todos los productos con stock en un lugar"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT pl.*, p.nombre as producto_nombre, p.codigo as producto_codigo
                     FROM productos_localidad pl
@@ -174,3 +183,5 @@ class LugarDAO:
         except Exception as e:
             print(f"Error getting stock en lugar: {e}")
             raise
+        finally:
+            connection.close()
