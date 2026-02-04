@@ -23,7 +23,8 @@ class CategoriaDAO:
             }
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     INSERT INTO categorias 
                     (tipo, nombre, codigo, descripcion, activo)
@@ -38,13 +39,17 @@ class CategoriaDAO:
                 return cursor.lastrowid
         except Exception as e:
             print(f"Error creating categoria: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_all(activo=None):
         """Obtener todas las categorías"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "SELECT * FROM categorias WHERE 1=1"
                 params = []
                 
@@ -58,48 +63,60 @@ class CategoriaDAO:
         except Exception as e:
             print(f"Error getting categorias: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_by_id(categoria_id: int) -> dict:
         """Obtener categoría por ID"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "SELECT * FROM categorias WHERE id_categoria = %s"
                 cursor.execute(query, (categoria_id,))
                 return cursor.fetchone()
         except Exception as e:
             print(f"Error getting categoria by id: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_by_codigo(codigo: str) -> dict:
         """Obtener categoría por código"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "SELECT * FROM categorias WHERE codigo = %s"
                 cursor.execute(query, (codigo,))
                 return cursor.fetchone()
         except Exception as e:
             print(f"Error getting categoria by codigo: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_by_tipo(tipo: str) -> list:
         """Obtener categorías por tipo"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "SELECT * FROM categorias WHERE tipo = %s AND activo = 1 ORDER BY nombre"
                 cursor.execute(query, (tipo,))
                 return cursor.fetchall()
         except Exception as e:
             print(f"Error getting categorias by tipo: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def update(categoria_id: int, data: dict) -> bool:
         """Actualizar categoría"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 fields = []
                 values = []
                 
@@ -117,25 +134,33 @@ class CategoriaDAO:
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error updating categoria: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def delete(categoria_id: int) -> bool:
         """Eliminar (soft delete) categoría"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "UPDATE categorias SET activo = 0 WHERE id_categoria = %s"
                 cursor.execute(query, (categoria_id,))
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error deleting categoria: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def exists_codigo(codigo: str, exclude_id: int = None) -> bool:
         """Verificar si existe una categoría con ese código"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "SELECT COUNT(*) as count FROM categorias WHERE codigo = %s"
                 params = [codigo]
                 
@@ -149,12 +174,15 @@ class CategoriaDAO:
         except Exception as e:
             print(f"Error checking codigo: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def count_productos(categoria_id: int) -> int:
         """Contar productos de una categoría"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT COUNT(*) as count 
                     FROM productos 
@@ -166,3 +194,5 @@ class CategoriaDAO:
         except Exception as e:
             print(f"Error counting productos: {e}")
             raise
+        finally:
+            connection.close()

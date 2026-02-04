@@ -3,16 +3,16 @@
 from flask import Blueprint, request, jsonify
 from app.services.usuario_service import UsuarioService
 from app.utils.decoradores_auth import (
-    jwt_required_custom,
-    require_permission,
+    jwt_required_cookie,
+    require_permiso,
     get_current_user_id
 )
 
 usuario_bp = Blueprint('usuario', __name__)
 
 @usuario_bp.route('/', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_usuarios')
+@jwt_required_cookie()
+@require_permiso('ver_usuarios')
 def get_usuarios():
     """Listar usuarios"""
     page = request.args.get('page', 1, type=int)
@@ -23,8 +23,8 @@ def get_usuarios():
     return jsonify(result), 200
 
 @usuario_bp.route('/<int:id>', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_usuarios')
+@jwt_required_cookie()
+@require_permiso('ver_usuarios')
 def get_usuario(id):
     """Obtener usuario por ID"""
     usuario = UsuarioService.get_by_id(id)
@@ -33,8 +33,8 @@ def get_usuario(id):
     return jsonify({'usuario': usuario}), 200
 
 @usuario_bp.route('/', methods=['POST'])
-@jwt_required_custom()
-@require_permission('crear_usuarios')
+@jwt_required_cookie()
+@require_permiso('crear_usuarios')
 def create_usuario():
     """Crear usuario (solo admin)"""
     admin_id = get_current_user_id()
@@ -47,8 +47,8 @@ def create_usuario():
     }), 201
 
 @usuario_bp.route('/<int:id>', methods=['PUT'])
-@jwt_required_custom()
-@require_permission('editar_usuarios')
+@jwt_required_cookie()
+@require_permiso('editar_usuarios')
 def update_usuario(id):
     """Actualizar usuario"""
     admin_id = get_current_user_id()
@@ -58,8 +58,8 @@ def update_usuario(id):
     return jsonify({'message': 'Usuario actualizado'}), 200
 
 @usuario_bp.route('/<int:id>', methods=['DELETE'])
-@jwt_required_custom()
-@require_permission('eliminar_usuarios')
+@jwt_required_cookie()
+@require_permiso('eliminar_usuarios')
 def delete_usuario(id):
     """Eliminar usuario"""
     admin_id = get_current_user_id()
@@ -67,8 +67,8 @@ def delete_usuario(id):
     return jsonify({'message': 'Usuario eliminado'}), 200
 
 @usuario_bp.route('/<int:usuario_id>/rol/<int:rol_id>', methods=['POST'])
-@jwt_required_custom()
-@require_permission('asignar_roles')
+@jwt_required_cookie()
+@require_permiso('asignar_roles')
 def asignar_rol(usuario_id, rol_id):
     """Asignar rol a usuario"""
     admin_id = get_current_user_id()

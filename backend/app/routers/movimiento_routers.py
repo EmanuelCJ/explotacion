@@ -8,8 +8,8 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt
 from app.services.movimiento_service import MovimientoService
 from app.utils.decoradores_auth import (
-    jwt_required_custom,
-    require_permission,
+    jwt_required_cookie,
+    require_permiso,
     require_any_permission,
     get_current_user_id
 )
@@ -19,8 +19,8 @@ movimiento_bp = Blueprint('movimiento', __name__)
 
 
 @movimiento_bp.route('/', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_movimientos')
+@jwt_required_cookie()
+@require_permiso('ver_movimientos')
 def get_movimientos():
     """
     Obtener todos los movimientos con filtros
@@ -64,8 +64,8 @@ def get_movimientos():
 
 
 @movimiento_bp.route('/<int:id>', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_movimientos')
+@jwt_required_cookie()
+@require_permiso('ver_movimientos')
 def get_movimiento(id):
     """
     Obtener un movimiento por ID
@@ -87,8 +87,8 @@ def get_movimiento(id):
 
 
 @movimiento_bp.route('/entrada', methods=['POST'])
-@jwt_required_custom()
-@require_permission('registrar_entrada')
+@jwt_required_cookie()
+@require_permiso('registrar_entrada')
 def crear_entrada():
     """
     Registrar entrada de stock
@@ -130,8 +130,8 @@ def crear_entrada():
 
 
 @movimiento_bp.route('/salida', methods=['POST'])
-@jwt_required_custom()
-@require_permission('registrar_salida')
+@jwt_required_cookie()
+@require_permiso('registrar_salida')
 def crear_salida():
     """
     Registrar salida de stock
@@ -174,8 +174,8 @@ def crear_salida():
 
 
 @movimiento_bp.route('/transferencia', methods=['POST'])
-@jwt_required_custom()
-@require_permission('registrar_transferencia')
+@jwt_required_cookie()
+@require_permiso('registrar_transferencia')
 def crear_transferencia():
     """
     Transferir stock entre lugares
@@ -218,8 +218,8 @@ def crear_transferencia():
 
 
 @movimiento_bp.route('/ajuste', methods=['POST'])
-@jwt_required_custom()
-@require_permission('registrar_ajuste')
+@jwt_required_cookie()
+@require_permiso('registrar_ajuste')
 def crear_ajuste():
     """
     Ajustar stock (inventario físico)
@@ -261,8 +261,8 @@ def crear_ajuste():
 
 
 @movimiento_bp.route('/ultimos', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_movimientos')
+@jwt_required_cookie()
+@require_permiso('ver_movimientos')
 def get_ultimos_movimientos():
     """
     Obtener los últimos N movimientos

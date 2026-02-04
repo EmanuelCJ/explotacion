@@ -6,8 +6,8 @@ Maneja envíos de productos entre localidades
 from flask import Blueprint, request, jsonify
 from app.services.envio_service import EnvioService
 from app.utils.decoradores_auth import (
-    jwt_required_custom,
-    require_permission,
+    jwt_required_cookie,
+    require_permiso,
     get_current_user_id
 )
 
@@ -16,8 +16,8 @@ envio_bp = Blueprint('envio', __name__)
 
 
 @envio_bp.route('/', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_envios')
+@jwt_required_cookie()
+@require_permiso('ver_envios')
 def get_envios():
     """
     Obtener todos los envíos con filtros
@@ -55,8 +55,8 @@ def get_envios():
 
 
 @envio_bp.route('/<int:id>', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_envios')
+@jwt_required_cookie()
+@require_permiso('ver_envios')
 def get_envio(id):
     """
     Obtener un envío por ID
@@ -78,8 +78,8 @@ def get_envio(id):
 
 
 @envio_bp.route('/', methods=['POST'])
-@jwt_required_custom()
-@require_permission('enviar_productos')
+@jwt_required_cookie()
+@require_permiso('enviar_productos')
 def crear_envio():
     """
     Crear un nuevo envío
@@ -120,8 +120,8 @@ def crear_envio():
 
 
 @envio_bp.route('/<int:id>/recibir', methods=['POST'])
-@jwt_required_custom()
-@require_permission('recibir_productos')
+@jwt_required_cookie()
+@require_permiso('recibir_productos')
 def recibir_envio(id):
     """
     Marcar un envío como recibido
@@ -162,8 +162,8 @@ def recibir_envio(id):
 
 
 @envio_bp.route('/<int:id>/cancelar', methods=['POST'])
-@jwt_required_custom()
-@require_permission('cancelar_envios')
+@jwt_required_cookie()
+@require_permiso('cancelar_envios')
 def cancelar_envio(id):
     """
     Cancelar un envío
@@ -197,8 +197,8 @@ def cancelar_envio(id):
 
 
 @envio_bp.route('/pendientes', methods=['GET'])
-@jwt_required_custom()
-@require_permission('recibir_productos')
+@jwt_required_cookie()
+@require_permiso('recibir_productos')
 def get_pendientes_recepcion():
     """
     Obtener envíos pendientes de recibir en mi localidad
@@ -227,8 +227,8 @@ def get_pendientes_recepcion():
 
 
 @envio_bp.route('/mis-envios', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_envios')
+@jwt_required_cookie()
+@require_permiso('ver_envios')
 def get_mis_envios():
     """
     Obtener envíos realizados por mí
@@ -251,8 +251,8 @@ def get_mis_envios():
 
 
 @envio_bp.route('/mis-recepciones', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_envios')
+@jwt_required_cookie()
+@require_permiso('ver_envios')
 def get_mis_recepciones():
     """
     Obtener envíos que yo he recibido

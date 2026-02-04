@@ -55,15 +55,20 @@ class AuditoriaDAO:
                 ))
                 return cursor.lastrowid
         except Exception as e:
+            connection.rollback()
             print(f"Error creating auditoria: {e}")
             raise
-    
+        finally:
+            connection.close()
+
+            
     @staticmethod
     def get_all(page=1, limit=50, entidad=None, accion=None, usuario_id=None, 
                 fecha_desde=None, fecha_hasta=None):
         """Obtener todos los registros de auditoría con filtros"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 # Contar total
                 count_query = "SELECT COUNT(*) as total FROM auditoria WHERE 1=1"
                 params = []
@@ -143,6 +148,8 @@ class AuditoriaDAO:
         except Exception as e:
             print(f"Error getting auditorias: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_by_usuario(usuario_id: int, page=1, limit=50) -> dict:
@@ -153,7 +160,8 @@ class AuditoriaDAO:
     def get_by_entidad(entidad: str, id_entidad: int) -> list:
         """Obtener historial de auditoría de una entidad específica"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT a.*,
                            u.nombre as usuario_nombre,
@@ -177,12 +185,15 @@ class AuditoriaDAO:
         except Exception as e:
             print(f"Error getting auditoria by entidad: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_actividad_reciente(limit: int = 20) -> list:
         """Obtener actividad reciente del sistema"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT a.*,
                            u.nombre as usuario_nombre,
@@ -197,12 +208,15 @@ class AuditoriaDAO:
         except Exception as e:
             print(f"Error getting actividad reciente: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def count_por_accion(fecha_desde=None, fecha_hasta=None) -> dict:
         """Contar acciones por tipo"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "SELECT accion, COUNT(*) as count FROM auditoria WHERE 1=1"
                 params = []
                 
@@ -222,12 +236,15 @@ class AuditoriaDAO:
         except Exception as e:
             print(f"Error counting por accion: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def count_por_usuario(fecha_desde=None, fecha_hasta=None) -> list:
         """Contar acciones por usuario"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT u.id_usuario, u.nombre, u.apellido, COUNT(*) as count
                     FROM auditoria a
@@ -250,3 +267,5 @@ class AuditoriaDAO:
         except Exception as e:
             print(f"Error counting por usuario: {e}")
             raise
+        finally:
+            connection.close()

@@ -9,7 +9,7 @@ from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity, get_jwt
 from app.services.auth_service import AuthService
 
 
-def jwt_required_custom():
+def jwt_required_cookie():
     """
     Decorador personalizado que valida JWT desde cookie HttpOnly
     
@@ -36,17 +36,17 @@ def jwt_required_custom():
     return decorator
 
 
-def require_permission(permission_name: str):
+def require_permiso(permiso_name: str):
     """
     Decorador para validar que el usuario tenga un permiso específico
     
     Args:
-        permission_name: Nombre del permiso requerido
+        permiso_name: Nombre del permiso requerido
     
     Usage:
         @router.route('/productos', methods=['POST'])
         @jwt_required_custom()
-        @require_permission('crear_productos')
+        @require_permiso('crear_productos')
         def crear_producto():
             ...
     """
@@ -58,12 +58,12 @@ def require_permission(permission_name: str):
                 usuario_id = get_jwt_identity()
                 
                 # Validar permiso
-                tiene_permiso = AuthService.validate_permissions(usuario_id, permission_name)
+                tiene_permiso = AuthService.validate_permissions(usuario_id, permiso_name)
                 
                 if not tiene_permiso:
                     return jsonify({
                         'error': 'No tienes permisos para realizar esta acción',
-                        'permiso_requerido': permission_name
+                        'permiso_requerido': permiso_name
                     }), 403
                 
                 return fn(*args, **kwargs)

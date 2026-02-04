@@ -2,13 +2,13 @@
 
 from flask import Blueprint, request, jsonify
 from app.services import AuditoriaService
-from app.utils.decoradores_auth import jwt_required_custom, require_permission
+from app.utils.decoradores_auth import jwt_required_cookie, require_permiso
 
 auditoria_bp = Blueprint('auditoria', __name__)
 
 @auditoria_bp.route('/', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_auditoria')
+@jwt_required_cookie()
+@require_permiso('ver_auditoria')
 def get_auditoria():
     """Obtener auditoría con filtros"""
     page = request.args.get('page', 1, type=int)
@@ -28,8 +28,8 @@ def get_auditoria():
     return jsonify(result), 200
 
 @auditoria_bp.route('/usuario/<int:usuario_id>', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_auditoria_usuario')
+@jwt_required_cookie()
+@require_permiso('ver_auditoria_usuario')
 def get_auditoria_usuario(usuario_id):
     """Ver qué hizo un usuario específico"""
     page = request.args.get('page', 1, type=int)
@@ -37,8 +37,8 @@ def get_auditoria_usuario(usuario_id):
     return jsonify(result), 200
 
 @auditoria_bp.route('/estadisticas', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_auditoria')
+@jwt_required_cookie()
+@require_permiso('ver_auditoria')
 def get_estadisticas():
     """Estadísticas de auditoría"""
     stats = AuditoriaService.get_estadisticas()

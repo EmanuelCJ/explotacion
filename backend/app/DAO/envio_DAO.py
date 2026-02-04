@@ -28,7 +28,8 @@ class EnvioDAO:
             }
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     INSERT INTO envios 
                     (id_producto, cantidad, id_usuario_envia, 
@@ -51,14 +52,18 @@ class EnvioDAO:
                 return cursor.lastrowid
         except Exception as e:
             print(f"Error creating envio: {e}")
+            connection.rollback() # en caso de error, revierte la transacción
             raise
+        finally:
+            connection.close() #cierra la conexion
     
     @staticmethod
     def get_all(page=1, limit=20, estado=None, localidad_origen=None, 
                 localidad_destino=None, producto_id=None):
         """Obtener todos los envíos con filtros"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 # Contar total
                 count_query = "SELECT COUNT(*) as total FROM envios WHERE 1=1"
                 params = []
@@ -137,12 +142,15 @@ class EnvioDAO:
         except Exception as e:
             print(f"Error getting envios: {e}")
             raise
+        finally:
+            connection.close() #cierra la conexion
     
     @staticmethod
     def get_by_id(envio_id: int) -> dict:
         """Obtener un envío por ID"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT e.*,
                            p.nombre as producto_nombre,
@@ -170,12 +178,15 @@ class EnvioDAO:
         except Exception as e:
             print(f"Error getting envio by id: {e}")
             raise
+        finally:
+            connection.close() #cierra la conexion
     
     @staticmethod
     def get_pendientes_recepcion(localidad_destino: int) -> list:
         """Obtener envíos pendientes de recibir en una localidad"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT e.*,
                            p.nombre as producto_nombre,
@@ -192,6 +203,8 @@ class EnvioDAO:
         except Exception as e:
             print(f"Error getting pendientes recepcion: {e}")
             raise
+        finally:
+            connection.close() #cierra la conexion
     
     @staticmethod
     def marcar_recibido(envio_id: int, usuario_recibe_id: int, lugar_destino_id: int, observaciones: str = '') -> bool:
@@ -205,7 +218,8 @@ class EnvioDAO:
             observaciones: Observaciones de recepción
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     UPDATE envios 
                     SET estado = 'recibido',
@@ -219,13 +233,17 @@ class EnvioDAO:
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error marcando recibido: {e}")
+            connection.rollback() # en caso de error, revierte la transacción
             raise
+        finally:
+            connection.close() #cierra la conexion
     
     @staticmethod
     def cancelar(envio_id: int, observaciones: str = '') -> bool:
         """Cancelar un envío"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     UPDATE envios 
                     SET estado = 'cancelado',
@@ -237,19 +255,26 @@ class EnvioDAO:
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error cancelando envio: {e}")
+            connection.rollback() # en caso de error, revierte la transacción
             raise
+        finally:
+            connection.close() #cierra la conexion
     
     @staticmethod
     def update_estado(envio_id: int, nuevo_estado: str) -> bool:
         """Actualizar estado del envío"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "UPDATE envios SET estado = %s WHERE id_envio = %s"
                 cursor.execute(query, (nuevo_estado, envio_id))
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error updating estado: {e}")
+            connection.rollback() # en caso de error, revierte la transacción
             raise
+        finally:
+            connection.close() #cierra la conexion
     
     @staticmethod
     def get_por_usuario_envia(usuario_id: int) -> list:

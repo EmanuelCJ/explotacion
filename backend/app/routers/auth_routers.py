@@ -13,7 +13,8 @@ from flask_jwt_extended import (
     unset_jwt_cookies
 )
 from app.services.auth_service import AuthService
-from app.utils.decoradores_auth import get_client_ip, get_user_agent, jwt_required_custom
+from app.middlewares.auth_validation import validate_credentials
+from app.utils.decoradores_auth import get_client_ip, get_user_agent, jwt_required_cookie
 from datetime import timedelta
 
 
@@ -21,6 +22,7 @@ auth_bp = Blueprint('auth', __name__)
 
 
 @auth_bp.route('/login', methods=['POST'])
+@validate_credentials()
 def login():
     """
     Login de usuario
@@ -45,6 +47,8 @@ def login():
         
         username = data.get('username')
         password = data.get('password')
+
+        # Obtener IP del cliente para auditoría
         ip_address = get_client_ip()
         
         # Autenticar
@@ -113,7 +117,7 @@ def login():
 
 
 @auth_bp.route('/logout', methods=['POST'])
-@jwt_required_custom()
+@jwt_required_cookie()
 def logout():
     """
     Cerrar sesión del usuario
@@ -195,7 +199,7 @@ def refresh():
 
 
 @auth_bp.route('/me', methods=['GET'])
-@jwt_required_custom()
+@jwt_required_cookie()
 def get_current_user():
     """
     Obtener información del usuario autenticado
@@ -232,7 +236,7 @@ def get_current_user():
 
 
 @auth_bp.route('/verify', methods=['GET'])
-@jwt_required_custom()
+@jwt_required_cookie()
 def verify_token():
     """
     Verificar si el token es válido
@@ -258,7 +262,8 @@ def verify_token():
 
 
 @auth_bp.route('/change-password', methods=['POST'])
-@jwt_required_custom()
+@jwt_required_cookie()
+@validate_credentials(require_current_password=True)
 def change_password():
     """
     Cambiar contraseña del usuario actual

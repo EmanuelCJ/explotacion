@@ -1,13 +1,17 @@
 """
 Router de Productos
-CRUD completo de productos con validación de permisos
+CRUD completo de productos con validación de permisos y rutas protegidas por JWT en cookies. Incluye:
+- Listar productos con paginación y filtros
+- Detalles de producto con stock por localidad
+- Crear, actualizar y eliminar productos (con validación de stock)
+- Verificar stock mínimo y productos con stock bajo
 """
 
 from flask import Blueprint, request, jsonify
 from app.services.producto_service import ProductoService
 from app.utils.decoradores_auth import (
-    jwt_required_custom,
-    require_permission,
+    jwt_required_cookie,
+    require_permiso,
     get_current_user_id
 )
 
@@ -16,8 +20,8 @@ producto_bp = Blueprint('producto', __name__)
 
 
 @producto_bp.route('/', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_productos')
+@jwt_required_cookie()
+@require_permiso('ver_productos')
 def get_productos():
     """
     Obtener todos los productos con paginación y filtros
@@ -54,8 +58,8 @@ def get_productos():
 
 
 @producto_bp.route('/<int:id>', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_productos')
+@jwt_required_cookie()
+@require_permiso('ver_productos')
 def get_producto(id):
     """
     Obtener un producto por ID con stock detallado
@@ -77,8 +81,8 @@ def get_producto(id):
 
 
 @producto_bp.route('/', methods=['POST'])
-@jwt_required_custom()
-@require_permission('crear_productos')
+@jwt_required_cookie()
+@require_permiso('crear_productos')
 def create_producto():
     """
     Crear un nuevo producto
@@ -118,8 +122,8 @@ def create_producto():
 
 
 @producto_bp.route('/<int:id>', methods=['PUT'])
-@jwt_required_custom()
-@require_permission('editar_productos')
+@jwt_required_cookie()
+@require_permiso('editar_productos')
 def update_producto(id):
     """
     Actualizar un producto
@@ -156,8 +160,8 @@ def update_producto(id):
 
 
 @producto_bp.route('/<int:id>', methods=['DELETE'])
-@jwt_required_custom()
-@require_permission('eliminar_productos')
+@jwt_required_cookie()
+@require_permiso('eliminar_productos')
 def delete_producto(id):
     """
     Eliminar (desactivar) un producto
@@ -184,8 +188,8 @@ def delete_producto(id):
 
 
 @producto_bp.route('/<int:id>/stock', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_productos')
+@jwt_required_cookie()
+@require_permiso('ver_productos')
 def get_stock_producto(id):
     """
     Obtener stock del producto por localidad/lugar
@@ -206,8 +210,8 @@ def get_stock_producto(id):
 
 
 @producto_bp.route('/stock-bajo', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_productos')
+@jwt_required_cookie()
+@require_permiso('ver_productos')
 def get_productos_stock_bajo():
     """
     Obtener productos con stock por debajo del mínimo
@@ -228,8 +232,8 @@ def get_productos_stock_bajo():
 
 
 @producto_bp.route('/<int:id>/verificar-stock', methods=['GET'])
-@jwt_required_custom()
-@require_permission('ver_productos')
+@jwt_required_cookie()
+@require_permiso('ver_productos')
 def verificar_stock_minimo(id):
     """
     Verificar si un producto está por debajo del stock mínimo
