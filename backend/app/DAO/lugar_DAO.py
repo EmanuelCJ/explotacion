@@ -23,7 +23,8 @@ class LugarDAO:
             }
         """
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     INSERT INTO lugares 
                     (nombre, descripcion, tipo, id_localidad, activo)
@@ -38,13 +39,17 @@ class LugarDAO:
                 return cursor.lastrowid
         except Exception as e:
             print(f"Error creating lugar: {e}")
+            connection.rollback()
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_all(localidad_id=None, tipo=None, activo=None):
         """Obtener todos los lugares con filtros"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT l.*, loc.nombre as localidad_nombre, loc.ciudad
                     FROM lugares l
@@ -71,12 +76,15 @@ class LugarDAO:
         except Exception as e:
             print(f"Error getting lugares: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_by_id(lugar_id: int) -> dict:
         """Obtener lugar por ID"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT l.*, loc.nombre as localidad_nombre
                     FROM lugares l
@@ -88,12 +96,15 @@ class LugarDAO:
         except Exception as e:
             print(f"Error getting lugar by id: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_by_localidad(localidad_id: int, activo=True) -> list:
         """Obtener todos los lugares de una localidad"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "SELECT * FROM lugares WHERE id_localidad = %s"
                 params = [localidad_id]
                 
@@ -107,6 +118,8 @@ class LugarDAO:
         except Exception as e:
             print(f"Error getting lugares by localidad: {e}")
             raise
+        finally:
+            connection.close()
     
     @staticmethod
     def update(lugar_id: int, data: dict) -> bool:
