@@ -50,9 +50,10 @@ def login():
 
         # Obtener IP del cliente para auditoría
         ip_address = get_client_ip()
-        
+
         # Autenticar
         usuario = AuthService.authenticate(username, password, ip_address)
+
         
         if not usuario:
             return jsonify({'error': 'Credenciales inválidas'}), 401

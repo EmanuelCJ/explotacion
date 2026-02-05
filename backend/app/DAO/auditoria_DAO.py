@@ -55,8 +55,8 @@ class AuditoriaDAO:
                 ))
                 return cursor.lastrowid
         except Exception as e:
-            connection.rollback()
             print(f"Error creating auditoria: {e}")
+            connection.rollback()
             raise
         finally:
             connection.close()

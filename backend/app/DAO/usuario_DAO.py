@@ -361,12 +361,12 @@ class UsuarioDAO:
             connection.close()
 
     @staticmethod
-    def get_permisos(usuario_id: int) -> list:
+    def get_permisos(usuario_id: int) -> dict:
         """Obtener todos los permisos de un usuario"""
+        
         try:
-            
             connection = ConectDB.get_connection()
-            with connection.cursor() as cursor:
+            with connection.cursor(dictionary=True) as cursor:
                 query = """
                     SELECT DISTINCT p.nombre, p.descripcion, p.recurso
                     FROM usuarios_roles ur

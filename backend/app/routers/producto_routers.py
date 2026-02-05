@@ -9,6 +9,7 @@ CRUD completo de productos con validación de permisos y rutas protegidas por JW
 
 from flask import Blueprint, request, jsonify
 from app.services.producto_service import ProductoService
+from app.middlewares.producto_validation import validate_producto_data
 from app.utils.decoradores_auth import (
     jwt_required_cookie,
     require_permiso,
@@ -81,8 +82,9 @@ def get_producto(id):
 
 
 @producto_bp.route('/', methods=['POST'])
-@jwt_required_cookie()
-@require_permiso('crear_productos')
+@jwt_required_cookie() # Asegura que el usuario esté autenticado
+@require_permiso('crear_productos') # Verifica que el usuario tenga permiso para crear productos
+@validate_producto_data() # Valida los datos del producto en el request
 def create_producto():
     """
     Crear un nuevo producto
@@ -124,6 +126,7 @@ def create_producto():
 @producto_bp.route('/<int:id>', methods=['PUT'])
 @jwt_required_cookie()
 @require_permiso('editar_productos')
+@validate_producto_data(is_update=True) # Valida los datos del producto en el request para actualización
 def update_producto(id):
     """
     Actualizar un producto

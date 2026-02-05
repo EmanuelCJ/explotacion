@@ -111,6 +111,9 @@ def validate_credentials(require_current_password=False):
                                 'error': 'Datos sospechosos detectados',
                                 'detail': 'El password contiene patrones no permitidos'
                             }), 400
+                #agregar validacion de para cuando mandan un id ejemplo sea positivo y no contenga letras, no sql injection
+
+                
                 
                 # Para cambio de contraseña
                 else:
