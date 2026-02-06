@@ -5,26 +5,21 @@ Aguas Rionegrinas - Sistema de Inventario
 
 import os
 from app import create_app
-from dotenv import load_dotenv
 
-# Cargar variables de entorno
-load_dotenv()
-
-# Crear aplicación
 app = create_app()
 
-if __name__ == '__main__':
-    # Configuración
-    debug_mode = os.getenv('DEBUG', 'False').lower() == 'true'
-    port = int(os.getenv('PORT', 5000))
-    host = os.getenv('HOST', '0.0.0.0')
-    
+if __name__ == "__main__":
+    host = os.getenv("HOST", "127.0.0.1")
+    port = int(os.getenv("PORT", 5000))
+    debug = os.getenv("FLASK_DEBUG", "False") == "True"
+
+
     print("\n" + "="*70)
     print("🌊 AGUAS RIONEGRINAS - SISTEMA DE INVENTARIO")
     print("="*70)
     print(f"\n📍 Servidor: http://{host}:{port}")
     print(f"🔧 Entorno: {os.getenv('FLASK_ENV', 'development')}")
-    print(f"🐛 Debug: {debug_mode}")
+    print(f"🐛 Debug: {debug}")
     print("\n📋 ENDPOINTS DISPONIBLES:\n")
     print("🔐 Autenticación:")
     print("   POST   /api/auth/login")
@@ -50,5 +45,5 @@ if __name__ == '__main__':
     app.run(
         host=host,
         port=port,
-        debug=debug_mode
+        debug=debug
     )

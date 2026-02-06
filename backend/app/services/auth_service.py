@@ -44,7 +44,7 @@ class AuthService:
         # Verificar password
         if not AuthService.verify_password(password, usuario['password_hash']):
             # Registrar intento fallido en auditoría
-            mose=AuditoriaDAO.create({
+            AuditoriaDAO.create({
                 'entidad': 'Usuario',
                 'id_entidad': usuario['id_usuario'],
                 'accion': 'login',

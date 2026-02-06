@@ -29,7 +29,7 @@ def jwt_required_cookie():
                 return fn(*args, **kwargs)
             except Exception as e:
                 return jsonify({
-                    'error': 'Token inválido o expirado',
+                    'error': 'Token invalido o expirado',
                     'detail': str(e)
                 }), 401
         return wrapper

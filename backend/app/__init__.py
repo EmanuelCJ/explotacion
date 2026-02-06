@@ -4,65 +4,43 @@ Inicialización y registro de routers
 """
 
 from flask import Flask
-from flask_cors import CORS
-from flask_jwt_extended import JWTManager
-from datetime import timedelta
-import os
 from dotenv import load_dotenv
 
-load_dotenv()
+from .config import Config
+from .extensions import jwt, cors
 
-jwt = JWTManager()
+# Blueprints
+from .routers.auth_routers import auth_bp
+from .routers.usuario_routers import usuario_bp
+from .routers.producto_routers import producto_bp
+from .routers.movimiento_routers import movimiento_bp
+from .routers.envio_routers import envio_bp
+from .routers.auditoria_routers import auditoria_bp
 
 def create_app():
-    """Factory para crear la aplicación Flask"""
+    
+    load_dotenv()
+
     app = Flask(__name__)
-    
-    # ========================================
-    # CONFIGURACIÓN
-    # ========================================
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
-    
-    # JWT en cookies HttpOnly
-    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key')
-    app.config['JWT_TOKEN_LOCATION'] = ['cookies']
-    app.config['JWT_COOKIE_HTTPONLY'] = True
-    app.config['JWT_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'
-    app.config['JWT_COOKIE_SAMESITE'] = 'Lax'
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
-    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
-    app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # Desactivar CSRF en desarrollo
-    
-    # CORS
-    app.config['CORS_ORIGINS'] = os.getenv('CORS_ORIGINS', 'http://localhost:8080').split(',')
-    
-    # ========================================
-    # EXTENSIONES
-    # ========================================
+    app.config.from_object(Config)
+
+    # Extensiones
     jwt.init_app(app)
-    
-    CORS(app,
-         origins=app.config['CORS_ORIGINS'],
-         supports_credentials=True,
-         allow_headers=['Content-Type', 'Authorization'])
-    
-    # ========================================
-    # REGISTRAR BLUEPRINTS/ROUTERS
-    # ========================================
-    from app.routers.auth_routers import auth_bp
-    from app.routers.producto_routers import producto_bp
-    from app.routers.movimiento_routers import movimiento_bp
-    from app.routers.envio_routers import envio_bp
-    # Importar los demás cuando los crees:
-    # from app.routers.usuario_routers import usuario_bp
-    # from app.routers.auditoria_routers import auditoria_bp
-    
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(producto_bp, url_prefix='/api/productos')
-    app.register_blueprint(movimiento_bp, url_prefix='/api/movimientos')
-    app.register_blueprint(envio_bp, url_prefix='/api/envios')
-    # app.register_blueprint(usuario_bp, url_prefix='/api/usuarios')
-    # app.register_blueprint(auditoria_bp, url_prefix='/api/auditoria')
+
+    cors.init_app(
+        app,
+        supports_credentials=True,
+        origins=app.config["CORS_ORIGINS"]
+    )
+
+    # Blueprints
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    app.register_blueprint(usuario_bp, url_prefix="/api/usuarios")
+    app.register_blueprint(producto_bp, url_prefix="/api/productos")
+    app.register_blueprint(movimiento_bp, url_prefix="/api/movimientos")
+    app.register_blueprint(envio_bp, url_prefix="/api/envios")
+    app.register_blueprint(auditoria_bp, url_prefix="/api/auditoria")
+
     
     # ========================================
     # MANEJADORES DE ERRORES

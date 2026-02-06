@@ -1,7 +1,7 @@
 """Router de Auditoría - Solo Maestro y Supervisor"""
 
 from flask import Blueprint, request, jsonify
-from app.services import AuditoriaService
+from app.services.services_init import AuditoriaService
 from app.utils.decoradores_auth import jwt_required_cookie, require_permiso
 
 auditoria_bp = Blueprint('auditoria', __name__)
