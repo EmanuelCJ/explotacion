@@ -1,48 +1,98 @@
-# vue-project
+# SISTEMAS Explotacion - Vue 3
 
-This template should help get you started developing with Vue 3 in Vite.
+Sistema de gestión de inventario construido con Vue 3, Composition API, TypeScript, Axios y CSS puro.
 
-## Recommended IDE Setup
+## 🚀 Instalación
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Recommended Browser Setup
-
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
+```bash
+# Instalar dependencias
 npm install
-```
 
-### Compile and Hot-Reload for Development
-
-```sh
+# Ejecutar en modo desarrollo
 npm run dev
-```
 
-### Type-Check, Compile and Minify for Production
-
-```sh
+# Compilar para producción
 npm run build
 ```
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+## 📁 Estructura del Proyecto
 
-```sh
-npm run test:unit
 ```
+vue-app/
+├── components/           # Componentes Vue
+│   ├── AppSidebar.vue   # Sidebar colapsable
+│   ├── AppHeader.vue    # Header con info de usuario
+│   ├── ActionBar.vue    # Botones CRUD
+│   ├── InventoryTable.vue  # Tabla de inventario
+│   └── ArticuloModal.vue   # Modal para operaciones
+├── types/               # Tipos TypeScript
+│   └── index.ts
+├── services/            # Servicios API
+│   └── api.ts          # Axios API service
+├── src/
+│   └── main.ts         # Entry point
+├── App.vue             # Componente principal
+├── index.html
+├── vite.config.ts
+└── package.json
+```
+
+## 🔌 Conectar con tu Backend
+
+Edita el archivo `services/api.ts` y cambia la URL base:
+
+```typescript
+const API_URL = "https://tu-backend.com/api";
+```
+
+O crea un archivo `.env`:
+
+```
+VITE_API_URL=https://tu-backend.com/api
+```
+
+## 📋 Características
+
+- ✅ **Sidebar colapsable** con navegación por secciones
+- ✅ **CRUD completo** (Crear, Actualizar, Buscar, Retirar, Agregar, Eliminar)
+- ✅ **Tabla de inventario** con selección múltiple
+- ✅ **Modales** para todas las operaciones
+- ✅ **Gestión de stock** con control de cantidades
+- ✅ **Visibilidad por rol** (admin, usuario, visualizador)
+- ✅ **TypeScript** para type safety
+- ✅ **CSS puro** con estilos modernos
+- ✅ **Axios** para peticiones HTTP
+
+## 🎨 Personalización
+
+Los estilos están en cada componente `.vue` dentro de `<style scoped>`. Puedes personalizar:
+
+- Colores en las clases CSS
+- Tamaños de fuente
+- Espaciados y márgenes
+- Transiciones y animaciones
+
+## 📡 API Endpoints
+
+El servicio espera los siguientes endpoints:
+
+- `GET /api/articulos` - Listar artículos (opcional: `?q=busqueda`)
+- `POST /api/articulos` - Crear artículo
+- `PUT /api/articulos` - Actualizar artículo
+- `DELETE /api/articulos?ids=1,2,3` - Eliminar artículos
+- `PATCH /api/articulos` - Ajustar stock (agregar/retirar)
+
+## 👤 Usuario de Ejemplo
+
+Usuario simulado en `App.vue`:
+
+```typescript
+{
+  username: "carlos.mendez",
+  nombre: "Carlos Mendez",
+  rol: "admin",
+  localidad: "Ciudad de Mexico"
+}
+```
+
+Puedes modificarlo o conectarlo con tu sistema de autenticación.
