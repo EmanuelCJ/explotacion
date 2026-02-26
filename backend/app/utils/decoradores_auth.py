@@ -55,7 +55,8 @@ def require_permiso(permiso_name: str):
         def wrapper(*args, **kwargs):
             try:
                 # Obtener usuario del JWT
-                usuario_id = get_jwt_identity()
+                usuario_id = int(get_jwt_identity())
+
                 
                 # Validar permiso
                 tiene_permiso = AuthService.validate_permissions(usuario_id, permiso_name)
@@ -94,7 +95,7 @@ def require_any_permission(*permissions):
         @wraps(fn)
         def wrapper(*args, **kwargs):
             try:
-                usuario_id = get_jwt_identity()
+                usuario_id = int(get_jwt_identity())
                 
                 # Validar que tenga al menos uno de los permisos
                 tiene_alguno = AuthService.validate_any_permission(usuario_id, list(permissions))

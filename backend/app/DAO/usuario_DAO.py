@@ -398,7 +398,7 @@ class UsuarioDAO:
                 """
                 cursor.execute(query, (usuario_id, nombre_permiso))
                 result = cursor.fetchone()
-                return result['count'] > 0
+                return result[0] > 0
         except Exception as e:
             print(f"Error checking permiso: {e}")
             raise

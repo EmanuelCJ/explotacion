@@ -61,7 +61,7 @@ def login():
         # Crear tokens JWT
         # Access token con información del usuario
         access_token = create_access_token(
-            identity=usuario['id_usuario'],
+            identity=str(usuario['id_usuario']),
             additional_claims={
                 'username': usuario['username'],
                 'rol': usuario['roles'].split(',')[0] if usuario.get('roles') else 'usuario',
@@ -94,7 +94,7 @@ def login():
         # Configurar cookies HttpOnly
         # IMPORTANTE: httponly=True para que JavaScript no pueda acceder
         response.set_cookie(
-            'access_token_cookie',
+            'access_token',
             value=access_token,
             httponly=True,
             secure=False,  # True en producción con HTTPS
@@ -103,7 +103,7 @@ def login():
         )
         
         response.set_cookie(
-            'refresh_token_cookie',
+            'refresh_token',
             value=refresh_token,
             httponly=True,
             secure=False,
@@ -185,7 +185,7 @@ def refresh():
         
         # Actualizar cookie de access token
         response.set_cookie(
-            'access_token_cookie',
+            'access_token',
             value=access_token,
             httponly=True,
             secure=False,
@@ -251,6 +251,7 @@ def verify_token():
         usuario_id = get_jwt_identity()
         
         return jsonify({
+            'message': 'Token válido',
             'valid': True,
             'usuario_id': usuario_id
         }), 200

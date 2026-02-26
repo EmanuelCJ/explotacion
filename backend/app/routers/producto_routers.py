@@ -17,10 +17,21 @@ from app.utils.decoradores_auth import (
 )
 
 
-producto_bp = Blueprint('producto', __name__)
+producto_bp = Blueprint('productos', __name__)
 
 
 @producto_bp.route('/', methods=['GET'])
+@jwt_required_cookie()
+@require_permiso('ver_productos')
+def get_productos():
+
+    try:
+        return jsonify(ProductoService.get_all()), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
+@producto_bp.route('/filtros', methods=['GET'])
 @jwt_required_cookie()
 @require_permiso('ver_productos')
 def get_productos():
