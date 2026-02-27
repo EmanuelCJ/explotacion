@@ -34,7 +34,7 @@ def get_productos():
 @producto_bp.route('/filtros', methods=['GET'])
 @jwt_required_cookie()
 @require_permiso('ver_productos')
-def get_productos():
+def get_productos_filtros():
     """
     Obtener todos los productos con paginación y filtros
     
@@ -92,7 +92,7 @@ def get_producto(id):
         return jsonify({'error': str(e)}), 500
 
 
-@producto_bp.route('/', methods=['POST'])
+@producto_bp.route('/create', methods=['POST'])
 @jwt_required_cookie() # Asegura que el usuario esté autenticado
 @require_permiso('crear_productos') # Verifica que el usuario tenga permiso para crear productos
 @validate_producto_data() # Valida los datos del producto en el request
