@@ -234,3 +234,29 @@ def get_user_agent() -> str:
         str: User Agent
     """
     return request.headers.get('User-Agent', 'unknown')
+
+def refresh_required_cookie():
+    """
+    Decorador para validar refresh_token desde cookie HttpOnly
+    
+    Usage:
+        @router.route('/refresh', methods=['POST'])
+        @refresh_required_cookie()
+        def refresh_token():
+            user_id = get_jwt_identity()
+            ...
+    """
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            try:
+                # Verificar específicamente que sea REFRESH token
+                verify_jwt_in_request(refresh=True)
+                return fn(*args, **kwargs)
+            except Exception as e:
+                return jsonify({
+                    'error': 'Refresh token inválido o expirado',
+                    'detail': str(e)
+                }), 401
+        return wrapper
+    return decorator

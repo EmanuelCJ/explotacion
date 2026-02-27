@@ -8,13 +8,13 @@ from flask import Blueprint, request, jsonify, make_response
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
-    jwt_required,
+    set_access_cookies,
     get_jwt_identity,
     unset_jwt_cookies
 )
 from app.services.auth_service import AuthService
 from app.middlewares.auth_validation import validate_credentials
-from app.utils.decoradores_auth import get_client_ip, get_user_agent, jwt_required_cookie
+from app.utils.decoradores_auth import get_client_ip, get_user_agent, jwt_required_cookie , refresh_required_cookie
 from datetime import timedelta
 
 
@@ -72,7 +72,7 @@ def login():
         
         # Refresh token
         refresh_token = create_refresh_token(
-            identity=usuario['id_usuario'],
+            identity=str(usuario['id_usuario']),
             expires_delta=timedelta(days=30)  # 30 días
         )
         
@@ -147,56 +147,41 @@ def logout():
 
 
 @auth_bp.route('/refresh', methods=['POST'])
-@jwt_required(refresh=True)
+@refresh_required_cookie()
 def refresh():
     """
     Renovar access token usando refresh token
-    El refresh token debe estar en la cookie
-    
-    Returns:
-        200: Nuevo access token
-        401: Refresh token inválido
     """
     try:
         usuario_id = get_jwt_identity()
-        
-        # Obtener datos actualizados del usuario
+
+        # Validar que el usuario aún exista
         usuario = AuthService.get_user_by_id(usuario_id)
-        
+
         if not usuario:
             return jsonify({'error': 'Usuario no encontrado'}), 404
-        
+
         if not usuario.get('activo'):
             return jsonify({'error': 'Usuario inactivo'}), 403
-        
+
         # Crear nuevo access token
         access_token = create_access_token(
-            identity=usuario_id,
+            identity=str(usuario['id_usuario']),
             additional_claims={
                 'username': usuario['username'],
                 'rol': usuario['roles'].split(',')[0] if usuario.get('roles') else 'usuario',
                 'localidad_id': usuario['id_localidad']
             },
-            expires_delta=timedelta(hours=1)
+            expires_delta=timedelta(hours=1)  # 1 hora
         )
-        
-        # Crear respuesta
-        response = make_response(jsonify({'message': 'Token renovado'}), 200)
-        
-        # Actualizar cookie de access token
-        response.set_cookie(
-            'access_token',
-            value=access_token,
-            httponly=True,
-            secure=False,
-            samesite='Lax',
-            max_age=3600
-        )
-        
-        return response
-        
+
+        response = jsonify({'message': 'Token renovado'})
+        set_access_cookies(response, access_token)
+
+        return response, 200
+
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Error interno'}), 500
 
 
 @auth_bp.route('/me', methods=['GET'])
