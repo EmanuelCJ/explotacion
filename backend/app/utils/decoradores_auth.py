@@ -6,6 +6,7 @@ Validan JWT desde cookies HttpOnly y permisos de usuarios
 from functools import wraps
 from flask import jsonify, request
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity, get_jwt
+from flask_jwt_extended.exceptions import NoAuthorizationError, InvalidHeaderError
 from app.services.auth_service import AuthService
 
 
@@ -56,7 +57,6 @@ def require_permiso(permiso_name: str):
             try:
                 # Obtener usuario del JWT
                 usuario_id = int(get_jwt_identity())
-
                 
                 # Validar permiso
                 tiene_permiso = AuthService.validate_permissions(usuario_id, permiso_name)

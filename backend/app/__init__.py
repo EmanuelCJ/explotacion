@@ -74,8 +74,8 @@ def create_app():
             'status': 'running'
         }
     
-    @app.route('/health')
+    @app.route('/estado')
     def health():
-        return {'status': 'healthy'}, 200
+        return {'status': 'activo'}, 200
     
     return app

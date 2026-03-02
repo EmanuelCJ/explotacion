@@ -176,7 +176,14 @@ def refresh():
         )
 
         response = jsonify({'message': 'Token renovado'})
-        set_access_cookies(response, access_token)
+        response.set_cookie(
+            'access_token',
+            value=access_token,
+            httponly=True,
+            secure=False,  # True en producción con HTTPS
+            samesite='Lax',
+            max_age=3600  # 1 hora en segundos
+        )
 
         return response, 200
 
@@ -187,38 +194,27 @@ def refresh():
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required_cookie()
 def get_current_user():
-    """
-    Obtener información del usuario autenticado
-    
-    Returns:
-        200: Datos del usuario actual
-        404: Usuario no encontrado
-    """
-    try:
-        usuario_id = get_jwt_identity()
-        
-        # Obtener datos del usuario
-        usuario = AuthService.get_user_by_id(usuario_id)
-        
-        if not usuario:
-            return jsonify({'error': 'Usuario no encontrado'}), 404
-        
-        return jsonify({
-            'usuario': {
-                'id': usuario['id_usuario'],
-                'nombre': usuario['nombre'],
-                'apellido': usuario['apellido'],
-                'username': usuario['username'],
-                'email': usuario.get('email'),
-                'legajo': usuario.get('legajo'),
-                'rol': usuario['roles'].split(',')[0] if usuario.get('roles') else 'usuario',
-                'localidad': usuario.get('localidad_nombre'),
-                'activo': usuario['activo']
-            }
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+
+    usuario_id = get_jwt_identity()
+
+    usuario = AuthService.get_user_by_id(usuario_id)
+
+    if not usuario:
+        return jsonify({'error': 'Usuario no encontrado'}), 404
+
+    return jsonify({
+        'usuario': {
+            'id': usuario['id_usuario'],
+            'nombre': usuario['nombre'],
+            'apellido': usuario['apellido'],
+            'username': usuario['username'],
+            'email': usuario.get('email'),
+            'legajo': usuario.get('legajo'),
+            'rol': usuario['roles'].split(',')[0] if usuario.get('roles') else 'usuario',
+            'localidad': usuario.get('localidad_nombre'),
+            'activo': usuario['activo']
+        }
+    }), 200
 
 
 @auth_bp.route('/verify', methods=['GET'])

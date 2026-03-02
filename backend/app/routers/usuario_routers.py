@@ -32,10 +32,11 @@ def get_usuario(id):
         return jsonify({'error': 'Usuario no encontrado'}), 404
     return jsonify({'usuario': usuario}), 200
 
-@usuario_bp.route('/', methods=['POST'])
+@usuario_bp.route('/create', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('crear_usuarios')
 def create_usuario():
+    print("Datos recibidos para crear usuario:", request.get_json())  # Debug: Ver datos recibidos
     """Crear usuario (solo admin)"""
     admin_id = get_current_user_id()
     data = request.get_json()

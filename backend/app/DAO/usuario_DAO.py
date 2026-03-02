@@ -302,7 +302,7 @@ class UsuarioDAO:
                 query = "SELECT COUNT(*) as count FROM usuarios WHERE username = %s"
                 cursor.execute(query, (username,))
                 result = cursor.fetchone()
-                return result['count'] > 0
+                return result[0] > 0
         except Exception as e:
             print(f"Error checking username: {e}")
             raise
@@ -398,9 +398,9 @@ class UsuarioDAO:
                 """
                 cursor.execute(query, (usuario_id, nombre_permiso))
                 result = cursor.fetchone()
-                return result[0] > 0
+                return result[0] > 0 
         except Exception as e:
-            print(f"Error checking permiso: {e}")
+            print(f"Error checking permiso : {e}")
             raise
         finally:
             connection.close()
