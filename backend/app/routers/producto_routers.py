@@ -15,7 +15,13 @@ from app.utils.decoradores_auth import (
     require_permiso,
     get_current_user_id
 )
-
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    set_access_cookies,
+    get_jwt_identity,
+    unset_jwt_cookies
+)
 
 producto_bp = Blueprint('productos', __name__)
 
@@ -116,7 +122,8 @@ def create_producto():
         400: Datos inválidos
     """
     try:
-        usuario_id = get_current_user_id()
+        usuario_id = get_jwt_identity()
+        print(f"Usuario ID desde JWT: {usuario_id}")
         data = request.get_json()
         
         if not data:
