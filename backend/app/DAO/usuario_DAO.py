@@ -45,6 +45,7 @@ class UsuarioDAO:
                     data.get('legajo'),
                     data['id_localidad']
                 ))
+                connection.commit()
                 return cursor.lastrowid
         except Exception as e:
             print(f"Error creating usuario: {e}")
@@ -155,6 +156,35 @@ class UsuarioDAO:
             raise
         finally:
             connection.close()
+        
+    @staticmethod
+    def username(usuario_id: int) -> dict:
+        """
+        Obtener un usuario por ID
+        
+        Args:
+            usuario_id (int): ID del usuario
+        
+        Returns:
+            dict: Username del usuario o None
+        """
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
+                query = """
+                    SELECT username
+                    FROM usuarios
+                    WHERE id_usuario = %s;
+                """
+                cursor.execute(query, (usuario_id,))
+                result = cursor.fetchone()
+                return result[0] if result else None
+            
+        except Exception as e:
+            print(f"Error getting usuario by id: {e}")
+            raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_by_username(username: str) -> dict:
@@ -244,6 +274,7 @@ class UsuarioDAO:
             with connection.cursor() as cursor:
                 query = "UPDATE usuarios SET password_hash = %s WHERE id_usuario = %s"
                 cursor.execute(query, (password_hash, usuario_id))
+                connection.commit()
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error updating password: {e}")
@@ -318,7 +349,7 @@ class UsuarioDAO:
                 query = "SELECT COUNT(*) as count FROM usuarios WHERE email = %s"
                 cursor.execute(query, (email,))
                 result = cursor.fetchone()
-                return result['count'] > 0
+                return result[0] > 0
         except Exception as e:
             print(f"Error checking email: {e}")
             raise

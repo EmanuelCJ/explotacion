@@ -5,7 +5,8 @@ from app.services.usuario_service import UsuarioService
 from app.utils.decoradores_auth import (
     jwt_required_cookie,
     require_permiso,
-    get_current_user_id
+    get_current_user_id,
+    require_role
 )
 
 usuario_bp = Blueprint('usuario', __name__)
@@ -35,14 +36,29 @@ def get_usuario(id):
 @usuario_bp.route('/create', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('crear_usuarios')
+@require_role('admin')
 def create_usuario():
-    print("Datos recibidos para crear usuario:", request.get_json())  # Debug: Ver datos recibidos
-    """Crear usuario (solo admin)"""
+    """
+    Crear nuevo usuario
+    {
+     "nombre" : "adminTest",
+     "apellido" : "test",
+     "username" : "subadmin",
+     "email" : "ejemplo@gmail.com",
+     "password" : "arsa2026",
+     "legajo" : "9999",
+     "id_localidad" : 1,
+     "id_rol" : 2
+    }
+    
+    """
+    
     admin_id = get_current_user_id()
     data = request.get_json()
     
     usuario_id = UsuarioService.create(data, admin_id)
     return jsonify({
+        'success': True,
         'message': 'Usuario creado',
         'usuario_id': usuario_id
     }), 201

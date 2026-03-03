@@ -14,7 +14,7 @@ from flask_jwt_extended import (
 )
 from app.services.auth_service import AuthService
 from app.middlewares.auth_validation import validate_credentials
-from app.utils.decoradores_auth import get_client_ip, get_user_agent, jwt_required_cookie , refresh_required_cookie
+from app.utils.decoradores_auth import get_client_ip, jwt_required_cookie , refresh_required_cookie, require_role
 from datetime import timedelta
 
 
@@ -244,9 +244,9 @@ def verify_token():
         }), 401
 
 
-@auth_bp.route('/change-password', methods=['POST'])
-@jwt_required_cookie()
+@auth_bp.route('/password', methods=['POST'])
 @validate_credentials(require_current_password=True)
+@jwt_required_cookie()
 def change_password():
     """
     Cambiar contraseña del usuario actual

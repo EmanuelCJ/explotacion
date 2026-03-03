@@ -7,6 +7,8 @@ from app.DAO.usuario_DAO import UsuarioDAO
 from app.DAO.localidad_DAO import LocalidadDAO
 from app.DAO.auditoria_DAO import AuditoriaDAO
 from app.services.auth_service import AuthService
+from app.utils.decoradores_auth import get_client_ip
+from app.DAO.usuario_DAO import UsuarioDAO
 import re
 
 
@@ -68,15 +70,24 @@ class UsuarioService:
         usuario_id = UsuarioDAO.create(user_data)
         
         # Asignar rol
-        if data.get('id_rol'):
+        if usuario_id > 0:
             UsuarioDAO.asignar_rol(usuario_id, data['id_rol'], admin_id)
         
+
+        # Obtener IP del cliente para la auditoría
+        ip_user = get_client_ip()
+
+        # Obtener User Agent para la auditoría osea quien crea el usuario
+        user_agent = UsuarioDAO.username(admin_id)
+
         # Registrar en auditoría
         AuditoriaDAO.create({
             'entidad': 'Usuario',
             'id_entidad': usuario_id,
             'accion': 'create',
             'descripcion': f"Usuario creado: {data['username']}",
+            'ip_address': ip_user,
+            'user_agent': user_agent,
             'datos_nuevos': {
                 'nombre': data['nombre'],
                 'apellido': data['apellido'],
@@ -85,7 +96,7 @@ class UsuarioService:
             },
             'id_usuario': admin_id
         })
-        
+
         return usuario_id
     
     @staticmethod
@@ -246,6 +257,17 @@ class UsuarioService:
         # Validar email si está presente
         if data.get('email') and not UsuarioService._validate_email(data['email']):
             raise Exception("Email inválido")
+        
+        #validar id_localidad que sea un entero
+        if not isinstance(data['id_localidad'], int):
+            raise Exception("id_localidad debe ser un número entero")
+        
+        #valida que id_rol sea un entero si está presente
+        if 'id_rol' not in data:
+            raise Exception("Campo requerido: id_rol")
+
+        if not isinstance(data['id_rol'], int):
+            raise Exception("id_rol debe ser un número entero")
     
     @staticmethod
     def _validate_email(email: str) -> bool:

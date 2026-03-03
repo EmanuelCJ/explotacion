@@ -32,7 +32,6 @@ class AuthService:
         usuario = UsuarioDAO.get_by_username(username)
         
         
-        
         if not usuario:
             raise Exception("Usuario no encontrado")
         
@@ -43,32 +42,11 @@ class AuthService:
         
         # Verificar password
         if not AuthService.verify_password(password, usuario['password_hash']):
-            # Registrar intento fallido en auditoría
-            AuditoriaDAO.create({
-                'entidad': 'Usuario',
-                'id_entidad': usuario['id_usuario'],
-                'accion': 'login',
-                'descripcion': 'Intento de login fallido',
-                'id_usuario': usuario['id_usuario'],
-                'ip_address': ip_address
-            })
             raise Exception("Contraseña incorrecta")
 
         
         # Actualizar último login
         UsuarioDAO.update_ultimo_login(usuario['id_usuario'])
-
-        
-        # Registrar login exitoso en auditoría
-        AuditoriaDAO.create({
-            'entidad': 'Usuario',
-            'id_entidad': usuario['id_usuario'],
-            'accion': 'login',
-            'descripcion': f"Login exitoso: {username}",
-            'id_usuario': usuario['id_usuario'],
-            'ip_address': ip_address
-        })
-
 
         
         # Obtener permisos del usuario
@@ -148,6 +126,9 @@ class AuthService:
         
         # Actualizar en BD
         success = UsuarioDAO.update_password(usuario_id, nuevo_hash)
+
+        #Obtiene un username del agente que edita
+        username_editor = UsuarioDAO.username(usuario_id)
         
         if success:
             # Registrar en auditoría
@@ -156,7 +137,8 @@ class AuthService:
                 'id_entidad': usuario_id,
                 'accion': 'update',
                 'descripcion': 'Cambio de contraseña',
-                'id_usuario': admin_id if admin_id else usuario_id
+                'id_usuario': admin_id if admin_id else usuario_id,
+                'user_agent': username_editor
             })
         
         return success

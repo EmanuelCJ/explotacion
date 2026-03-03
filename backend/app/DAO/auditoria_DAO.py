@@ -26,6 +26,7 @@ class AuditoriaDAO:
                 'id_usuario': int,
                 'ip_address': str (opcional),
                 'user_agent': str (opcional)
+                'username': str (opcional)
             }
         """
         try:
@@ -38,7 +39,7 @@ class AuditoriaDAO:
                 query = """
                     INSERT INTO auditoria 
                     (entidad, id_entidad, accion, descripcion, 
-                     datos_anteriores, datos_nuevos, id_usuario, 
+                     datos_anteriores, datos_nuevos, id_usuario,
                      ip_address, user_agent)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
@@ -53,6 +54,7 @@ class AuditoriaDAO:
                     data.get('ip_address'),
                     data.get('user_agent')
                 ))
+                connection.commit()
                 return cursor.lastrowid
         except Exception as e:
             print(f"Error creating auditoria: {e}")
