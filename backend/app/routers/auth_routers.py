@@ -264,6 +264,7 @@ def change_password():
     try:
         usuario_id = get_jwt_identity()
         data = request.get_json()
+        ip_editor = get_client_ip()
         
         # Validar datos
         if not data or not data.get('password_actual') or not data.get('password_nuevo'):
@@ -273,7 +274,8 @@ def change_password():
         success = AuthService.change_password(
             usuario_id,
             data['password_actual'],
-            data['password_nuevo']
+            data['password_nuevo'],
+            ip_editor=ip_editor
         )
         
         if success:

@@ -7,7 +7,6 @@ import bcrypt
 from app.DAO.usuario_DAO import UsuarioDAO
 from app.DAO.auditoria_DAO import AuditoriaDAO
 
-
 class AuthService:
     """Servicio de autenticación y gestión de sesiones"""
     
@@ -94,7 +93,7 @@ class AuthService:
             return False
     
     @staticmethod
-    def change_password(usuario_id: int, password_actual: str, password_nuevo: str, admin_id: int = None) -> bool:
+    def change_password(usuario_id: int, password_actual: str, password_nuevo: str, admin_id: int = None, ip_editor: str = None) -> bool:
         """
         Cambiar contraseña de usuario
         
@@ -103,6 +102,7 @@ class AuthService:
             password_actual: Password actual (validar)
             password_nuevo: Nuevo password
             admin_id: ID del admin que hace el cambio (opcional)
+            ip_address: IP del usuario (opcional)
         
         Returns:
             bool: True si se cambió correctamente
@@ -138,7 +138,10 @@ class AuthService:
                 'accion': 'update',
                 'descripcion': 'Cambio de contraseña',
                 'id_usuario': admin_id if admin_id else usuario_id,
-                'user_agent': username_editor
+                'user_agent': username_editor,
+                'datos_anteriores': {'password_vieja': password_actual},
+                'datos_nuevos': {'password_nueva': nuevo_hash},
+                'ip_address': ip_editor
             })
         
         return success
