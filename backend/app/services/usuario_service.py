@@ -200,17 +200,24 @@ class UsuarioService:
         if not usuario:
             raise Exception("Usuario no encontrado")
         
+        rol_anterior = UsuarioDAO.get_rol(usuario_id)
+        ip_user = get_client_ip()
+
         success = UsuarioDAO.asignar_rol(usuario_id, rol_id, admin_id)
         
+
         if success:
             # Registrar en auditoría
             AuditoriaDAO.create({
                 'entidad': 'Usuario',
                 'id_entidad': usuario_id,
-                'accion': 'asignar_rol',
+                'accion': 'update',
+                'datos_anteriores': rol_anterior,
                 'descripcion': f"Rol asignado al usuario {usuario['username']}",
                 'datos_nuevos': {'rol_id': rol_id},
-                'id_usuario': admin_id
+                'id_usuario': admin_id,
+                'user_agent': UsuarioDAO.username(admin_id),
+                'ip_address': ip_user
             })
         
         return success
@@ -221,18 +228,22 @@ class UsuarioService:
         usuario = UsuarioDAO.get_by_id(usuario_id)
         if not usuario:
             raise Exception("Usuario no encontrado")
-        
+        rol_anterior = UsuarioDAO.get_rol(usuario_id)
         success = UsuarioDAO.quitar_rol(usuario_id, rol_id)
+        ip_user = get_client_ip()
         
         if success:
             # Registrar en auditoría
             AuditoriaDAO.create({
                 'entidad': 'Usuario',
                 'id_entidad': usuario_id,
-                'accion': 'asignar_rol',
+                'accion': 'update',
                 'descripcion': f"Rol removido del usuario {usuario['username']}",
+                'datos_anteriores': rol_anterior,
                 'datos_anteriores': {'rol_id': rol_id},
-                'id_usuario': admin_id
+                'id_usuario': admin_id,
+                'user_agent': UsuarioDAO.username(admin_id),
+                'ip_address': ip_user
             })
         
         return success

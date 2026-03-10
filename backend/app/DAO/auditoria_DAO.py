@@ -26,7 +26,6 @@ class AuditoriaDAO:
                 'id_usuario': int,
                 'ip_address': str (opcional),
                 'user_agent': str (opcional)
-                'username': str (opcional)
             }
         """
         try:

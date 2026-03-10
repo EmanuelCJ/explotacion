@@ -367,6 +367,7 @@ class UsuarioDAO:
                     VALUES (%s, %s, %s)
                 """
                 cursor.execute(query, (usuario_id, rol_id, asignado_por))
+                connection.commit()
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error asignando rol: {e}")
@@ -383,6 +384,7 @@ class UsuarioDAO:
             with connection.cursor() as cursor:
                 query = "DELETE FROM usuarios_roles WHERE id_usuario = %s AND id_rol = %s"
                 cursor.execute(query, (usuario_id, rol_id))
+                connection.commit()
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error quitando rol: {e}")
