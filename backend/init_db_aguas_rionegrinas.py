@@ -158,15 +158,17 @@ def create_tables():
             # ========================================
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS usuarios_roles (
-                    id_usuario INT NOT NULL,
-                    id_rol INT NOT NULL,
-                    asignado_por INT COMMENT 'Usuario que asignó el rol',
-                    fecha_asignacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (id_usuario, id_rol),
-                    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-                    FOREIGN KEY (id_rol) REFERENCES roles(id_rol) ON DELETE CASCADE,
-                    FOREIGN KEY (asignado_por) REFERENCES usuarios(id_usuario)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+                id_usuario INT NOT NULL,
+                id_rol INT NOT NULL,
+                asignado_por INT COMMENT 'Usuario que asignó el rol',
+                fecha_asignacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+                PRIMARY KEY (id_usuario),
+    
+                FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+                FOREIGN KEY (id_rol) REFERENCES roles(id_rol) ON DELETE CASCADE,
+                FOREIGN KEY (asignado_por) REFERENCES usuarios(id_usuario)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
             """)
             print("  ✓ Tabla 'usuarios_roles' creada")
             

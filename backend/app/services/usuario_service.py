@@ -201,20 +201,20 @@ class UsuarioService:
             raise Exception("Usuario no encontrado")
         
         rol_anterior = UsuarioDAO.get_rol(usuario_id)
+        
         ip_user = get_client_ip()
 
         success = UsuarioDAO.asignar_rol(usuario_id, rol_id, admin_id)
         
-
         if success:
             # Registrar en auditoría
             AuditoriaDAO.create({
                 'entidad': 'Usuario',
                 'id_entidad': usuario_id,
                 'accion': 'update',
-                'datos_anteriores': rol_anterior,
+                'datos_anteriores': {'rol': rol_anterior},
                 'descripcion': f"Rol asignado al usuario {usuario['username']}",
-                'datos_nuevos': {'rol_id': rol_id},
+                'datos_nuevos': {'rol_id': UsuarioDAO.get_rol(usuario_id)},
                 'id_usuario': admin_id,
                 'user_agent': UsuarioDAO.username(admin_id),
                 'ip_address': ip_user

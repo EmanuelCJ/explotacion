@@ -365,8 +365,12 @@ class UsuarioDAO:
                 query = """
                     INSERT INTO usuarios_roles (id_usuario, id_rol, asignado_por)
                     VALUES (%s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                    id_rol = VALUES(id_rol),
+                    asignado_por = VALUES(asignado_por),
+                    fecha_asignacion = CURRENT_TIMESTAMP
                 """
-                cursor.execute(query, (usuario_id, rol_id, asignado_por))
+                cursor.execute(query, (rol_id, asignado_por, usuario_id))
                 connection.commit()
                 return cursor.rowcount > 0
         except Exception as e:
@@ -434,6 +438,29 @@ class UsuarioDAO:
                 return result[0] > 0 
         except Exception as e:
             print(f"Error checking permiso : {e}")
+            raise
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_rol(usuario_id: int) -> dict:
+        """Obtener el rol principal de un usuario"""
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
+                query = """
+                    SELECT r.nombre
+                    FROM usuarios_roles ur
+                    JOIN roles r ON ur.id_rol = r.id_rol
+                    WHERE ur.id_usuario = %s
+                    ORDER BY ur.asignado_por DESC
+                    LIMIT 1
+                """
+                cursor.execute(query, (usuario_id,))
+                result = cursor.fetchone()
+                return result[0] if result else None
+        except Exception as e:
+            print(f"Error getting rol: {e}")
             raise
         finally:
             connection.close()

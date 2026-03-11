@@ -131,8 +131,8 @@ def logout():
         usuario_id = get_jwt_identity()
         ip_address = get_client_ip()
         
-        # Registrar logout
-        AuthService.logout(usuario_id, ip_address)
+        # Registrar logout en auditoría (opcional) posiblemente borrar
+        #AuthService.logout(usuario_id, ip_address)
         
         # Crear respuesta
         response = make_response(jsonify({'message': 'Logout exitoso'}), 200)
