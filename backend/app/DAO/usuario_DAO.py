@@ -370,7 +370,7 @@ class UsuarioDAO:
                     asignado_por = VALUES(asignado_por),
                     fecha_asignacion = CURRENT_TIMESTAMP
                 """
-                cursor.execute(query, (rol_id, asignado_por, usuario_id))
+                cursor.execute(query, (usuario_id, rol_id, asignado_por,))
                 connection.commit()
                 return cursor.rowcount > 0
         except Exception as e:

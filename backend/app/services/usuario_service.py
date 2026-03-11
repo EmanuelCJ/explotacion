@@ -200,8 +200,7 @@ class UsuarioService:
         if not usuario:
             raise Exception("Usuario no encontrado")
         
-        rol_anterior = UsuarioDAO.get_rol(usuario_id)
-        
+        rol_viejo = UsuarioDAO.get_rol(usuario_id)
         ip_user = get_client_ip()
 
         success = UsuarioDAO.asignar_rol(usuario_id, rol_id, admin_id)
@@ -212,7 +211,7 @@ class UsuarioService:
                 'entidad': 'Usuario',
                 'id_entidad': usuario_id,
                 'accion': 'update',
-                'datos_anteriores': {'rol': rol_anterior},
+                'datos_anteriores': {'rol': rol_viejo},
                 'descripcion': f"Rol asignado al usuario {usuario['username']}",
                 'datos_nuevos': {'rol_id': UsuarioDAO.get_rol(usuario_id)},
                 'id_usuario': admin_id,
@@ -224,12 +223,16 @@ class UsuarioService:
     
     @staticmethod
     def quitar_rol(usuario_id: int, rol_id: int, admin_id: int) -> bool:
+
         """Quitar rol de usuario"""
         usuario = UsuarioDAO.get_by_id(usuario_id)
         if not usuario:
             raise Exception("Usuario no encontrado")
-        rol_anterior = UsuarioDAO.get_rol(usuario_id)
+        
+        rol_viejo = UsuarioDAO.get_rol(usuario_id)
+        
         success = UsuarioDAO.quitar_rol(usuario_id, rol_id)
+        
         ip_user = get_client_ip()
         
         if success:
@@ -239,8 +242,8 @@ class UsuarioService:
                 'id_entidad': usuario_id,
                 'accion': 'update',
                 'descripcion': f"Rol removido del usuario {usuario['username']}",
-                'datos_anteriores': rol_anterior,
-                'datos_anteriores': {'rol_id': rol_id},
+                'datos_anteriores': {'rol': rol_viejo},
+                'datos_nuevos': {'rol_id': UsuarioDAO.get_rol(usuario_id)},
                 'id_usuario': admin_id,
                 'user_agent': UsuarioDAO.username(admin_id),
                 'ip_address': ip_user
