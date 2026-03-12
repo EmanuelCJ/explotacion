@@ -93,15 +93,15 @@ def asignar_rol():
     success = UsuarioService.asignar_rol(data['usuario_id'], data['rol_id'], admin_id)
     return jsonify({'message': 'Rol asignado'}), 200
 
-
-@usuario_bp.route('/quitar-rol', methods=['POST]'])
+#se rol_id por que no era necesario, cada usuario debe tener un rol asignado
+@usuario_bp.route('/quitar-rol', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('asignar_roles')
 def remover_rol():
     """Remover rol de usuario"""
     admin_id = get_current_user_id()
-    data = request.get_json()
-    success = UsuarioService.quitar_rol(data['usuario_id'], data['rol_id'], admin_id)
+    data = request.get_json()  
+    success = UsuarioService.quitar_rol(data['usuario_id'], admin_id)
     return jsonify({'message': 'Rol removido'}), 200
 
 @usuario_bp.route('/<int:id>/activar', methods=['POST'])

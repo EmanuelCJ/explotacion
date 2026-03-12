@@ -222,33 +222,39 @@ class UsuarioService:
         return success
     
     @staticmethod
-    def quitar_rol(usuario_id: int, rol_id: int, admin_id: int) -> bool:
-
+    def quitar_rol(usuario_id: int, admin_id: int) -> bool:
         """Quitar rol de usuario"""
+
+        print(f"Intentando quitar rol del usuario {usuario_id} por el admin {admin_id}")
+        
+        # 🚨 Evitar que el admin se quite su propio rol
+        if usuario_id == admin_id:
+            raise Exception("No puedes quitar tu propio rol")
+
         usuario = UsuarioDAO.get_by_id(usuario_id)
+
         if not usuario:
             raise Exception("Usuario no encontrado")
-        
+
         rol_viejo = UsuarioDAO.get_rol(usuario_id)
-        
-        success = UsuarioDAO.quitar_rol(usuario_id, rol_id)
-        
         ip_user = get_client_ip()
+
+        success = UsuarioDAO.quitar_rol(usuario_id)
+        success= False
         
         if success:
-            # Registrar en auditoría
             AuditoriaDAO.create({
-                'entidad': 'Usuario',
-                'id_entidad': usuario_id,
-                'accion': 'update',
-                'descripcion': f"Rol removido del usuario {usuario['username']}",
-                'datos_anteriores': {'rol': rol_viejo},
-                'datos_nuevos': {'rol_id': UsuarioDAO.get_rol(usuario_id)},
-                'id_usuario': admin_id,
-                'user_agent': UsuarioDAO.username(admin_id),
-                'ip_address': ip_user
+            'entidad': 'Usuario',
+            'id_entidad': usuario_id,
+            'accion': 'update',
+            'descripcion': f"Rol removido del usuario {usuario['username']}",
+            'datos_anteriores': {'rol': rol_viejo},
+            'datos_nuevos': {'rol_id': "sin rol"},
+            'id_usuario': admin_id,
+            'user_agent': UsuarioDAO.username(admin_id),
+            'ip_address': ip_user
             })
-        
+
         return success
     
     @staticmethod

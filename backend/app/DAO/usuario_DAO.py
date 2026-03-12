@@ -381,13 +381,13 @@ class UsuarioDAO:
             connection.close()
     
     @staticmethod
-    def quitar_rol(usuario_id: int, rol_id: int) -> bool:
+    def quitar_rol(usuario_id: int) -> bool:
         """Quitar un rol de un usuario"""
         try:
             connection = ConectDB.get_connection()
             with connection.cursor() as cursor:
-                query = "DELETE FROM usuarios_roles WHERE id_usuario = %s AND id_rol = %s"
-                cursor.execute(query, (usuario_id, rol_id))
+                query = "DELETE FROM usuarios_roles WHERE id_usuario = %s"
+                cursor.execute(query, (usuario_id,))
                 connection.commit()
                 return cursor.rowcount > 0
         except Exception as e:
