@@ -176,8 +176,11 @@ class UsuarioService:
             raise Exception("Usuario no encontrado")
         
         # No permitir eliminar el propio usuario
-        if usuario_id == admin_id:
+        if int(usuario_id) == int(admin_id):
             raise Exception("No puedes eliminarte a ti mismo")
+        
+        username = UsuarioDAO.username(admin_id)
+        ip_user = get_client_ip()
         
         success = UsuarioDAO.delete(usuario_id)
         
@@ -188,7 +191,17 @@ class UsuarioService:
                 'id_entidad': usuario_id,
                 'accion': 'delete',
                 'descripcion': f"Usuario eliminado: {usuario['username']}",
-                'id_usuario': admin_id
+                'id_usuario': admin_id,
+                'user_agent': username,
+                'ip_address': ip_user,
+                'datos_anteriores': {
+                    'nombre': usuario['nombre'],
+                    'apellido': usuario['apellido'],
+                    'username': usuario['username']
+                },
+                'datos_nuevos': {
+                    'el usuario fue eliminado y no tiene datos nuevos'
+                }
             })
         
         return success
@@ -202,6 +215,7 @@ class UsuarioService:
         
         rol_viejo = UsuarioDAO.get_rol(usuario_id)
         ip_user = get_client_ip()
+        username = UsuarioDAO.username(admin_id)
 
         success = UsuarioDAO.asignar_rol(usuario_id, rol_id, admin_id)
         
@@ -211,11 +225,11 @@ class UsuarioService:
                 'entidad': 'Usuario',
                 'id_entidad': usuario_id,
                 'accion': 'update',
-                'datos_anteriores': {'rol': rol_viejo},
+                'datos_anteriores': {'rol': rol_viejo if rol_viejo is not None else "sin rol"},
                 'descripcion': f"Rol asignado al usuario {usuario['username']}",
                 'datos_nuevos': {'rol_id': UsuarioDAO.get_rol(usuario_id)},
                 'id_usuario': admin_id,
-                'user_agent': UsuarioDAO.username(admin_id),
+                'user_agent': username,
                 'ip_address': ip_user
             })
         
@@ -224,11 +238,9 @@ class UsuarioService:
     @staticmethod
     def quitar_rol(usuario_id: int, admin_id: int) -> bool:
         """Quitar rol de usuario"""
-
-        print(f"Intentando quitar rol del usuario {usuario_id} por el admin {admin_id}")
         
-        # 🚨 Evitar que el admin se quite su propio rol
-        if usuario_id == admin_id:
+        # 🚨 Evitar que el usuario elimine su propio rol
+        if int(usuario_id) == int(admin_id):
             raise Exception("No puedes quitar tu propio rol")
 
         usuario = UsuarioDAO.get_by_id(usuario_id)
@@ -240,7 +252,6 @@ class UsuarioService:
         ip_user = get_client_ip()
 
         success = UsuarioDAO.quitar_rol(usuario_id)
-        success= False
         
         if success:
             AuditoriaDAO.create({
@@ -294,3 +305,60 @@ class UsuarioService:
         """Validar formato de email"""
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         return re.match(pattern, email) is not None
+    
+
+    @staticmethod
+    def activar_usuario(usuario_id: int, admin_id: int) -> bool:
+        """Activar usuario"""
+        usuario = UsuarioDAO.get_by_id(usuario_id)
+        if not usuario:
+            raise Exception("Usuario no encontrado")
+        
+        ip_user = get_client_ip()
+        username = UsuarioDAO.username(admin_id)
+        
+        success = UsuarioDAO.activar_usuario(usuario_id)
+        
+        if success:
+            # Registrar en auditoría
+            AuditoriaDAO.create({
+                'entidad': 'Usuario',
+                'id_entidad': usuario_id,
+                'accion': 'update',
+                'descripcion': f"Usuario activado: {usuario['username']}",
+                'id_usuario': admin_id,
+                'user_agent': username,
+                'ip_address': ip_user
+            })
+        
+        return success
+    
+    @staticmethod
+    def desactivar_usuario(usuario_id: int, admin_id: int) -> bool:
+        """Desactivar usuario"""
+        usuario = UsuarioDAO.get_by_id(usuario_id)
+        if not usuario:
+            raise Exception("Usuario no encontrado")
+        
+        # No permitir desactivar el propio usuario
+        if int(usuario_id) == int(admin_id):
+            raise Exception("No puedes desactivarte a ti mismo")
+        
+        ip_user = get_client_ip()
+        username = UsuarioDAO.username(admin_id)
+
+        success = UsuarioDAO.desactivar_usuario(usuario_id)
+        
+        if success:
+            # Registrar en auditoría
+            AuditoriaDAO.create({
+                'entidad': 'Usuario',
+                'id_entidad': usuario_id,
+                'accion': 'update',
+                'descripcion': f"Usuario desactivado: {usuario['username']}",
+                'id_usuario': admin_id,
+                'user_agent': username,
+                'ip_address': ip_user
+            })
+        
+        return success

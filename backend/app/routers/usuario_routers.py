@@ -74,13 +74,14 @@ def update_usuario(id):
     success = UsuarioService.update(id, data, admin_id)
     return jsonify({'message': 'Usuario actualizado'}), 200
 
-@usuario_bp.route('/<int:id>', methods=['DELETE'])
+@usuario_bp.route('/eliminar', methods=['DELETE'])
 @jwt_required_cookie()
 @require_permiso('eliminar_usuarios')
-def delete_usuario(id):
+def delete_usuario():
     """Eliminar usuario"""
     admin_id = get_current_user_id()
-    success = UsuarioService.delete(id, admin_id)
+    data = request.get_json()
+    success = UsuarioService.delete(data['usuario_id'], admin_id)
     return jsonify({'message': 'Usuario eliminado'}), 200
 
 @usuario_bp.route('/asignar-rol', methods=['POST'])
@@ -104,20 +105,23 @@ def remover_rol():
     success = UsuarioService.quitar_rol(data['usuario_id'], admin_id)
     return jsonify({'message': 'Rol removido'}), 200
 
-@usuario_bp.route('/<int:id>/activar', methods=['POST'])
+@usuario_bp.route('/activar', methods=['POST'])
 @jwt_required_cookie()
-@require_permiso('activar_usuarios')
-def activar_usuario(id):
+@require_permiso('editar_usuarios')
+def activar_usuario():
     """Activar usuario"""
     admin_id = get_current_user_id()
-    success = UsuarioService.activar_usuario(id, admin_id)
+    data = request.get_json()
+    success = UsuarioService.activar_usuario(data['usuario_id'], admin_id)
     return jsonify({'message': 'Usuario activado'}), 200
 
-@usuario_bp.route('/<int:id>/desactivar', methods=['POST'])
+@usuario_bp.route('/desactivar', methods=['POST'])
 @jwt_required_cookie()
-@require_permiso('desactivar_usuarios')
-def desactivar_usuario(id):
+@require_permiso('editar_usuarios')
+def desactivar_usuario():
     """Desactivar usuario"""
     admin_id = get_current_user_id()
-    success = UsuarioService.desactivar_usuario(id, admin_id)
+    data = request.get_json()
+    success = UsuarioService.desactivar_usuario(data['usuario_id'], admin_id)
     return jsonify({'message': 'Usuario desactivado'}), 200
+

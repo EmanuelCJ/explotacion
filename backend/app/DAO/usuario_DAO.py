@@ -314,8 +314,9 @@ class UsuarioDAO:
         try:
             connection = ConectDB.get_connection()
             with connection.cursor() as cursor:
-                query = "UPDATE usuarios SET activo = 0 WHERE id_usuario = %s"
+                query = "DELETE FROM usuarios WHERE id_usuario = %s"
                 cursor.execute(query, (usuario_id,))
+                connection.commit()
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error deleting usuario: {e}")
@@ -461,6 +462,56 @@ class UsuarioDAO:
                 return result[0] if result else None
         except Exception as e:
             print(f"Error getting rol: {e}")
+            raise
+        finally:
+            connection.close()
+    
+    @staticmethod
+    def activar_usuario(usuario_id: int) -> bool:
+        """Activar un usuario"""
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
+                query = "UPDATE usuarios SET activo = 1 WHERE id_usuario = %s"
+                cursor.execute(query, (usuario_id,))
+                connection.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            print(f"Error activating usuario: {e}")
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
+    
+    @staticmethod
+    def desactivar_usuario(usuario_id: int) -> bool:
+        """Desactivar un usuario"""
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
+                query = "UPDATE usuarios SET activo = 0 WHERE id_usuario = %s"
+                cursor.execute(query, (usuario_id,))
+                connection.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            print(f"Error desactivating usuario: {e}")
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_estado(usuario_id: int) -> bool:
+        """Obtener el estado activo de un usuario"""
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
+                query = "SELECT activo FROM usuarios WHERE id_usuario = %s"
+                cursor.execute(query, (usuario_id,))
+                result = cursor.fetchone()
+                return result[0] == 1 if result else False
+        except Exception as e:
+            print(f"Error getting estado: {e}")
             raise
         finally:
             connection.close()
