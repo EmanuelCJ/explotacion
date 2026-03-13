@@ -63,15 +63,15 @@ def create_usuario():
         'usuario_id': usuario_id
     }), 201
 
-@usuario_bp.route('/<int:id>', methods=['PUT'])
+@usuario_bp.route('/actualizar', methods=['PUT'])
 @jwt_required_cookie()
 @require_permiso('editar_usuarios')
-def update_usuario(id):
+def update_usuario():
     """Actualizar usuario"""
     admin_id = get_current_user_id()
     data = request.get_json()
     
-    success = UsuarioService.update(id, data, admin_id)
+    success = UsuarioService.update(data['usuario_id'], data, admin_id)
     return jsonify({'message': 'Usuario actualizado'}), 200
 
 @usuario_bp.route('/eliminar', methods=['DELETE'])
@@ -125,3 +125,18 @@ def desactivar_usuario():
     success = UsuarioService.desactivar_usuario(data['usuario_id'], admin_id)
     return jsonify({'message': 'Usuario desactivado'}), 200
 
+@usuario_bp.route('/cambiar-password', methods=['POST'])
+@jwt_required_cookie()
+@require_permiso('editar_usuarios')
+def cambiar_password():
+    """Cambiar contraseña de un usuario"""
+
+    admin_id = get_current_user_id()
+    data = request.get_json()
+
+    success = UsuarioService.cambiar_password(data['usuario_id'], data['new_password'], admin_id)
+
+    if success:
+        return jsonify({'message': 'Contraseña actualizada correctamente'}), 200
+    else:
+        return jsonify({'error': 'No se pudo actualizar la contraseña'}), 500

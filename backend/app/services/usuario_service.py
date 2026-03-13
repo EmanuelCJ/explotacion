@@ -365,3 +365,36 @@ class UsuarioService:
             })
         
         return success
+    
+    @staticmethod
+    def cambiar_password(usuario_id: int, new_password: str, admin_id: int) -> bool:
+
+        """Cambiar contraseña de usuario"""
+        if len(new_password) < 6:
+            raise Exception("El password debe tener al menos 6 caracteres")
+        
+        # Obtener usuario
+        usuario = UsuarioDAO.get_by_id(usuario_id)
+        if not usuario:
+            raise Exception("Usuario no encontrado")
+        
+        password_hash = AuthService.hash_password(new_password)
+        username = UsuarioDAO.username(admin_id)
+        username_usuario = usuario['username']
+
+
+        success = UsuarioDAO.update_password(usuario_id, password_hash)
+
+        if success:
+            # Registrar en auditoría
+            AuditoriaDAO.create({
+                'entidad': 'Usuario',
+                'id_entidad': usuario_id,
+                'accion': 'update',
+                'descripcion': f"Cambio de contraseña para el usuario con ID: {usuario_id} -- ({username_usuario})",
+                'id_usuario': admin_id,
+                'user_agent': username,
+                'ip_address': get_client_ip()
+            })
+
+        return success

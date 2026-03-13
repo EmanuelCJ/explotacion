@@ -515,3 +515,50 @@ class UsuarioDAO:
             raise
         finally:
             connection.close()
+
+    # esta funcion deberia recibir un diccionario con los datos que se desean actualiar por editor
+    @staticmethod
+    def update_usuario(id_usuario: int, data: dict) -> bool:
+
+        connection = ConectDB.get_connection()
+        with connection.cursor() as cursor:
+            try:
+                # Validar campos permitidos
+                campos_permitidos = ['nombre', 'apellido', 'username', 'rol', 'password']
+                for key in data.keys():
+                 if key not in campos_permitidos:
+                    raise ValueError(f"Campo no permitido para actualizar: {key}")
+    
+                # Validar que haya al menos un campo
+                if not data:
+                    raise ValueError("No se proporcionaron campos para actualizar")
+                
+                # Construir la parte SET de la query dinámicamente
+                # Ejemplo: "nombre=%s, apellido=%s, rol=%s"
+                set_clause = ", ".join([f"{campo}=%s" for campo in data.keys()])
+            
+                # Query completa
+                query = f"""
+                    UPDATE usuarios
+                    SET {set_clause}
+                    WHERE id_usuario=%s
+                """
+            
+                # Los valores en el orden correcto
+                values = tuple(data.values()) + (id_usuario,)
+            
+                # Debug (opcional, comentar en producción)
+                print(f"Query: {query}")
+                print(f"Values: {values}")
+            
+                cursor.execute(query, values)
+                connection.commit()
+            
+                return cursor.rowcount > 0  # True si actualizó al menos 1 fila
+            
+            except Exception as e:
+                connection.rollback()
+                print(f"Error update usuarioDAO: {e}")
+                return False
+            finally:
+                connection.close()
