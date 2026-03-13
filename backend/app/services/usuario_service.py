@@ -313,6 +313,9 @@ class UsuarioService:
         usuario = UsuarioDAO.get_by_id(usuario_id)
         if not usuario:
             raise Exception("Usuario no encontrado")
+
+        if int(usuario_id) == int(admin_id):
+            raise Exception("No es necesario activarte a ti mismo")
         
         ip_user = get_client_ip()
         username = UsuarioDAO.username(admin_id)
