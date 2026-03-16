@@ -520,11 +520,20 @@ class UsuarioDAO:
     @staticmethod
     def update_usuario(id_usuario: int, data: dict) -> bool:
 
-        connection = ConectDB.get_connection()
-        with connection.cursor() as cursor:
-            try:
+        """
+        
+            Actualizar un usuario con datos dinámicos
+            crea una query UPDATE dinámicamente según los campos presentes en el diccionario data
+            dependiendo los datos se envian desde el frontend
+
+        """
+        
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
+
                 # Validar campos permitidos
-                campos_permitidos = ['nombre', 'apellido', 'username', 'rol', 'password']
+                campos_permitidos = ['nombre', 'apellido', 'username', 'email', 'legajo', 'id_localidad', 'activo']
                 for key in data.keys():
                  if key not in campos_permitidos:
                     raise ValueError(f"Campo no permitido para actualizar: {key}")
@@ -547,18 +556,14 @@ class UsuarioDAO:
                 # Los valores en el orden correcto
                 values = tuple(data.values()) + (id_usuario,)
             
-                # Debug (opcional, comentar en producción)
-                print(f"Query: {query}")
-                print(f"Values: {values}")
-            
                 cursor.execute(query, values)
                 connection.commit()
             
                 return cursor.rowcount > 0  # True si actualizó al menos 1 fila
             
-            except Exception as e:
+        except Exception as e:
                 connection.rollback()
                 print(f"Error update usuarioDAO: {e}")
                 return False
-            finally:
+        finally:
                 connection.close()

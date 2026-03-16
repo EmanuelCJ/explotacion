@@ -125,12 +125,13 @@ class UsuarioService:
         Returns:
             bool: True si se actualizó
         """
-        # Obtener usuario actual
+
+        # busca si existe el usuario a actualizar
         usuario_actual = UsuarioDAO.get_by_id(usuario_id)
         if not usuario_actual:
             raise Exception("Usuario no encontrado")
         
-        # Validar campos si están presentes
+        # Validar campos si están presentes (permitir actualizar solo algunos campos)
         if 'email' in data and data['email']:
             if not UsuarioService._validate_email(data['email']):
                 raise Exception("Email inválido")
@@ -141,8 +142,26 @@ class UsuarioService:
                 if usuario_email['id_usuario'] != usuario_id:
                     raise Exception("El email ya está en uso")
         
+        #Esta valiendo que el username no se repita con otro usuario que no sea el mismo
+        if 'username' in data and data['username']:
+           # Validar username (solo alfanumérico y _)
+            if not re.match(r'^[a-zA-Z0-9_]{3,50}$', data['username']):
+                raise Exception("Username inválido (3-50 caracteres, solo letras, números y _)")
+                
+            # Verificar que no exista otro usuario con ese username
+            if UsuarioDAO.exists_username(data['username']):
+
+                usuario_username = UsuarioDAO.get_by_username(data['username'])
+    
+                if usuario_username['id_usuario'] != usuario_id:
+                        raise Exception("El username ya está en uso intentá con otro")
+        
         # Actualizar
-        success = UsuarioDAO.update(usuario_id, data)
+        success = UsuarioDAO.update_usuario(usuario_id, data)
+
+        # Obtener IP del cliente para la auditoría y ademas buscamos el username del admin que actualiza
+        ip_user = get_client_ip()
+        admin_username = UsuarioDAO.username(admin_id)
         
         if success:
             # Registrar en auditoría
@@ -157,13 +176,15 @@ class UsuarioService:
                     'email': usuario_actual.get('email')
                 },
                 'datos_nuevos': data,
-                'id_usuario': admin_id
+                'id_usuario': admin_id,
+                'user_agent': admin_username,
+                'ip_address': ip_user
             })
         
         return success
     
     @staticmethod
-    def delete(usuario_id: int, admin_id: int) -> bool:
+    def kdelete(usuario_id: int, admin_id: int) -> bool:
         """
         Eliminar (desactivar) usuario
         

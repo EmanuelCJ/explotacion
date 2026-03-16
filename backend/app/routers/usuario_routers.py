@@ -68,11 +68,28 @@ def create_usuario():
 @require_permiso('editar_usuarios')
 def update_usuario():
     """Actualizar usuario"""
+
     admin_id = get_current_user_id()
     data = request.get_json()
+
+    # Extraer el campo "usuario_id" del JSON y eliminarlo del diccionario de datos
+    usuario_id = data.pop('usuario_id', None)
+
+    # Validar que el campo "usuario_id" esté presente en el JSON
+    if usuario_id is None:
+        return jsonify({'error': 'El campo "usuario_id" es obligatorio'}), 400
     
-    success = UsuarioService.update(data['usuario_id'], data, admin_id)
-    return jsonify({'message': 'Usuario actualizado'}), 200
+    # 1. Verifica si el JSON llegó, si tiene contenido y si el ID está presente
+    if not data or len(data) == 0:
+        return jsonify({'error': 'No se enviaron datos en la solicitud'}), 400
+    
+    success = UsuarioService.update(usuario_id, data, admin_id)
+
+    if success:
+        return jsonify({'message': 'Usuario actualizado correctamente'}), 200
+    else:
+        return jsonify({'error': 'No se pudo actualizar el usuario'}), 500
+    
 
 @usuario_bp.route('/eliminar', methods=['DELETE'])
 @jwt_required_cookie()
