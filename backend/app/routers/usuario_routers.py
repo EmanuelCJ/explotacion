@@ -15,23 +15,68 @@ usuario_bp = Blueprint('usuario', __name__)
 @jwt_required_cookie()
 @require_permiso('ver_usuarios')
 def get_usuarios():
-    """Listar usuarios"""
+
+    """Listar usuarios si password no se muestra"""
+
+    data = request.get_json()
+
     page = request.args.get('page', 1, type=int)
     limit = request.args.get('limit', 20, type=int)
-    activo = request.args.get('activo', type=lambda x: x.lower() == 'true')
+
+    activo = data.get('activo')
     
     result = UsuarioService.get_all(page, limit, activo)
     return jsonify(result), 200
 
-@usuario_bp.route('/<int:id>', methods=['GET'])
+@usuario_bp.route('/buscar/id', methods=['GET'])
 @jwt_required_cookie()
 @require_permiso('ver_usuarios')
-def get_usuario(id):
+def get_usuario_id():
+
     """Obtener usuario por ID"""
-    usuario = UsuarioService.get_by_id(id)
-    if not usuario:
-        return jsonify({'error': 'Usuario no encontrado'}), 404
-    return jsonify({'usuario': usuario}), 200
+
+    data = request.get_json()
+
+    if not data.get('usuario_id'):
+        return jsonify({'error': 'Se requiere usuario_id'}), 400
+
+    try:
+        
+        usuario_id = int(data.get('usuario_id'))
+        usuario = UsuarioService.get_by_id(usuario_id)
+
+        if not usuario:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+        return jsonify({'usuario': usuario}), 200
+    
+    except ValueError:
+        return jsonify({'error': 'usuario_id debe ser un número entero'}), 400
+
+
+@usuario_bp.route('/buscar/username', methods=['GET'])
+@jwt_required_cookie()
+@require_permiso('ver_usuarios')
+def get_usuario_username():
+
+    """Obtener usuario por username"""
+
+    data = request.get_json()
+
+    if not data.get('username'):
+        return jsonify({'error': 'Se requiere username'}), 400
+
+    try:
+        
+        username = data.get('username')
+        usuario = UsuarioService.get_username(username)
+
+        if not usuario:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+        return jsonify({'usuario': usuario}), 200
+    
+    except ValueError:
+        return jsonify({'error': 'username debe ser una cadena de texto'}), 400
+
 
 @usuario_bp.route('/create', methods=['POST'])
 @jwt_required_cookie()
@@ -90,16 +135,16 @@ def update_usuario():
     else:
         return jsonify({'error': 'No se pudo actualizar el usuario'}), 500
     
-
-@usuario_bp.route('/eliminar', methods=['DELETE'])
-@jwt_required_cookie()
-@require_permiso('eliminar_usuarios')
-def delete_usuario():
-    """Eliminar usuario"""
-    admin_id = get_current_user_id()
-    data = request.get_json()
-    success = UsuarioService.delete(data['usuario_id'], admin_id)
-    return jsonify({'message': 'Usuario eliminado'}), 200
+# No aplica no deberia eliminar un usuario 
+# @usuario_bp.route('/eliminar', methods=['DELETE'])
+# @jwt_required_cookie()
+# @require_permiso('eliminar_usuarios')
+# def delete_usuario():
+#     """Eliminar usuario"""
+#     admin_id = get_current_user_id()
+#     data = request.get_json()
+#     success = UsuarioService.delete(data['usuario_id'], admin_id)
+#     return jsonify({'message': 'Usuario eliminado'}), 200
 
 @usuario_bp.route('/asignar-rol', methods=['POST'])
 @jwt_required_cookie()
@@ -109,7 +154,11 @@ def asignar_rol():
     admin_id = get_current_user_id()
     data = request.get_json()
     success = UsuarioService.asignar_rol(data['usuario_id'], data['rol_id'], admin_id)
-    return jsonify({'message': 'Rol asignado'}), 200
+
+    if success:
+        return jsonify({'message': 'Rol asignado'}), 200
+    else:
+        return jsonify({'error': 'No se pudo asignar el rol'}), 500
 
 #se rol_id por que no era necesario, cada usuario debe tener un rol asignado
 @usuario_bp.route('/quitar-rol', methods=['POST'])

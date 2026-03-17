@@ -100,18 +100,26 @@ class UsuarioService:
         return usuario_id
     
     @staticmethod
-    def get_all(page=1, limit=20, activo=None):
+    def get_all(page=1, limit=20, activo=1):
         """Obtener todos los usuarios con paginación"""
         return UsuarioDAO.get_all(page, limit, activo)
     
     @staticmethod
     def get_by_id(usuario_id: int) -> dict:
         """Obtener usuario por ID (sin password)"""
-        usuario = UsuarioDAO.get_by_id(usuario_id)
-        if usuario and 'password_hash' in usuario:
-            del usuario['password_hash']
+        usuario = UsuarioDAO.get_id(usuario_id)       
         return usuario
     
+    @staticmethod
+    def get_username(username: str) -> str:
+        """Obtener username por nombre de usuario"""
+        return UsuarioDAO.get_by_username(username)
+            
+    @staticmethod
+    def get_localidad(localidad_id: int) -> dict:
+        """Obtener usuarios por ID de localidad"""
+        return UsuarioDAO.get_localidad(localidad_id)
+
     @staticmethod
     def update(usuario_id: int, data: dict, admin_id: int) -> bool:
         """
@@ -182,50 +190,51 @@ class UsuarioService:
             })
         
         return success
-    
-    @staticmethod
-    def kdelete(usuario_id: int, admin_id: int) -> bool:
-        """
-        Eliminar (desactivar) usuario
+
+    # No se implementa la eliminación física de usuarios por la relación con auditoría, en su lugar se implementa desactivación    
+    # @staticmethod
+    # def delete(usuario_id: int, admin_id: int) -> bool:
+    #     """
+    #     Eliminar (desactivar) usuario
         
-        Args:
-            usuario_id: ID del usuario
-            admin_id: ID del admin que elimina
-        """
-        usuario = UsuarioDAO.get_by_id(usuario_id)
-        if not usuario:
-            raise Exception("Usuario no encontrado")
+    #     Args:
+    #         usuario_id: ID del usuario
+    #         admin_id: ID del admin que elimina
+    #     """
+    #     usuario = UsuarioDAO.get_by_id(usuario_id)
+    #     if not usuario:
+    #         raise Exception("Usuario no encontrado")
         
-        # No permitir eliminar el propio usuario
-        if int(usuario_id) == int(admin_id):
-            raise Exception("No puedes eliminarte a ti mismo")
+    #     # No permitir eliminar el propio usuario
+    #     if int(usuario_id) == int(admin_id):
+    #         raise Exception("No puedes eliminarte a ti mismo")
         
-        username = UsuarioDAO.username(admin_id)
-        ip_user = get_client_ip()
+    #     username = UsuarioDAO.username(admin_id)
+    #     ip_user = get_client_ip()
         
-        success = UsuarioDAO.delete(usuario_id)
+    #     success = UsuarioDAO.delete(usuario_id)
         
-        if success:
-            # Registrar en auditoría
-            AuditoriaDAO.create({
-                'entidad': 'Usuario',
-                'id_entidad': usuario_id,
-                'accion': 'delete',
-                'descripcion': f"Usuario eliminado: {usuario['username']}",
-                'id_usuario': admin_id,
-                'user_agent': username,
-                'ip_address': ip_user,
-                'datos_anteriores': {
-                    'nombre': usuario['nombre'],
-                    'apellido': usuario['apellido'],
-                    'username': usuario['username']
-                },
-                'datos_nuevos': {
-                    'el usuario fue eliminado y no tiene datos nuevos'
-                }
-            })
+    #     if success:
+    #         # Registrar en auditoría
+    #         AuditoriaDAO.create({
+    #             'entidad': 'Usuario',
+    #             'id_entidad': usuario_id,
+    #             'accion': 'delete',
+    #             'descripcion': f"Usuario eliminado: {usuario['username']}",
+    #             'id_usuario': admin_id,
+    #             'user_agent': username,
+    #             'ip_address': ip_user,
+    #             'datos_anteriores': {
+    #                 'nombre': usuario['nombre'],
+    #                 'apellido': usuario['apellido'],
+    #                 'username': usuario['username']
+    #             },
+    #             'datos_nuevos': {
+    #                 'el usuario fue eliminado y no tiene datos nuevos'
+    #             }
+    #         })
         
-        return success
+    #     return success
     
     @staticmethod
     def asignar_rol(usuario_id: int, rol_id: int, admin_id: int) -> bool:
@@ -241,6 +250,9 @@ class UsuarioService:
         success = UsuarioDAO.asignar_rol(usuario_id, rol_id, admin_id)
         
         if success:
+
+            estado = UsuarioDAO.activar_usuario(usuario_id)  # Activar usuario al asignar rol
+
             # Registrar en auditoría
             AuditoriaDAO.create({
                 'entidad': 'Usuario',
@@ -248,7 +260,7 @@ class UsuarioService:
                 'accion': 'update',
                 'datos_anteriores': {'rol': rol_viejo if rol_viejo is not None else "sin rol"},
                 'descripcion': f"Rol asignado al usuario {usuario['username']}",
-                'datos_nuevos': {'rol_id': UsuarioDAO.get_rol(usuario_id)},
+                'datos_nuevos': {'rol_id': UsuarioDAO.get_rol(usuario_id), 'activo': estado},
                 'id_usuario': admin_id,
                 'user_agent': username,
                 'ip_address': ip_user
@@ -270,22 +282,28 @@ class UsuarioService:
             raise Exception("Usuario no encontrado")
 
         rol_viejo = UsuarioDAO.get_rol(usuario_id)
+        user_agent = UsuarioDAO.username(admin_id)
         ip_user = get_client_ip()
 
         success = UsuarioDAO.quitar_rol(usuario_id)
         
         if success:
+
+            #Una vez quitado el rol se desactiva el usuario
+            estado =  UsuarioDAO.desactivar_usuario(usuario_id)  # Desactivar usuario al quitar rol
+
+            # Registrar en auditoría
             AuditoriaDAO.create({
             'entidad': 'Usuario',
             'id_entidad': usuario_id,
             'accion': 'update',
             'descripcion': f"Rol removido del usuario {usuario['username']}",
             'datos_anteriores': {'rol': rol_viejo},
-            'datos_nuevos': {'rol_id': "sin rol"},
+            'datos_nuevos': {'rol_id': "sin rol", 'activo': estado},
             'id_usuario': admin_id,
-            'user_agent': UsuarioDAO.username(admin_id),
+            'user_agent': user_agent,
             'ip_address': ip_user
-            })
+        })
 
         return success
     

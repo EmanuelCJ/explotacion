@@ -148,17 +148,17 @@ class AuthService:
     
     @staticmethod
     def get_user_by_id(usuario_id: int) -> dict:
+
         usuario = UsuarioDAO.get_by_id(usuario_id)
     
         if not usuario:
             return None
     
-        # Crear copia sin password_hash
-        usuario_sin_password = {
-            k: v for k, v in usuario.items() if k != 'password_hash'
-        }
-    
-        return usuario_sin_password
+        if usuario:
+        # Extrae el password y lo desecha; si no existe, no lanza error
+            usuario.pop('password_hash', None)
+
+        return usuario
     
     @staticmethod
     def validate_permissions(usuario_id: int, required_permission: str) -> bool:

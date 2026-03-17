@@ -55,7 +55,7 @@ class UsuarioDAO:
             connection.close()
     
     @staticmethod
-    def get_all(page=1, limit=20, activo=None):
+    def get_all(page=1, limit=20, activo=None) -> dict:
         """
         Obtener todos los usuarios con paginación
         
@@ -77,7 +77,7 @@ class UsuarioDAO:
         """
         try:
             connection = ConectDB.get_connection()
-            with connection.cursor() as cursor:
+            with connection.cursor(dictionary=True) as cursor:
                 # Contar total
                 count_query = "SELECT COUNT(*) as total FROM usuarios WHERE 1=1"
                 params = []
@@ -92,7 +92,13 @@ class UsuarioDAO:
                 # Obtener registros paginados
                 offset = (page - 1) * limit
                 query = """
-                    SELECT u.*, l.nombre as localidad_nombre,
+                    SELECT u.id_usuario, 
+                    u.nombre, 
+                    u.email, 
+                    u.apellido,
+                    u.legajo,
+                    u.activo,
+                    u.created_at, l.nombre as localidad_nombre,
                            GROUP_CONCAT(r.nombre) as roles
                     FROM usuarios u
                     LEFT JOIN localidades l ON u.id_localidad = l.id_localidad
@@ -125,8 +131,10 @@ class UsuarioDAO:
         finally:
             connection.close()
     
+
+
     @staticmethod
-    def get_by_id(usuario_id: int) -> dict:
+    def get_id(usuario_id: int) -> dict:
         """
         Obtener un usuario por ID
         
@@ -140,9 +148,49 @@ class UsuarioDAO:
             connection = ConectDB.get_connection()
             with connection.cursor(dictionary=True) as cursor:
                 query = """
-                    SELECT u.*, l.nombre as localidad_nombre,
-                           GROUP_CONCAT(r.nombre) as roles
+                    SELECT 
+                    u.id_usuario, 
+                    u.nombre, 
+                    u.email, 
+                    u.apellido,
+                    u.legajo,
+                    u.activo,
+                    u.created_at,-- Agrega aquí todos los campos que necesites de 'u'
+                    l.nombre AS localidad_nombre,
+                    GROUP_CONCAT(r.nombre) AS roles
                     FROM usuarios u
+                    LEFT JOIN localidades l ON u.id_localidad = l.id_localidad
+                    LEFT JOIN usuarios_roles ur ON u.id_usuario = ur.id_usuario
+                    LEFT JOIN roles r ON ur.id_rol = r.id_rol
+                    WHERE u.id_usuario = %s
+                    GROUP BY u.id_usuario;
+                """
+                cursor.execute(query, (usuario_id,))
+                return cursor.fetchone()
+        except Exception as e:
+            print(f"Error getting usuario by id: {e}")
+            raise
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_by_id(usuario_id: int) -> dict:
+        """
+        Obtener un usuario por ID incluyendo password_hash para el refresh token
+        
+        Args:
+            usuario_id (int): ID del usuario
+        
+        Returns:
+            dict: Datos del usuario o None
+        """
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor(dictionary=True) as cursor:
+                query = """
+                    SELECT u.*, l.nombre as localidad_nombre,
+                    GROUP_CONCAT(r.nombre) as roles
+                    FROM usuarios u         
                     LEFT JOIN localidades l ON u.id_localidad = l.id_localidad
                     LEFT JOIN usuarios_roles ur ON u.id_usuario = ur.id_usuario
                     LEFT JOIN roles r ON ur.id_rol = r.id_rol
@@ -300,30 +348,31 @@ class UsuarioDAO:
         finally:
                 connection.close()
     
-    @staticmethod
-    def delete(usuario_id: int) -> bool:
-        """
-        Eliminar (soft delete) un usuario
+    # Esta funcion no debe estar por que el id del usuario tiene relacion con tabla auditoria.
+    # @staticmethod
+    # def delete(usuario_id: int) -> bool:
+    #     """
+    #     Eliminar (soft delete) un usuario
         
-        Args:
-            usuario_id (int): ID del usuario
+    #     Args:
+    #         usuario_id (int): ID del usuario
         
-        Returns:
-            bool: True si se eliminó, False si no
-        """
-        try:
-            connection = ConectDB.get_connection()
-            with connection.cursor() as cursor:
-                query = "DELETE FROM usuarios WHERE id_usuario = %s"
-                cursor.execute(query, (usuario_id,))
-                connection.commit()
-                return cursor.rowcount > 0
-        except Exception as e:
-            print(f"Error deleting usuario: {e}")
-            connection.rollback()
-            raise
-        finally:
-            connection.close()
+    #     Returns:
+    #         bool: True si se eliminó, False si no
+    #     """
+    #     try:
+    #         connection = ConectDB.get_connection()
+    #         with connection.cursor() as cursor:
+    #             query = "DELETE FROM usuarios WHERE id_usuario = %s"
+    #             cursor.execute(query, (usuario_id,))
+    #             connection.commit()
+    #             return cursor.rowcount > 0
+    #     except Exception as e:
+    #         print(f"Error deleting usuario: {e}")
+    #         connection.rollback()
+    #         raise
+    #     finally:
+    #         connection.close()
     
     @staticmethod
     def exists_username(username: str) -> bool:
@@ -359,7 +408,13 @@ class UsuarioDAO:
     
     @staticmethod
     def asignar_rol(usuario_id: int, rol_id: int, asignado_por: int = None) -> bool:
+
         """Asignar un rol a un usuario"""
+
+        # validar roles posibles para asignar, no se pueden asignar roles que no existan en la tabla roles
+        if not UsuarioDAO.rol_existe(rol_id):
+            raise ValueError(f"El rol con ID {rol_id} no existe")
+
         try:
             connection = ConectDB.get_connection()
             with connection.cursor() as cursor:
@@ -383,6 +438,7 @@ class UsuarioDAO:
     
     @staticmethod
     def quitar_rol(usuario_id: int) -> bool:
+        
         """Quitar un rol de un usuario"""
         try:
             connection = ConectDB.get_connection()
@@ -465,7 +521,25 @@ class UsuarioDAO:
             raise
         finally:
             connection.close()
+
     
+    @staticmethod
+    def rol_existe(rol_id: int) -> bool:
+        """Verificar si existe un rol por ID"""
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
+                query = "SELECT COUNT(*) as count FROM roles WHERE id_rol = %s"
+                cursor.execute(query, (rol_id,))
+                result = cursor.fetchone()
+                return result[0] > 0
+        except Exception as e:
+            print(f"Error checking rol: {e}")
+            raise
+        finally:
+            connection.close()
+
+
     @staticmethod
     def activar_usuario(usuario_id: int) -> bool:
         """Activar un usuario"""
@@ -567,3 +641,28 @@ class UsuarioDAO:
                 return False
         finally:
                 connection.close()
+        
+    @staticmethod
+    def get_localidad(localidad_id: int) -> dict:
+        """Obtener localidad de un usuario"""
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor(dictionary=True) as cursor:
+                query = """
+                        SELECT 
+                        u.id_usuario, 
+                        u.nombre, 
+                        u.email, 
+                        l.nombre AS localidad_nombre
+                        FROM usuarios u
+                        INNER JOIN localidades l ON u.id_localidad = l.id_localidad
+                WHERE l.id_localidad = %s;
+                """
+                
+                cursor.execute(query, (localidad_id,))
+                return cursor.fetchone()
+        except Exception as e:
+            print(f"Error getting localidad: {e}")
+            raise
+        finally:
+            connection.close()
