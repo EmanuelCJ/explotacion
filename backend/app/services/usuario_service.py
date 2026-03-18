@@ -100,10 +100,15 @@ class UsuarioService:
         return usuario_id
     
     @staticmethod
-    def get_all(page=1, limit=20, activo=1):
+    def get_estado(page=1, limit=20, activo=1):
         """Obtener todos los usuarios con paginación"""
         return UsuarioDAO.get_all(page, limit, activo)
     
+    @staticmethod
+    def get_all_sin_paginacion():
+        """Obtener todos los usuarios sin paginación"""
+        return UsuarioDAO.get_all_sin_paginacion()
+
     @staticmethod
     def get_by_id(usuario_id: int) -> dict:
         """Obtener usuario por ID (sin password)"""
@@ -113,7 +118,9 @@ class UsuarioService:
     @staticmethod
     def get_username(username: str) -> str:
         """Obtener username por nombre de usuario"""
-        return UsuarioDAO.get_by_username(username)
+        usuario_sin_contraseña = UsuarioDAO.get_by_username(username)
+        usuario_sin_contraseña.pop('password_hash', None) #elimina un campo del diccionario si existe, si no existe no lanza error
+        return usuario_sin_contraseña
             
     @staticmethod
     def get_localidad(localidad_id: int) -> dict:

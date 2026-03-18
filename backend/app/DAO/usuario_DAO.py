@@ -131,6 +131,45 @@ class UsuarioDAO:
         finally:
             connection.close()
     
+    @staticmethod
+    def get_all_sin_paginacion() -> dict:
+        """
+        Obtener todos los usuarios sin paginación
+        
+        Returns:
+            dict: {
+                'usuarios': list
+            }
+        """
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor(dictionary=True) as cursor:
+                query = """
+                    SELECT u.id_usuario, 
+                    u.nombre, 
+                    u.email, 
+                    u.apellido,
+                    u.legajo,
+                    u.activo,
+                    u.created_at, l.nombre as localidad_nombre,
+                           GROUP_CONCAT(r.nombre) as roles
+                    FROM usuarios u
+                    LEFT JOIN localidades l ON u.id_localidad = l.id_localidad
+                    LEFT JOIN usuarios_roles ur ON u.id_usuario = ur.id_usuario
+                    LEFT JOIN roles r ON ur.id_rol = r.id_rol
+                    GROUP BY u.id_usuario ORDER BY u.id_usuario DESC
+                """
+                cursor.execute(query)
+                usuarios = cursor.fetchall()
+                
+                return {
+                    'usuarios': usuarios
+                }
+        except Exception as e:
+            print(f"Error getting usuarios: {e}")
+            raise
+        finally:
+            connection.close()
 
 
     @staticmethod
@@ -149,13 +188,15 @@ class UsuarioDAO:
             with connection.cursor(dictionary=True) as cursor:
                 query = """
                     SELECT 
-                    u.id_usuario, 
+                    u.id_usuario,
+                    u.username,
                     u.nombre, 
-                    u.email, 
                     u.apellido,
-                    u.legajo,
                     u.activo,
-                    u.created_at,-- Agrega aquí todos los campos que necesites de 'u'
+                    u.legajo,
+                    u.email,
+                    u.created_at,
+                    u.updated_at,
                     l.nombre AS localidad_nombre,
                     GROUP_CONCAT(r.nombre) AS roles
                     FROM usuarios u
@@ -241,7 +282,9 @@ class UsuarioDAO:
             connection = ConectDB.get_connection()
             with connection.cursor(dictionary=True) as cursor:
                 query = """
-                SELECT u.*, l.nombre as localidad_nombre,
+                SELECT 
+                    u.*
+                , l.nombre as localidad_nombre,
                        GROUP_CONCAT(r.nombre) as roles,
                        GROUP_CONCAT(r.id_rol) as roles_ids
                 FROM usuarios u
@@ -259,6 +302,7 @@ class UsuarioDAO:
                 raise
         finally:
                 connection.close()
+    
     
     @staticmethod
     def get_by_email(email: str) -> dict:

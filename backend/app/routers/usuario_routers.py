@@ -11,12 +11,12 @@ from app.utils.decoradores_auth import (
 
 usuario_bp = Blueprint('usuario', __name__)
 
-@usuario_bp.route('/', methods=['GET'])
+@usuario_bp.route('/estado', methods=['GET'])
 @jwt_required_cookie()
 @require_permiso('ver_usuarios')
 def get_usuarios():
 
-    """Listar usuarios si password no se muestra"""
+    """Listar usuarios sin password no se muestra"""
 
     data = request.get_json()
 
@@ -25,8 +25,15 @@ def get_usuarios():
 
     activo = data.get('activo')
     
-    result = UsuarioService.get_all(page, limit, activo)
+    result = UsuarioService.get_estado(page, limit, activo)
     return jsonify(result), 200
+
+@usuario_bp.route('/', methods=['GET'])
+@jwt_required_cookie()
+@require_permiso('ver_usuarios')
+def get_all_usuarios():
+    usuarios = UsuarioService.get_all_sin_paginacion()
+    return jsonify(usuarios), 200
 
 @usuario_bp.route('/buscar/id', methods=['GET'])
 @jwt_required_cookie()
