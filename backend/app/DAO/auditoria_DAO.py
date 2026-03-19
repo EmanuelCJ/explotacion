@@ -69,7 +69,7 @@ class AuditoriaDAO:
         """Obtener todos los registros de auditoría con filtros"""
         try:
             connection = ConectDB.get_connection()
-            with connection.cursor() as cursor:
+            with connection.cursor(dictionary=True) as cursor:
                 # Contar total
                 count_query = "SELECT COUNT(*) as total FROM auditoria WHERE 1=1"
                 params = []

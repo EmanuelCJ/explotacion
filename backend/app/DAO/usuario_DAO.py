@@ -146,12 +146,15 @@ class UsuarioDAO:
             with connection.cursor(dictionary=True) as cursor:
                 query = """
                     SELECT u.id_usuario, 
+                    u.id_usuario,
+                    u.username,
                     u.nombre, 
-                    u.email, 
                     u.apellido,
-                    u.legajo,
                     u.activo,
-                    u.created_at, l.nombre as localidad_nombre,
+                    u.legajo,
+                    u.email,
+                    u.created_at,
+                    u.updated_at, l.nombre as localidad_nombre,
                            GROUP_CONCAT(r.nombre) as roles
                     FROM usuarios u
                     LEFT JOIN localidades l ON u.id_localidad = l.id_localidad
