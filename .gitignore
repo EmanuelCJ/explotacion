@@ -10,3 +10,5 @@ backend/.env/
 
 # Ignorar todos los .env
 *.env
+
+#ignora el archivo de Excel
