@@ -537,23 +537,28 @@ def insert_initial_data():
             """)
             
             print("    ✓ Usuario 'admin' creado")
-            print(f"      📧 Email: admin@aguasrionegrinas.gov.ar")
+            print(f"      📧 Email: admin@aguasrionegrinas.com.ar")
             print(f"      👤 Username: admin")
             print(f"      🔑 Password: {password}")
             print(f"      📍 Localidad: Viedma")
+            
             
             # ========================================
             # CATEGORÍAS INICIALES
             # ========================================
             print("\n  📁 Insertando categorías...")
             cursor.execute("""
-                INSERT INTO categorias (tipo, nombre, codigo, descripcion) VALUES
-                ('INSUMO', 'Químicos', 'QUIM', 'Productos químicos para tratamiento de agua'),
-                ('INSUMO', 'Materiales de Construcción', 'CONST', 'Materiales para obras'),
-                ('INSUMO', 'Herramientas', 'HERR', 'Herramientas de trabajo'),
-                ('INSUMO', 'Repuestos', 'REP', 'Repuestos y piezas de equipos'),
-                ('INSUMO', 'Equipos de Seguridad', 'SEG', 'Elementos de protección personal'),
-                ('INSUMO', 'Oficina', 'OFIC', 'Materiales de oficina')
+                INSERT INTO categorias (tipo, nombre, codigo, descripcion, activo) VALUES
+                ('MATERIAL', 'Abrazaderas', 'ABRAZADERAS', 'Elementos para sujeción de tuberías', 1),
+                ('MATERIAL', 'Conexiones', 'CONEXIONES', 'Accesorios para unión de tuberías', 1),
+                ('MATERIAL', 'Espigas', 'ESPIGAS', 'Piezas para acople en sistemas hidráulicos', 1),
+                ('MATERIAL', 'Estribos', 'ESTRIBOS', 'Soportes metálicos para fijación', 1),
+                ('MATERIAL', 'Hidráulicos', 'HIDRAULICOS', 'Componentes del sistema hidráulico', 1),
+                ('MATERIAL', 'Juntamas', 'JUNTAMAS', 'Elementos para unión y sellado', 1),
+                ('MATERIAL', 'Juntas Gibault', 'JUNTAS_GIBAULT', 'Juntas especiales tipo Gibault para tuberías', 1),
+                ('MATERIAL', 'Otros', 'OTROS', 'Categoría general para elementos varios', 1),
+                ('MATERIAL', 'Reducciones', 'REDUCCIONES', 'Piezas para reducción de diámetro', 1),
+                ('MATERIAL', 'Tuberías PVC', 'TUBERIAS_PVC', 'Tuberías fabricadas en PVC', 1);
                 ON DUPLICATE KEY UPDATE nombre=VALUES(nombre)
             """)
             print("    ✓ 6 categorías iniciales")
