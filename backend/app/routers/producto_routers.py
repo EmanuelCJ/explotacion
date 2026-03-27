@@ -123,7 +123,9 @@ def create_producto():
     """
     try:
         usuario_id = get_jwt_identity()
-        print(f"Usuario ID desde JWT: {usuario_id}")
+
+        # print(f"Usuario ID desde JWT: {usuario_id}") borrar
+        
         data = request.get_json()
         
         if not data:

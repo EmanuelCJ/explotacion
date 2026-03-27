@@ -153,9 +153,12 @@ class AuthService:
     
         if not usuario:
             return None
+        
+        
     
         if usuario:
-        # Extrae el password y lo desecha; si no existe, no lanza error
+        # Extrae el password y lo desecha; si no existe, no lanza error agrega los permisos
+            usuario["permisos"] = UsuarioDAO.get_permisos(usuario_id)
             usuario.pop('password_hash', None)
 
         return usuario

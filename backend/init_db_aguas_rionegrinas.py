@@ -387,10 +387,10 @@ def insert_initial_data():
             cursor.execute("""
                 INSERT INTO localidades (nombre, descripcion, ciudad) VALUES
                 ('Viedma', 'Sede Central - Capital de Río Negro', 'Viedma'),
-                ('San Carlos de Bariloche', 'Sede Bariloche', 'San Carlos de Bariloche'),
+                ('San Carlos de Bariloche', 'Unidad Operativa Andina', 'San Carlos de Bariloche'),
                 ('General Roca', 'Unidad Operativa Valle', 'General Roca'),
                 ('Cipolletti', 'Unidad Operativa Valle', 'Cipolletti'),
-                ('Choele Choel', 'Sede Choele Choel', 'Choele Choel'),
+                ('Choele Choel', 'Unidad Operativa Este', 'Choele Choel'),
                 ('El Bolsón', 'Sede El Bolsón', 'El Bolsón'),
                 ('Villa Regina', 'Sede Villa Regina', 'Villa Regina'),
                 ('Cinco Saltos', 'Unidad Operativa Valle', 'Cinco Saltos'),
@@ -410,7 +410,24 @@ def insert_initial_data():
                 ('Rio Colorado', 'Unidad Operativa Este', 'Rio Colorado'),
                 ('Luis Beltrán', 'Unidad Operativa Este', 'Luis Beltrán'),
                 ('Conesa', 'Unidad Operativa Este', 'Conesa'),
-                ('', '', '') -- Agregar más localidades según sea necesario
+                ('Maquinchao', 'Unidad Operativa Atlantica', 'Maquinchao'),
+                ('Los Menucos', 'Unidad Operativa Atlantica', 'Los Menucos'),
+                ('Sierra Colarada', 'Unidad Operativa Atlantica', 'Sierra Colarada'),
+                ('Ramos Mexia', 'Unidad Operativa Atlantica', 'Ramos Mexia'),
+                ('Los Berros', 'Unidad Operativa Atlantica', 'Los Berros'),
+                ('Conaniyeu', 'Unidad Operativa Atlantica', 'Conaniyeu'),
+                ('Sierra Grande', 'Unidad Operativa Atlantica', 'Sierra Grande'),
+                ('San Antonio Oeste', 'Unidad Operativa Atlantica', 'San Antonio Oeste'),
+                ('Puerto S.A.E', 'Unidad Operativa Atlantica', 'Puerto S.A.E'),
+                ('Las Grutas', 'Unidad Operativa Atlantica', 'Las Grutas'),
+                ('San Javier', 'Unidad Operativa Atlantica', 'San Javier'),
+                ('Guardia Mitre', 'Unidad Operativa Atlantica', 'Guardia Mitre'),
+                ('El Condor', 'Unidad Operativa Atlantica', 'El Condor'),
+                ('Pilcaniyeu', 'Unidad Operativa Andina', 'Pilcaniyeu'),
+                ('Comallo', 'Unidad Operativa Andina', 'Comallo'),
+                ('Ñorquinco', 'Unidad Operativa Andina', 'Ñorquinco'),
+                ('El Bolsón', 'Unidad Operativa Andina', 'El Bolsón'),
+                ('Rio Chico', 'Unidad Operativa Andina', 'Rio Chico')
                 ON DUPLICATE KEY UPDATE nombre=VALUES(nombre)
             """)
             print("    ✓ 8 localidades de Río Negro insertadas")

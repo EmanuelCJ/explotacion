@@ -212,7 +212,8 @@ def get_current_user():
             'legajo': usuario.get('legajo'),
             'rol': usuario['roles'].split(',')[0] if usuario.get('roles') else 'usuario',
             'localidad': usuario.get('localidad_nombre'),
-            'activo': usuario['activo']
+            'activo': usuario['activo'],
+            'permisos': usuario['permisos']
         }
     }), 200
 
