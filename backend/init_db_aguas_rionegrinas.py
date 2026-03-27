@@ -388,12 +388,29 @@ def insert_initial_data():
                 INSERT INTO localidades (nombre, descripcion, ciudad) VALUES
                 ('Viedma', 'Sede Central - Capital de Río Negro', 'Viedma'),
                 ('San Carlos de Bariloche', 'Sede Bariloche', 'San Carlos de Bariloche'),
-                ('General Roca', 'Sede General Roca', 'General Roca'),
-                ('Cipolletti', 'Sede Cipolletti', 'Cipolletti'),
+                ('General Roca', 'Unidad Operativa Valle', 'General Roca'),
+                ('Cipolletti', 'Unidad Operativa Valle', 'Cipolletti'),
                 ('Choele Choel', 'Sede Choele Choel', 'Choele Choel'),
                 ('El Bolsón', 'Sede El Bolsón', 'El Bolsón'),
                 ('Villa Regina', 'Sede Villa Regina', 'Villa Regina'),
-                ('Cinco Saltos', 'Sede Cinco Saltos', 'Cinco Saltos')
+                ('Cinco Saltos', 'Unidad Operativa Valle', 'Cinco Saltos'),
+                ('Catriel', 'Unidad Operativa Valle', 'Catriel'),
+                ('Allen', 'Unidad Operativa Valle', 'Allen'),
+                ('Fernández Oro', 'Unidad Operativa Valle', 'Fernández Oro'),
+                ('Chichinales', 'Unidad Operativa Valle', 'Chichinales'),
+                ('Ing. Godoy', 'Unidad Operativa Valle', 'Ing. Godoy'),
+                ('Ing. Huergo', 'Unidad Operativa Valle', 'Ing. Huergo'),
+                ('Cervantes', 'Unidad Operativa Valle', 'Cervantes'),
+                ('Barda del Medio', 'Unidad Operativa Valle', 'Barda del Medio'),
+                ('C. Cordero', 'Unidad Operativa Valle', 'C. Cordero'),
+                ('Paraje Las Perlas', 'Unidad Operativa Valle', 'Paraje Las Perlas'),
+                ('Cnel. Belisle', 'Unidad Operativa Este', 'Cnel. Belisle'),
+                ('Darwin', 'Unidad Operativa Este', 'Darwin'),
+                ('Pomona', 'Unidad Operativa Este', 'Pomona'),
+                ('Rio Colorado', 'Unidad Operativa Este', 'Rio Colorado'),
+                ('Luis Beltrán', 'Unidad Operativa Este', 'Luis Beltrán'),
+                ('Conesa', 'Unidad Operativa Este', 'Conesa'),
+                ('', '', '') -- Agregar más localidades según sea necesario
                 ON DUPLICATE KEY UPDATE nombre=VALUES(nombre)
             """)
             print("    ✓ 8 localidades de Río Negro insertadas")
