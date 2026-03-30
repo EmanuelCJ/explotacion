@@ -1,24 +1,40 @@
 """
 Router de Productos
-CRUD completo de productos con validación de permisos
+CRUD completo de productos con validación de permisos y rutas protegidas por JWT en cookies. Incluye:
+- Listar productos con paginación y filtros
+- Detalles de producto con stock por localidad
+- Crear, actualizar y eliminar productos (con validación de stock)
+- Verificar stock mínimo y productos con stock bajo
 """
 
 from flask import Blueprint, request, jsonify
 from app.services.producto_service import ProductoService
+from app.middlewares.producto_validation import validate_producto_data
+from flask_jwt_extended import get_jwt_identity
 from app.utils.decoradores_auth import (
     jwt_required_cookie,
     require_permiso,
     get_current_user_id
 )
 
-
-producto_bp = Blueprint('producto', __name__)
+producto_bp = Blueprint('productos', __name__)
 
 
 @producto_bp.route('/', methods=['GET'])
 @jwt_required_cookie()
 @require_permiso('ver_productos')
 def get_productos():
+
+    try:
+        return jsonify(ProductoService.get_all()), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
+@producto_bp.route('/filtros', methods=['GET'])
+@jwt_required_cookie()
+@require_permiso('ver_productos')
+def get_productos_filtros():
     """
     Obtener todos los productos con paginación y filtros
     
@@ -77,8 +93,9 @@ def get_producto(id):
 
 
 @producto_bp.route('/create', methods=['POST'])
-@jwt_required_cookie()
-@require_permiso('crear_productos')
+@jwt_required_cookie() # Asegura que el usuario esté autenticado
+@require_permiso('crear_productos') # Verifica que el usuario tenga permiso para crear productos
+@validate_producto_data() # Valida los datos del producto en el request
 def create_producto():
     """
     Crear un nuevo producto
@@ -99,7 +116,10 @@ def create_producto():
         400: Datos inválidos
     """
     try:
-        usuario_id = get_current_user_id()
+        usuario_id = get_jwt_identity()
+
+        # print(f"Usuario ID desde JWT: {usuario_id}") borrar
+        
         data = request.get_json()
         
         if not data:
@@ -120,6 +140,7 @@ def create_producto():
 @producto_bp.route('/<int:id>', methods=['PUT'])
 @jwt_required_cookie()
 @require_permiso('editar_productos')
+@validate_producto_data(is_update=True) # Valida los datos del producto en el request para actualización
 def update_producto(id):
     """
     Actualizar un producto

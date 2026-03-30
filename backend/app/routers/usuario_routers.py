@@ -63,6 +63,7 @@ def get_usuario_id():
 @usuario_bp.route('/buscar/username', methods=['GET'])
 @jwt_required_cookie()
 @require_permiso('ver_usuarios')
+@require_role('admin')
 def get_usuario_username():
 
     """Obtener usuario por username"""
@@ -118,6 +119,7 @@ def create_usuario():
 @usuario_bp.route('/actualizar', methods=['PUT'])
 @jwt_required_cookie()
 @require_permiso('editar_usuarios')
+@require_role('admin')
 def update_usuario():
     """Actualizar usuario"""
 
@@ -146,6 +148,7 @@ def update_usuario():
 # @usuario_bp.route('/eliminar', methods=['DELETE'])
 # @jwt_required_cookie()
 # @require_permiso('eliminar_usuarios')
+# @require_role('admin')
 # def delete_usuario():
 #     """Eliminar usuario"""
 #     admin_id = get_current_user_id()
@@ -156,6 +159,7 @@ def update_usuario():
 @usuario_bp.route('/asignar-rol', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('asignar_roles')
+@require_role('admin')
 def asignar_rol():
     """Asignar rol a usuario"""
     admin_id = get_current_user_id()
@@ -171,6 +175,7 @@ def asignar_rol():
 @usuario_bp.route('/quitar-rol', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('asignar_roles')
+@require_role('admin')
 def remover_rol():
     """Remover rol de usuario"""
     admin_id = get_current_user_id()
@@ -181,6 +186,7 @@ def remover_rol():
 @usuario_bp.route('/activar', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('editar_usuarios')
+@require_role('admin')
 def activar_usuario():
     """Activar usuario"""
     admin_id = get_current_user_id()
@@ -191,6 +197,7 @@ def activar_usuario():
 @usuario_bp.route('/desactivar', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('editar_usuarios')
+@require_role('admin')
 def desactivar_usuario():
     """Desactivar usuario"""
     admin_id = get_current_user_id()
@@ -201,6 +208,7 @@ def desactivar_usuario():
 @usuario_bp.route('/cambiar-password', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('editar_usuarios')
+@require_role('admin')
 def cambiar_password():
     """Cambiar contraseña de un usuario"""
 
