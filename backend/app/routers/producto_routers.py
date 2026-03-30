@@ -10,17 +10,11 @@ CRUD completo de productos con validación de permisos y rutas protegidas por JW
 from flask import Blueprint, request, jsonify
 from app.services.producto_service import ProductoService
 from app.middlewares.producto_validation import validate_producto_data
+from flask_jwt_extended import get_jwt_identity
 from app.utils.decoradores_auth import (
     jwt_required_cookie,
     require_permiso,
     get_current_user_id
-)
-from flask_jwt_extended import (
-    create_access_token,
-    create_refresh_token,
-    set_access_cookies,
-    get_jwt_identity,
-    unset_jwt_cookies
 )
 
 producto_bp = Blueprint('productos', __name__)

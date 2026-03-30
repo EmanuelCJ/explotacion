@@ -76,7 +76,7 @@ def get_producto(id):
         return jsonify({'error': str(e)}), 500
 
 
-@producto_bp.route('/', methods=['POST'])
+@producto_bp.route('/create', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('crear_productos')
 def create_producto():
