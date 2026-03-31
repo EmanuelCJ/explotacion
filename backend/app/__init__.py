@@ -12,7 +12,7 @@ from .extensions import jwt, cors
 # Blueprints
 from .routers.auth_routers import auth_bp
 from .routers.usuario_routers import usuario_bp
-from .routers.producto_router_borrar_o_no import producto_bp
+from .routers.producto_routers import producto_bp
 from .routers.movimiento_routers import movimiento_bp
 from .routers.envio_routers import envio_bp
 from .routers.auditoria_routers import auditoria_bp
