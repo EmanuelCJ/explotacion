@@ -96,44 +96,44 @@ def validate_producto_data(is_update=False):
                         'detail': 'El nombre es obligatorio'
                     }), 400
                 
-                # ===== VALIDAR CÓDIGO =====
-                if 'codigo' in data:
-                    codigo = data.get('codigo')
+                # # ===== VALIDAR CÓDIGO =====
+                # if 'codigo' in data:
+                #     codigo = data.get('codigo')
                     
-                    if not isinstance(codigo, str):
-                        return jsonify({
-                            'error': 'Código inválido',
-                            'detail': 'El código debe ser un string'
-                        }), 400
+                #     if not isinstance(codigo, str):
+                #         return jsonify({
+                #             'error': 'Código inválido',
+                #             'detail': 'El código debe ser un string'
+                #         }), 400
                     
-                    codigo = codigo.strip().upper()  # Normalizar a mayúsculas
+                #     codigo = codigo.strip().upper()  # Normalizar a mayúsculas
                     
-                    if len(codigo) < 3 or len(codigo) > 50:
-                        return jsonify({
-                            'error': 'Código inválido',
-                            'detail': 'El código debe tener entre 3 y 50 caracteres'
-                        }), 400
+                #     if len(codigo) < 3 or len(codigo) > 50:
+                #         return jsonify({
+                #             'error': 'Código inválido',
+                #             'detail': 'El código debe tener entre 3 y 50 caracteres'
+                #         }), 400
                     
-                    # Solo alfanuméricos y guiones
-                    if not re.match(r'^[A-Z0-9\-]+$', codigo):
-                        return jsonify({
-                            'error': 'Código inválido',
-                            'detail': 'El código solo puede contener letras, números y guiones'
-                        }), 400
+                #     # Solo alfanuméricos y guiones
+                #     if not re.match(r'^[A-Z0-9\-]+$', codigo):
+                #         return jsonify({
+                #             'error': 'Código inválido',
+                #             'detail': 'El código solo puede contener letras, números y guiones'
+                #         }), 400
                     
-                    if _tiene_patron_sql_injection(codigo):
-                        return jsonify({
-                            'error': 'Datos sospechosos detectados',
-                            'detail': 'El código contiene patrones no permitidos'
-                        }), 400
+                #     if _tiene_patron_sql_injection(codigo):
+                #         return jsonify({
+                #             'error': 'Datos sospechosos detectados',
+                #             'detail': 'El código contiene patrones no permitidos'
+                #         }), 400
                     
-                    data['codigo'] = codigo
+                #     data['codigo'] = codigo
                 
-                elif not is_update:
-                    return jsonify({
-                        'error': 'Campo requerido',
-                        'detail': 'El código es obligatorio'
-                    }), 400
+                # elif not is_update:
+                #     return jsonify({
+                #         'error': 'Campo requerido',
+                #         'detail': 'El código es obligatorio'
+                #     }), 400
                 
                 # ===== VALIDAR DESCRIPCIÓN =====
                 if 'descripcion' in data:

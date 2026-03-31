@@ -5,6 +5,7 @@ CRUD completo de productos con validación de permisos
 
 from flask import Blueprint, request, jsonify
 from app.services.producto_service import ProductoService
+from app.middlewares.producto_validation import validate_producto_data
 from app.utils.decoradores_auth import (
     jwt_required_cookie,
     require_permiso,
@@ -79,6 +80,7 @@ def get_producto(id):
 @producto_bp.route('/create', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('crear_productos')
+@validate_producto_data()
 def create_producto():
     """
     Crear un nuevo producto
@@ -91,7 +93,8 @@ def create_producto():
         "id_categoria": 1,
         "costo": 2500.00,
         "unidad_medida": "kg",
-        "stock_minimo": 50
+        "stock_minimo": 50,
+        "id_localidad": 1
     }
     
     Returns:

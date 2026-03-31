@@ -71,7 +71,7 @@ class CategoriaDAO:
         """Obtener categoría por ID"""
         try:
             connection = ConectDB.get_connection()
-            with connection.cursor() as cursor:
+            with connection.cursor(dictionary=True) as cursor:
                 query = "SELECT * FROM categorias WHERE id_categoria = %s"
                 cursor.execute(query, (categoria_id,))
                 return cursor.fetchone()

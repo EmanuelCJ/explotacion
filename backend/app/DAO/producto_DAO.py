@@ -45,6 +45,7 @@ class ProductoDAO:
                     data.get('unidad_medida'),
                     data.get('stock_minimo', 0)
                 ))
+                connection.commit()
                 return cursor.lastrowid
         except Exception as e:
             print(f"Error creating producto: {e}")
@@ -216,21 +217,24 @@ class ProductoDAO:
             connection.close()
     
     @staticmethod
-    def exists_codigo(codigo: str, exclude_id: int = None) -> bool:
+    def exists_codigo(codigo: str, id_producto: int = None) -> bool:
         """Verificar si existe un código de producto"""
         try:
             connection = ConectDB.get_connection()
             with connection.cursor() as cursor:
+
                 query = "SELECT COUNT(*) as count FROM productos WHERE codigo = %s"
                 params = [codigo]
                 
-                if exclude_id:
+                if id_producto:
                     query += " AND id_producto != %s"
-                    params.append(exclude_id)
+                    params.append(id_producto)
                 
                 cursor.execute(query, params)
                 result = cursor.fetchone()
-                return result['count'] > 0
+
+                return result[0] > 0 # Cambiado de 'count' a índice 0 para evitar problemas con cursor sin dictionary=True
+
         except Exception as e:
             print(f"Error checking codigo: {e}")
             raise

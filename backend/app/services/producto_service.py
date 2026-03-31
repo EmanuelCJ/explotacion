@@ -33,13 +33,6 @@ class ProductoService:
             int: ID del producto creado
         """
 
-        # Validaciones
-        ProductoService._validate_product_data(data)
-
-        # Verificar que no exista el código
-        if data.get('codigo') and ProductoDAO.exists_codigo(data['codigo']):
-            raise Exception(f"El código '{data['codigo']}' ya existe")
-
         # Verificar que existe la categoría
         categoria = CategoriaDAO.get_by_id(data['id_categoria'])
         if not categoria:
@@ -47,13 +40,16 @@ class ProductoService:
 
         if not categoria['activo']:
             raise Exception("La categoría está inactiva")
-
-
+        
         data['codigo'] =  generar_codigo_producto(data['nombre'], categoria['nombre'])
 
-        print (f"Generando código para producto '{data['nombre']}' en categoría '{categoria['nombre']}': {data['codigo']}")
+        # Verificar que no exista el código
+        if data.get('codigo') and ProductoDAO.exists_codigo(codigo=data['codigo']):
+            raise Exception(f"El código '{data['codigo']}' ya existe")
+
+
         # # Crear producto
-        # producto_id = ProductoDAO.create(data)
+        producto_id = ProductoDAO.create(data)
 
         # # Registrar en auditoría
         # AuditoriaDAO.create({
@@ -70,7 +66,7 @@ class ProductoService:
         # })
 
         # return producto_id
-        return 1
+        return producto_id
 
     @staticmethod
     def get_all(page=1, limit=20, categoria_id=None, activo=None, search=None):
@@ -221,6 +217,7 @@ class ProductoService:
     #esta función es para validar los datos de entrada al crear o actualizar un producto
     @staticmethod
     def _validate_product_data(data: dict):
+
         """Validar datos de producto"""
         # Campos requeridos
         required = ['nombre', 'id_categoria']
