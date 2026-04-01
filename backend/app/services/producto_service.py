@@ -6,6 +6,8 @@ Maneja lógica de negocio de productos e inventario
 from app.DAO.producto_DAO import ProductoDAO
 from app.DAO.categoria_DAO import CategoriaDAO
 from app.DAO.auditoria_DAO import AuditoriaDAO
+from app.DAO.usuario_DAO import UsuarioDAO
+from app.utils.decoradores_auth import get_client_ip
 from app.utils.generacion_codigo_producto import generar_codigo_producto
 
 
@@ -40,32 +42,39 @@ class ProductoService:
 
         if not categoria['activo']:
             raise Exception("La categoría está inactiva")
-        
+
+        #crear codigo unicos a partir del nombre del producto y el nombre de la categoria
         data['codigo'] =  generar_codigo_producto(data['nombre'], categoria['nombre'])
 
         # Verificar que no exista el código
         if data.get('codigo') and ProductoDAO.exists_codigo(codigo=data['codigo']):
             raise Exception(f"El código '{data['codigo']}' ya existe")
-
-
-        # # Crear producto
+        
+        # Crear producto
         producto_id = ProductoDAO.create(data)
 
-        # # Registrar en auditoría
-        # AuditoriaDAO.create({
-        #     'entidad': 'Producto',
-        #     'id_entidad': producto_id,
-        #     'accion': 'create',
-        #     'descripcion': f"Producto creado: {data['nombre']}",
-        #     'datos_nuevos': {
-        #         'nombre': data['nombre'],
-        #         'codigo': data.get('codigo'),
-        #         'categoria_id': data['id_categoria']
-        #     },
-        #     'id_usuario': usuario_id
-        # })
+        ip_user = get_client_ip()
 
-        # return producto_id
+        # Obtener User Agent para la auditoría osea quien crea el usuario
+        user_agent = UsuarioDAO.username(usuario_id)
+        
+        if producto_id:
+            # Registrar en auditoría
+            AuditoriaDAO.create({
+                'entidad': 'Producto',
+                'id_entidad': producto_id,
+                'accion': 'create',
+                'descripcion': f"Producto creado: {data['nombre']}",
+                'datos_nuevos': {
+                    'nombre': data['nombre'],
+                    'codigo': data.get('codigo'),
+                    'categoria_id': data['id_categoria']
+                },
+                'id_usuario': usuario_id,
+                'ip_address': ip_user,
+                'user_agent': user_agent
+            })
+
         return producto_id
 
     @staticmethod
