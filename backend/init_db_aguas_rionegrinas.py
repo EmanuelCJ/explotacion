@@ -22,7 +22,7 @@ DB_CONFIG = {
     'charset': 'utf8mb4'
 }
 
-DB_NAME = os.getenv('DB_NAME', 'aguas_rionegrinas_db')
+DB_NAME = os.getenv('DB_NAME', 'aguas_rionegrinas_db_explotacion')
 
 
 def create_database():
@@ -432,6 +432,40 @@ def insert_initial_data():
             """)
             print("    ✓ 8 localidades de Río Negro insertadas")
             
+
+            # =======================================
+            # Creando lugares en base a las localidades
+            # =======================================
+            
+            #consulta y trae info de las localidades
+            cursor.execute("SELECT id_localidad, nombre FROM localidades")
+            localidades = cursor.fetchall()
+
+            print("\n  🏗️ Insertando lugares base por localidad...")
+
+            lugares_base = [
+                ("Depósito Principal", "Depósito general", "deposito"),
+                ("Almacén", "Almacén de insumos", "almacen"),
+                ("Planta", "Planta operativa", "planta"),
+                ("Servicio", "Área técnica", "servicio"),
+                ("otro", "Otro tipo de lugar en", "otro")
+            ]
+            
+            #recorre las localidades y crea los lugares
+            for id_localidad, nombre_localidad in localidades:
+                for nombre, descripcion, tipo in lugares_base:
+                    
+                    descripcion_final = f"{descripcion} - {nombre_localidad}"
+                    
+                    cursor.execute("""
+                        INSERT INTO lugares (nombre, descripcion, tipo, id_localidad)
+                        VALUES (%s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE descripcion=VALUES(descripcion)
+                    """, (nombre, descripcion_final, tipo, id_localidad))
+
+            print("    ✓ Lugares base creados para todas las localidades")
+
+
             # ========================================
             # ROLES (4 roles jerárquicos)
             # ========================================
@@ -560,7 +594,7 @@ def insert_initial_data():
             cursor.execute("""
                 INSERT INTO usuarios 
                 (nombre, apellido, username, email, password_hash, id_localidad, activo)
-                VALUES ('Administrador', 'Sistema', 'admin', 'admin@aguasrionegrinas.gov.ar', %s, %s, 1)
+                VALUES ('Administrador', 'Sistema', 'admin', 'admin@aguasrionegrinas.com.ar', %s, %s, 1)
                 ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash)
             """, (password_hash, id_viedma))
             
@@ -701,7 +735,7 @@ def main():
         print("\n📋 CREDENCIALES DE ACCESO:")
         print("   👤 Username: admin")
         print("   🔑 Password: comahue719")
-        print("   📧 Email: admin@aguasrionegrinas.gov.ar")
+        print("   📧 Email: admin@aguasrionegrinas.com.ar")
         print("   📍 Localidad: Viedma")
         print("\n⚠️  IMPORTANTE: Cambiar la contraseña después del primer login")
         print("\n🌊 Sistema listo para Aguas Rionegrinas")

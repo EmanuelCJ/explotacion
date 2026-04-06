@@ -88,7 +88,7 @@ class LocalidadDAO:
         """Obtener localidad por nombre"""
         try:
             connection = ConectDB.get_connection()
-            with connection.cursor() as cursor:
+            with connection.cursor(dictionary=True) as cursor:
                 query = "SELECT * FROM localidades WHERE nombre = %s"
                 cursor.execute(query, (nombre,))
                 return cursor.fetchone()
@@ -202,3 +202,5 @@ class LocalidadDAO:
         except Exception as e:
             print(f"Error counting lugares: {e}")
             raise
+
+    

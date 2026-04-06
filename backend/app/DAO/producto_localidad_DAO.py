@@ -31,9 +31,11 @@ class ProductoLocalidadDAO:
                     ON DUPLICATE KEY UPDATE cantidad = %s
                 """
                 cursor.execute(query, (producto_id, localidad_id, lugar_id, cantidad, cantidad))
+                connection.commit()
                 return cursor.rowcount > 0
         except Exception as e:
             print(f"Error init stock: {e}")
+            connection.rollback()
             raise
         finally:
             connection.close()

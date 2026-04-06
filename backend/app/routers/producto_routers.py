@@ -94,7 +94,7 @@ def create_producto():
         "costo": 2500.00,
         "unidad_medida": "kg",
         "stock_minimo": 50,
-        "id_localidad": 1
+        "id_lugar": 2
     }
     
     Returns:

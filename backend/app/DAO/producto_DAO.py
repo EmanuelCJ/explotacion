@@ -53,6 +53,46 @@ class ProductoDAO:
             raise
         finally:
             connection.close()
+
+    #creamos una funcion que registre localidad/producto
+    @staticmethod
+    def producto_localidad(data: dict) -> int:
+        """
+        Registrar un producto en una localidad específica
+        
+        Args:
+            data (dict): {
+                'id_producto': int,
+                'id_localidad': int,
+                'id_lugar': int,
+                'cantidad': int
+            }
+        
+        Returns:
+            int: ID del registro creado
+        """
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
+                query = """
+                    INSERT INTO productos_localidad 
+                    (id_producto, id_localidad, id_lugar, cantidad)
+                    VALUES (%s, %s, %s, %s)
+                """
+                cursor.execute(query, (
+                    data['id_producto'],
+                    data['id_localidad'],
+                    data['id_lugar'],
+                    data['cantidad']
+                ))
+                connection.commit()
+                return cursor.lastrowid
+        except Exception as e:
+            print(f"Error creating producto_localidad: {e}")
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
     
     @staticmethod
     def get_all(page=1, limit=20, categoria_id=None, activo=None, search=None):

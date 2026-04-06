@@ -6,7 +6,9 @@ Maneja lógica de negocio de productos e inventario
 from app.DAO.producto_DAO import ProductoDAO
 from app.DAO.categoria_DAO import CategoriaDAO
 from app.DAO.auditoria_DAO import AuditoriaDAO
+from app.DAO.localidad_DAO import LocalidadDAO
 from app.DAO.usuario_DAO import UsuarioDAO
+from app.DAO.producto_localidad_DAO import ProductoLocalidadDAO
 from app.utils.decoradores_auth import get_client_ip
 from app.utils.generacion_codigo_producto import generar_codigo_producto
 
@@ -50,15 +52,33 @@ class ProductoService:
         if data.get('codigo') and ProductoDAO.exists_codigo(codigo=data['codigo']):
             raise Exception(f"El código '{data['codigo']}' ya existe")
         
+        # Validar que el producto no exista con el mismo nombre en la misma categoría
+        if ProductoDAO.exists_nombre_categoria(nombre=data['nombre'], id_categoria=data['id_categoria']):
+            raise Exception(f"Ya existe un producto con el nombre '{data['nombre']}' en la categoría seleccionada")
+        
+        # trae info del usuario que crea el producto
+        usuario = UsuarioDAO.get_by_id(usuario_id)
+
+        # verifica la localidad del usuario que crea el producto
+        localidad = LocalidadDAO.get_by_nombre(usuario.get('localidad_nombre'))
+
+        #verificar que exista la localidad
+        if localidad is None:
+            raise Exception("La localidad no existe")
+        
         # Crear producto
         producto_id = ProductoDAO.create(data)
 
-        ip_user = get_client_ip()
-
-        # Obtener User Agent para la auditoría osea quien crea el usuario
-        user_agent = UsuarioDAO.username(usuario_id)
         
         if producto_id:
+
+            # crear un a consulta para registrar localidad/producto
+            ProductoLocalidadDAO.init_stock(
+                producto_id=producto_id, 
+                lugar_id=data['id_lugar'], 
+                localidad_id=localidad['id_localidad'],
+                cantidad=data['stock_minimo'])
+
             # Registrar en auditoría
             AuditoriaDAO.create({
                 'entidad': 'Producto',
@@ -71,8 +91,8 @@ class ProductoService:
                     'categoria_id': data['id_categoria']
                 },
                 'id_usuario': usuario_id,
-                'ip_address': ip_user,
-                'user_agent': user_agent
+                'ip_address': get_client_ip(),
+                'user_agent': usuario['username']
             })
 
         return producto_id

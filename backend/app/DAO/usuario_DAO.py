@@ -252,7 +252,7 @@ class UsuarioDAO:
     @staticmethod
     def username(usuario_id: int) -> dict:
         """
-        Obtener un usuario por ID
+        Obtener un usuario por username
         
         Args:
             usuario_id (int): ID del usuario
