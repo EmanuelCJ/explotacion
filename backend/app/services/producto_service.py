@@ -14,6 +14,7 @@ from app.utils.generacion_codigo_producto import generar_codigo_producto
 
 
 class ProductoService:
+
     """Servicio de gestión de productos"""
 
     @staticmethod
@@ -37,11 +38,16 @@ class ProductoService:
             int: ID del producto creado
         """
 
+        #obtener la localidad del usuario que crea el producto
+        usuario = UsuarioDAO.get_by_id(usuario_id)
+        localidad = LocalidadDAO.get_by_nombre(usuario.get('localidad_nombre'))
+
         # Verificar que existe la categoría
         categoria = CategoriaDAO.get_by_id(data['id_categoria'])
         if not categoria:
             raise Exception("Categoría no encontrada")
 
+        # Verificar que la categoría esté activa
         if not categoria['activo']:
             raise Exception("La categoría está inactiva")
 
@@ -52,16 +58,10 @@ class ProductoService:
         if data.get('codigo') and ProductoDAO.exists_codigo(codigo=data['codigo']):
             raise Exception(f"El código '{data['codigo']}' ya existe")
         
-        # Validar que el producto no exista con el mismo nombre en la misma categoría
-        if ProductoDAO.exists_nombre_categoria(nombre=data['nombre'], id_categoria=data['id_categoria']):
+        # verificar que no exista un producto con el mismo nombre en la misma categoría en esa| localidad y lugar
+        if ProductoDAO.exist_producto(nombre=data['nombre'], id_categoria=data['id_categoria'], id_localidad=localidad['id_localidad'], id_lugar=data['id_lugar']):
             raise Exception(f"Ya existe un producto con el nombre '{data['nombre']}' en la categoría seleccionada")
         
-        # trae info del usuario que crea el producto
-        usuario = UsuarioDAO.get_by_id(usuario_id)
-
-        # verifica la localidad del usuario que crea el producto
-        localidad = LocalidadDAO.get_by_nombre(usuario.get('localidad_nombre'))
-
         #verificar que exista la localidad
         if localidad is None:
             raise Exception("La localidad no existe")

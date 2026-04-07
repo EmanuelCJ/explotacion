@@ -371,3 +371,41 @@ class ProductoDAO:
             raise
         finally:
             connection.close()
+
+
+    @staticmethod
+    def exist_producto(nombre: str, id_categoria: int, id_localidad: int, id_lugar: int = None, id_producto: int = None) -> bool:
+
+        """
+            Verificar si existe un producto con el  nombre que tenga la categoría , dependiendo
+            del lugar y localidad del usuario. 
+        """
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
+                query = """
+                    SELECT COUNT(*) 
+                    FROM productos p
+                    INNER JOIN categorias c ON p.id_categoria = c.id_categoria
+                    INNER JOIN productos_localidad pl ON p.id_producto = pl.id_producto
+                    INNER JOIN localidades l ON pl.id_localidad = l.id_localidad
+                    INNER JOIN lugares lu ON pl.id_lugar = lu.id_lugar
+                    WHERE p.nombre = %s        -- Nombre del producto
+                    AND c.id_categoria = %s    -- ID de la categoría
+                    AND l.id_localidad = %s    -- ID de la localidad (ej. Viedma)
+                    AND lu.id_lugar = %s;      -- ID del lugar (ej. Almacén Central)
+                """
+                params = [nombre, id_categoria, id_localidad, id_lugar]
+                
+                if id_producto:
+                    query += " AND id_producto != %s"
+                    params.append(id_producto)
+                
+                cursor.execute(query, params)
+                result = cursor.fetchone()
+                return result[0] > 0 # Cambiado de 'count' a índice 0 para evitar problemas con cursor sin dictionary=True
+        except Exception as e:
+            print(f"Error checking nombre categoria: {e}")
+            raise
+        finally:
+            connection.close()

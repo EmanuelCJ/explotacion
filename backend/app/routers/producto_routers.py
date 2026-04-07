@@ -88,7 +88,6 @@ def create_producto():
     Body:
     {
         "nombre": "Cloro Granulado",
-        "codigo": "CLORO001",
         "descripcion": "Cloro granulado para tratamiento de agua",
         "id_categoria": 1,
         "costo": 2500.00,

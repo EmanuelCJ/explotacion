@@ -433,39 +433,6 @@ def insert_initial_data():
             print("    ✓ 8 localidades de Río Negro insertadas")
             
 
-            # =======================================
-            # Creando lugares en base a las localidades
-            # =======================================
-            
-            #consulta y trae info de las localidades
-            cursor.execute("SELECT id_localidad, nombre FROM localidades")
-            localidades = cursor.fetchall()
-
-            print("\n  🏗️ Insertando lugares base por localidad...")
-
-            lugares_base = [
-                ("Depósito Principal", "Depósito general", "deposito"),
-                ("Almacén", "Almacén de insumos", "almacen"),
-                ("Planta", "Planta operativa", "planta"),
-                ("Servicio", "Área técnica", "servicio"),
-                ("otro", "Otro tipo de lugar en", "otro")
-            ]
-            
-            #recorre las localidades y crea los lugares
-            for id_localidad, nombre_localidad in localidades:
-                for nombre, descripcion, tipo in lugares_base:
-                    
-                    descripcion_final = f"{descripcion} - {nombre_localidad}"
-                    
-                    cursor.execute("""
-                        INSERT INTO lugares (nombre, descripcion, tipo, id_localidad)
-                        VALUES (%s, %s, %s, %s)
-                        ON DUPLICATE KEY UPDATE descripcion=VALUES(descripcion)
-                    """, (nombre, descripcion_final, tipo, id_localidad))
-
-            print("    ✓ Lugares base creados para todas las localidades")
-
-
             # ========================================
             # ROLES (4 roles jerárquicos)
             # ========================================
@@ -626,23 +593,43 @@ def insert_initial_data():
                 ('MATERIAL', 'Juntas Gibault', 'JUNTAS_GIBAULT', 'Juntas especiales tipo Gibault para tuberías', 1),
                 ('MATERIAL', 'Otros', 'OTROS', 'Categoría general para elementos varios', 1),
                 ('MATERIAL', 'Reducciones', 'REDUCCIONES', 'Piezas para reducción de diámetro', 1),
-                ('MATERIAL', 'Tuberías PVC', 'TUBERIAS_PVC', 'Tuberías fabricadas en PVC', 1);
-                ON DUPLICATE KEY UPDATE nombre=VALUES(nombre)
+                ('MATERIAL', 'Tuberías PVC', 'TUBERIAS_PVC', 'Tuberías fabricadas en PVC', 1)
+                ON DUPLICATE KEY UPDATE nombre=VALUES(nombre);
             """)
             print("    ✓ 6 categorías iniciales")
             
-            # ========================================
-            # LUGARES PARA VIEDMA (ejemplo)
-            # ========================================
-            print("\n  🏢 Insertando lugares de ejemplo...")
-            cursor.execute("""
-                INSERT INTO lugares (nombre, descripcion, tipo, id_localidad) VALUES
-                ('Planta Potabilizadora Viedma', 'Planta de tratamiento de agua', 'planta', %s),
-                ('Almacén Central Viedma', 'Depósito principal', 'almacen', %s),
-                ('Taller Viedma', 'Taller de mantenimiento', 'servicio', %s)
-                ON DUPLICATE KEY UPDATE nombre=VALUES(nombre)
-            """, (id_viedma, id_viedma, id_viedma))
-            print("    ✓ 3 lugares creados en Viedma")
+            # =======================================
+            # Creando lugares en base a las localidades
+            # =======================================
+            
+            #consulta y trae info de las localidades
+            cursor.execute("SELECT id_localidad, nombre FROM localidades")
+            localidades = cursor.fetchall()
+
+            print("\n  🏗️ Insertando lugares base por localidad...")
+
+            lugares_base = [
+                ("Depósito Principal", "Depósito general", "deposito"),
+                ("Almacén", "Almacén de insumos", "almacen"),
+                ("Planta", "Planta operativa", "planta"),
+                ("Servicio", "Área técnica", "servicio"),
+                ("otro", "Otro tipo de lugar en", "otro")
+            ]
+            
+            #recorre las localidades y crea los lugares
+            for id_localidad, nombre_localidad in localidades:
+                for nombre, descripcion, tipo in lugares_base:
+                    
+                    descripcion_final = f"{descripcion} - {nombre_localidad}"
+                    
+                    cursor.execute("""
+                        INSERT INTO lugares (nombre, descripcion, tipo, id_localidad)
+                        VALUES (%s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE descripcion=VALUES(descripcion)
+                    """, (nombre, descripcion_final, tipo, id_localidad))
+
+            print("    ✓ Lugares base creados para todas las localidades")
+
             
         connection.commit()
         print("\n✅ Datos iniciales insertados correctamente")
@@ -656,6 +643,7 @@ def insert_initial_data():
 
 
 def verify_installation():
+
     """Verificar que la instalación fue exitosa"""
     print("\n🔍 Verificando instalación...")
     
@@ -739,7 +727,7 @@ def main():
         print("   📍 Localidad: Viedma")
         print("\n⚠️  IMPORTANTE: Cambiar la contraseña después del primer login")
         print("\n🌊 Sistema listo para Aguas Rionegrinas")
-        print("   📍 8 Localidades de Río Negro configuradas")
+        print("   📍 Localidades de Río Negro configuradas")
         print("   👥 4 Roles jerárquicos creados")
         print("   🔐 27 Permisos configurados")
         print("\n🚀 Ejecuta 'python run.py' para iniciar el servidor")
