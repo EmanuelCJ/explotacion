@@ -17,6 +17,69 @@ from app.utils.decoradores_auth import (
 producto_bp = Blueprint('producto', __name__)
 
 
+@producto_bp.route('/stock', methods=['GET'])
+@jwt_required_cookie()
+@require_permiso('ver_productos')
+def stock_localidad():
+    """
+    Obtener stock del producto en la localidad del usuario
+    
+    Returns:
+        200: Stock del producto en la localidad
+    """
+    try:
+        # Obtener el ID del usuario desde el token JWT
+        id_usuario = get_current_user_id()
+        
+        # Obtener el usuario para conocer su información, incluyendo la localidad
+        usuario = UsuarioService.get_by_id(id_usuario)
+        if usuario['activo'] == 0:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+        
+        # Obtener el stock del producto en la localidad del usuario
+        stock = ProductoService.get_stock_en_localidad(usuario['localidad_nombre'])
+        
+        #respuesta con el stock del producto en la localidad
+        return jsonify({
+            'stock': stock
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@producto_bp.route('/stock/categoria', methods=['GET'])
+@jwt_required_cookie()
+@require_permiso('ver_productos')
+def stock_categoria():
+    """
+    Obtener stock de un producto por categoría en la localidad
+    
+    Returns:
+        200: Stock del producto por categoría
+    """
+    try:
+        #obtenemos el ID del usuario desde el token JWT
+        id_usuario = get_current_user_id()
+
+        #obtenemos la categoria_id desde los query params
+        categoria_id = request.args.get('categoria_id', type=int)
+
+        #obtenemos el usuario para conocer su información, incluyendo la localidad
+        usuario = UsuarioService.get_by_id(id_usuario)
+
+        if usuario['activo'] == 0:
+            return jsonify({'error': 'Usuario no encontrado o no esta activo'}), 404
+
+        stock_categoria = ProductoService.get_stock_categoria(usuario['localidad_nombre'], categoria_id)
+        
+        #respuesta con el stock del producto por categoría en la localidad
+        return jsonify({
+            'stock_categoria': stock_categoria
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @producto_bp.route('/', methods=['GET'])
 @jwt_required_cookie()
 @require_permiso('ver_productos')
@@ -250,33 +313,3 @@ def verificar_stock_minimo(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-@producto_bp.route('/stock', methods=['GET'])
-@jwt_required_cookie()
-@require_permiso('ver_productos')
-def stock_localidad():
-    """
-    Obtener stock del producto en la localidad del usuario
-    
-    Returns:
-        200: Stock del producto en la localidad
-    """
-    try:
-        # Obtener el ID del usuario desde el token JWT
-        id_usuario = get_current_user_id()
-        
-        # Obtener el usuario para conocer su localidad
-        usuario = UsuarioService.get_by_id(id_usuario)
-        
-        if usuario['activo'] == 0:
-            return jsonify({'error': 'Usuario no encontrado'}), 404
-        
-        # Obtener el stock del producto en la localidad del usuario
-        stock = ProductoService.get_stock_en_localidad(usuario['localidad_nombre'])
-        
-        return jsonify({
-            'nombre_localidad': usuario['localidad_nombre'],
-            'stock': stock
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500

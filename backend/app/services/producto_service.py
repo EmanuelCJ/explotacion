@@ -98,6 +98,30 @@ class ProductoService:
         return producto_id
     
     @staticmethod
+    def get_stock_categoria(localidad_nombre: str, categoria_id: int) -> dict:
+        """Obtener stock total de productos por categoría en una localidad"""
+
+        #verificar que existe la localidad
+        localidad = LocalidadDAO.get_by_nombre(localidad_nombre)
+        if not localidad:
+            raise Exception("Localidad no encontrada")
+        
+        #verificar que la localidad esté activa
+        if localidad['activo'] == 0:
+            raise Exception("La localidad está inactiva")
+
+        # Verificar que existe la categoría
+        categoria = CategoriaDAO.get_by_id(categoria_id=categoria_id)
+        if not categoria:
+            raise Exception("Categoría no encontrada")
+
+        # Verificar que la categoría esté activa
+        if not categoria['activo']:
+            raise Exception("La categoría está inactiva")
+        
+        return ProductoDAO.get_stock_categoria(localidad_nombre, categoria_id)
+    
+    @staticmethod
     def get_stock_en_localidad(localidad_nombre: str) -> dict:
         """Obtener stock de todos los productos en una localidad"""
         return ProductoDAO.get_stock_en_localidad(localidad_nombre)

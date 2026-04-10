@@ -69,9 +69,32 @@ class ProductoDAO:
                     GROUP BY p.id_producto
                 """
                 cursor.execute(query, (localidad_nombre,))
-                return {row['id_producto']: {'nombre': row['nombre'], 'descripcion': row['descripcion'], 'stock': row['stock']} for row in cursor.fetchall()}
+                return {row['id_producto']: {'nombre': row['nombre'], 'descripcion': row['descripcion'], 'stock': int(row['stock'])} for row in cursor.fetchall()}
         except Exception as e:
             print(f"Error getting stock en localidad: {e}")
+            raise
+        finally:
+            connection.close()
+    
+    @staticmethod
+    def get_stock_categoria(localidad_nombre: str, categoria_id: int) -> dict:
+        """Obtener stock de productos por categoría en una localidad"""
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor(dictionary=True) as cursor:
+                query = """
+                    SELECT p.id_producto, p.nombre as producto, p.descripcion, lu.nombre as lugar, COALESCE(SUM(pl.cantidad), 0) as stock
+                    FROM productos p
+                    INNER JOIN productos_localidad pl ON p.id_producto = pl.id_producto
+                    INNER JOIN localidades l ON pl.id_localidad = l.id_localidad
+                    INNER JOIN lugares lu ON lu.id_localidad = l.id_localidad
+                    WHERE l.nombre = %s AND p.id_categoria = %s AND p.activo = 1
+                    GROUP BY p.id_producto
+                """
+                cursor.execute(query, (localidad_nombre, categoria_id))
+                return {row['id_producto']: {'nombre': row['producto'], 'descripcion': row['descripcion'], 'lugar': row['lugar'], 'stock': int(row['stock'])} for row in cursor.fetchall()}
+        except Exception as e:
+            print(f"Error getting stock categoria: {e}")
             raise
         finally:
             connection.close()
