@@ -96,6 +96,11 @@ class ProductoService:
             })
 
         return producto_id
+    
+    @staticmethod
+    def get_stock_en_localidad(localidad_nombre: str) -> dict:
+        """Obtener stock de todos los productos en una localidad"""
+        return ProductoDAO.get_stock_en_localidad(localidad_nombre)
 
     @staticmethod
     def get_all(page=1, limit=20, categoria_id=None, activo=None, search=None):
@@ -267,3 +272,4 @@ class ProductoService:
         if 'stock_minimo' in data and data['stock_minimo'] is not None:
             if data['stock_minimo'] < 0:
                 raise Exception("El stock mínimo no puede ser negativo")
+            

@@ -29,12 +29,42 @@ ID_LUGAR_DEFAULT = 196
 # FUNCIONES
 # =========================
 
+# def separar_material(texto):
+#     texto = str(texto).upper().strip()
+    
+#     if " DE " in texto:
+#         nombre, descripcion = texto.split(" DE ", 1)
+#     else:
+#         partes = texto.split()
+#         nombre = partes[0]
+#         descripcion = " ".join(partes[1:])
+    
+#     return nombre.strip(), descripcion.strip()
+
 def separar_material(texto):
     texto = str(texto).upper().strip()
     
-    if " DE " in texto:
+    # Buscamos patrones de medidas comunes: Ø 50mm, 1/2, 110mm, etc.
+    # Esta regex busca: (Simbolo Ø opcional) + Numero + (unidades mm, " o /)
+    patron_medida = r'(Ø\s?\d+|(?:\d+/\d+["\']?)|(?:\d+MM))'
+    
+    match = re.search(patron_medida, texto)
+    
+    if match:
+        # El nombre será todo lo que esté hasta la medida inclusive
+        punto_corte = match.end()
+        nombre = texto[:punto_corte].strip()
+        descripcion = texto[punto_corte:].strip()
+        
+        # Limpieza de la descripción si quedó empezando con "DE"
+        if descripcion.startswith("DE "):
+            descripcion = descripcion[3:].strip()
+            
+    elif " DE " in texto:
+        # Si no hay medidas pero hay un "DE", mantenemos tu lógica anterior
         nombre, descripcion = texto.split(" DE ", 1)
     else:
+        # Caso base: separar por la primera palabra
         partes = texto.split()
         nombre = partes[0]
         descripcion = " ".join(partes[1:])

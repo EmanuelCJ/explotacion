@@ -5,6 +5,7 @@ CRUD completo de productos con validación de permisos
 
 from flask import Blueprint, request, jsonify
 from app.services.producto_service import ProductoService
+from app.services.usuario_service import UsuarioService
 from app.middlewares.producto_validation import validate_producto_data
 from app.utils.decoradores_auth import (
     jwt_required_cookie,
@@ -245,6 +246,37 @@ def verificar_stock_minimo(id):
         resultado = ProductoService.verificar_stock_minimo(id)
         
         return jsonify(resultado), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@producto_bp.route('/stock', methods=['GET'])
+@jwt_required_cookie()
+@require_permiso('ver_productos')
+def stock_localidad():
+    """
+    Obtener stock del producto en la localidad del usuario
+    
+    Returns:
+        200: Stock del producto en la localidad
+    """
+    try:
+        # Obtener el ID del usuario desde el token JWT
+        id_usuario = get_current_user_id()
+        
+        # Obtener el usuario para conocer su localidad
+        usuario = UsuarioService.get_by_id(id_usuario)
+        
+        if usuario['activo'] == 0:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+        
+        # Obtener el stock del producto en la localidad del usuario
+        stock = ProductoService.get_stock_en_localidad(usuario['localidad_nombre'])
+        
+        return jsonify({
+            'nombre_localidad': usuario['localidad_nombre'],
+            'stock': stock
+        }), 200
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500

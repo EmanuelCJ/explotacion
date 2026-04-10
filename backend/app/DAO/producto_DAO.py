@@ -54,6 +54,28 @@ class ProductoDAO:
         finally:
             connection.close()
 
+    @staticmethod
+    def get_stock_en_localidad(localidad_nombre: str) -> dict:
+        """Obtener stock de todos los productos en una localidad"""
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor(dictionary=True) as cursor:
+                query = """
+                    SELECT p.id_producto, p.nombre, p.descripcion, COALESCE(SUM(pl.cantidad), 0) as stock
+                    FROM productos p
+                    INNER JOIN productos_localidad pl ON p.id_producto = pl.id_producto
+                    INNER JOIN localidades l ON pl.id_localidad = l.id_localidad
+                    WHERE l.nombre = %s and p.activo = 1
+                    GROUP BY p.id_producto
+                """
+                cursor.execute(query, (localidad_nombre,))
+                return {row['id_producto']: {'nombre': row['nombre'], 'descripcion': row['descripcion'], 'stock': row['stock']} for row in cursor.fetchall()}
+        except Exception as e:
+            print(f"Error getting stock en localidad: {e}")
+            raise
+        finally:
+            connection.close()
+
     #creamos una funcion que registre localidad/producto
     @staticmethod
     def producto_localidad(data: dict) -> int:
