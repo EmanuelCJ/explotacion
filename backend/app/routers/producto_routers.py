@@ -10,6 +10,7 @@ from app.middlewares.producto_validation import validate_producto_data
 from app.utils.decoradores_auth import (
     jwt_required_cookie,
     require_permiso,
+    require_role,
     get_current_user_id
 )
 
@@ -22,7 +23,7 @@ producto_bp = Blueprint('producto', __name__)
 @require_permiso('ver_productos')
 def stock_localidad():
     """
-    Obtener stock del producto en la localidad del usuario
+    Obtener stock en la localidad del usuario 
     
     Returns:
         200: Stock del producto en la localidad
@@ -33,8 +34,8 @@ def stock_localidad():
         
         # Obtener el usuario para conocer su información, incluyendo la localidad
         usuario = UsuarioService.get_by_id(id_usuario)
-        if usuario['activo'] == 0:
-            return jsonify({'error': 'Usuario no encontrado'}), 404
+        if usuario['activo'] == 0 and usuario is None:
+            return jsonify({'error': 'Usuario no encontrado o no esta activo'}), 404
         
         # Obtener el stock del producto en la localidad del usuario
         stock = ProductoService.get_stock_en_localidad(usuario['localidad_nombre'])
@@ -47,10 +48,10 @@ def stock_localidad():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@producto_bp.route('/stock/categoria', methods=['GET'])
+@producto_bp.route('/stock/categoria/<int:categoria_id>', methods=['GET'])
 @jwt_required_cookie()
 @require_permiso('ver_productos')
-def stock_categoria():
+def stock_categoria(categoria_id):
     """
     Obtener stock de un producto por categoría en la localidad
     
@@ -60,9 +61,6 @@ def stock_categoria():
     try:
         #obtenemos el ID del usuario desde el token JWT
         id_usuario = get_current_user_id()
-
-        #obtenemos la categoria_id desde los query params
-        categoria_id = request.args.get('categoria_id', type=int)
 
         #obtenemos el usuario para conocer su información, incluyendo la localidad
         usuario = UsuarioService.get_by_id(id_usuario)
@@ -83,6 +81,7 @@ def stock_categoria():
 @producto_bp.route('/', methods=['GET'])
 @jwt_required_cookie()
 @require_permiso('ver_productos')
+@require_role('admin','maestro') # Roles que pueden acceder a esta ruta
 def get_productos():
     """
     Obtener todos los productos con paginación y filtros
@@ -147,7 +146,8 @@ def get_producto(id):
 @validate_producto_data()
 def create_producto():
     """
-    Crear un nuevo producto
+
+    Crear un nuevo producto, en un lugar dependiendo de la localidad del usuario
     
     Body:
     {
@@ -185,7 +185,7 @@ def create_producto():
         return jsonify({'error': str(e)}), 400
 
 
-@producto_bp.route('/<int:id>', methods=['PUT'])
+@producto_bp.route('/editar/<int:id>', methods=['PUT'])
 @jwt_required_cookie()
 @require_permiso('editar_productos')
 def update_producto(id):
@@ -205,7 +205,10 @@ def update_producto(id):
         400: Datos inválidos
     """
     try:
+        #obtener el ID del usuario que edita desde el token JWT
         usuario_id = get_current_user_id()
+        
+        #obtener los datos del producto a actualizar desde el body de la solicitud
         data = request.get_json()
         
         if not data:

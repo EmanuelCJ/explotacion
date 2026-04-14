@@ -156,7 +156,7 @@ class ProductoDAO:
         """
         try:
             connection = ConectDB.get_connection()
-            with connection.cursor() as cursor:
+            with connection.cursor(dictionary=True) as cursor:
                 # Contar total
                 count_query = """
                     SELECT COUNT(*) as total 
@@ -213,6 +213,7 @@ class ProductoDAO:
                         'total_pages': (total + limit - 1) // limit
                     }
                 }
+            
         except Exception as e:
             print(f"Error getting productos: {e}")
             raise
@@ -331,7 +332,7 @@ class ProductoDAO:
         """Obtener stock total de un producto (suma de todas las localidades)"""
         try:
             connection = ConectDB.get_connection()
-            with connection.cursor() as cursor:
+            with connection.cursor(dictionary=True) as cursor:
                 query = """
                     SELECT COALESCE(SUM(cantidad), 0) as stock_total
                     FROM productos_localidad

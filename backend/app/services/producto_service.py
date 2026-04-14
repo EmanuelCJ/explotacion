@@ -42,6 +42,10 @@ class ProductoService:
         usuario = UsuarioDAO.get_by_id(usuario_id)
         localidad = LocalidadDAO.get_by_nombre(usuario.get('localidad_nombre'))
 
+        #verificar que exista la localidad
+        if localidad is None:
+            raise Exception("La localidad no existe")
+        
         # Verificar que existe la categoría
         categoria = CategoriaDAO.get_by_id(data['id_categoria'])
         if not categoria:
@@ -58,13 +62,10 @@ class ProductoService:
         if data.get('codigo') and ProductoDAO.exists_codigo(codigo=data['codigo']):
             raise Exception(f"El código '{data['codigo']}' ya existe")
         
-        # verificar que no exista un producto con el mismo nombre en la misma categoría en esa| localidad y lugar
+        # verificar que no exista un producto con el mismo nombre en la misma categoría en esa localidad y lugar, 
         if ProductoDAO.exist_producto(nombre=data['nombre'], id_categoria=data['id_categoria'], id_localidad=localidad['id_localidad'], id_lugar=data['id_lugar']):
-            raise Exception(f"Ya existe un producto con el nombre '{data['nombre']}' en la categoría seleccionada")
+            raise Exception(f"Ya existe un producto con el nombre '{data['nombre']}' en la categoría seleccionada aumente el stock o use otro nombre")
         
-        #verificar que exista la localidad
-        if localidad is None:
-            raise Exception("La localidad no existe")
         
         # Crear producto
         producto_id = ProductoDAO.create(data)

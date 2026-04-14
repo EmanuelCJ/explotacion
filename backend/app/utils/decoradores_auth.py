@@ -116,19 +116,16 @@ def require_any_permission(*permissions):
     return decorator
 
 
-def require_role(role_name: str):
+def require_role(*roles: str):
     """
-    Decorador para validar que el usuario tenga un rol específico
+    Decorador para validar que el usuario tenga uno de los roles permitidos.
     
     Args:
-        role_name: Nombre del rol (admin, maestro, supervisor, usuario)
+        *roles: Uno o más nombres de roles (admin, maestro, supervisor, usuario)
     
     Usage:
-        @router.route('/usuarios', methods=['POST'])
-        @jwt_required_custom()
         @require_role('admin')
-        def crear_usuario():
-            ...
+        @require_role('maestro', 'admin')
     """
     def decorator(fn):
         @wraps(fn)
@@ -138,10 +135,11 @@ def require_role(role_name: str):
                 claims = get_jwt()
                 user_role = claims.get('rol')
                 
-                if user_role != role_name:
+                # Verificamos si el rol del usuario está en la lista de roles permitidos
+                if user_role not in roles:
                     return jsonify({
-                        'error': 'No tienes el rol requerido',
-                        'rol_requerido': role_name,
+                        'error': 'No tienes los permisos necesarios',
+                        'roles_permitidos': roles,
                         'tu_rol': user_role
                     }), 403
                 
