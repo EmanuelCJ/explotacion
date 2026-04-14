@@ -1,10 +1,13 @@
-<script setup lang="ts">
+<script setup lang="js">
+
 import loginView from './views/LoginView.vue'
 import HomeView from './views/HomeView.vue';
-import { h } from 'vue';
+import productos from './views/productos.vue';
+
 </script>
 
 <template>
   <!-- <loginView /> -->
-  <homeView />
+  <!-- <homeView /> -->
+  <productos />
 </template>
