@@ -226,7 +226,7 @@ def update_producto(id):
         return jsonify({'error': str(e)}), 400
 
 
-@producto_bp.route('/<int:id>', methods=['DELETE'])
+@producto_bp.route('/eliminar/<int:id>', methods=['DELETE'])
 @jwt_required_cookie()
 @require_permiso('eliminar_productos')
 def delete_producto(id):
