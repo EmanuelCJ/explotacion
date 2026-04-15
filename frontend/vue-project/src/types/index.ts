@@ -1,4 +1,8 @@
-export interface Articulo {
+// interfaces TypeScript completas (Producto, Movimiento, Resumen, Listas, etc).
+
+import type { st } from "vue-router/dist/router-CWoNjPRp.mjs";
+
+export interface Producto {
   id: number;
   nombre: string;
   codigo: string;
@@ -10,11 +14,16 @@ export interface Articulo {
   unidadMedida: string;
 }
 
-export interface User {
+export interface Usuario {
   username: string;
   nombre: string;
-  rol: "admin" | "usuario" | "visualizador";
-  localidad: string;
+  rol: number;
+  apellido : string,
+  email : string,
+  password : string,
+  legajo : string,
+  id_localidad : number,
+  id_rol : number
 }
 
 export type CrudAction =

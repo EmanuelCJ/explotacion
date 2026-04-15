@@ -1,13 +1,11 @@
-<script setup lang="js">
+<script setup lang="ts">
 
 import loginView from './views/LoginView.vue'
 import HomeView from './views/HomeView.vue';
-import productos from './views/productos.vue';
 
 </script>
 
 <template>
   <!-- <loginView /> -->
   <!-- <homeView /> -->
-  <productos />
 </template>
