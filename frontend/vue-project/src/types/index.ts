@@ -1,37 +1,107 @@
-// interfaces TypeScript completas (Producto, Movimiento, Resumen, Listas, etc).
+// ─── Enums ────────────────────────────────────────────────────────────────────
 
-import type { st } from "vue-router/dist/router-CWoNjPRp.mjs";
+export enum TipoMovimiento {
+  INGRESO = 'INGRESO',
+  SALIDA = 'SALIDA',
+  AJUSTE_POSITIVO = 'AJUSTE_POSITIVO',
+  AJUSTE_NEGATIVO = 'AJUSTE_NEGATIVO',
+  AJUSTE = 'AJUSTE'
+}
+
+export enum EstadoStock {
+  NORMAL = 'Normal',
+  BAJO = 'Stock Bajo',
+  SIN_STOCK = 'Sin Stock'
+}
+
+// ─── Modelos ──────────────────────────────────────────────────────────────────
 
 export interface Producto {
-  id: number;
-  nombre: string;
-  codigo: string;
-  descripcion: string;
-  costo: number;
-  stock: number;
-  categoria: string;
-  lugar: string;
-  unidadMedida: string;
+  codigo: string
+  nombre: string
+  unidad: string
+  grupo: string
+  stockMin: number
+  fechaCreacion?: string
 }
 
-export interface Usuario {
-  username: string;
-  nombre: string;
-  rol: number;
-  apellido : string,
-  email : string,
-  password : string,
-  legajo : string,
-  id_localidad : number,
-  id_rol : number
+export interface ProductoStock extends Producto {
+  cantidad: number
+  estado: EstadoStock
 }
 
-export type CrudAction =
-  | "crear"
-  | "actualizar"
-  | "buscar"
-  | "retirar"
-  | "agregar"
-  | "eliminar";
+export interface ProductoSugerencia {
+  codigo: string
+  nombre: string
+  unidad: string
+  grupo: string
+}
 
-export type SidebarSection = "almacen" | "envios" | "auditoria" | "estadisticas";
+export interface Movimiento {
+  codigo: string
+  fecha: string
+  tipo: TipoMovimiento
+  cantidad: number
+  producto: string
+  observaciones: string
+  usuario: string
+}
+
+export interface Resumen {
+  totalProductos: number
+  totalMovimientos: number
+  sinStock: number
+  stockBajo: number
+  valorTotalInventario: number
+  movimientosUltimoMes: number
+}
+
+export interface Listas {
+  unidades: string[]
+  grupos: string[]
+}
+
+export interface ValidacionIntegridad {
+  errores: string[]
+}
+
+// ─── Payloads para requests ───────────────────────────────────────────────────
+
+export interface NuevoProductoPayload {
+  codigo: string
+  nombre: string
+  unidad: string
+  grupo: string
+  stockMin: number
+}
+
+export interface NuevoMovimientoPayload {
+  codigo: string
+  fecha: string
+  tipo: TipoMovimiento
+  cantidad: number
+  observaciones: string
+}
+
+export interface FiltrosHistorial {
+  fechaDesde: string
+  fechaHasta: string
+  tipo: TipoMovimiento | ''
+}
+
+// ─── Respuesta API genérica ───────────────────────────────────────────────────
+
+export interface ApiResponse<T = void> {
+  ok: boolean
+  mensaje?: string
+  data?: T
+}
+
+// ─── UI helpers ───────────────────────────────────────────────────────────────
+
+export type MessageType = 'success' | 'error' | 'warning' | 'info'
+
+export interface AppMessage {
+  text: string
+  type: MessageType
+}

@@ -1,98 +1,112 @@
-# SISTEMAS Explotacion - Vue 3
+# QASO System — Vue 3 + TypeScript
 
-Sistema de gestión de inventario construido con Vue 3, Composition API, TypeScript, Axios y CSS puro.
+Sistema de Control de Inventario construido con **Vue 3**, **TypeScript**, **Pinia** y **Vue Router**, conectado a una API REST Flask.
 
-## 🚀 Instalación
+---
+
+## Estructura del proyecto
+
+```
+src/
+├── api/
+│   └── inventario.ts       # Capa de servicio (axios → Flask)
+├── assets/
+│   └── main.css            # Estilos globales
+├── components/
+│   ├── AppSidebar.vue      # Navegación lateral
+│   ├── AppMessage.vue      # Alertas reutilizables
+│   ├── AutocompleteInput.vue  # Input con búsqueda de productos
+│   └── StatCard.vue        # Tarjetas del dashboard
+├── router/
+│   └── index.ts            # Rutas (lazy-loaded)
+├── stores/
+│   └── inventario.ts       # Pinia store (listas + resumen)
+├── types/
+│   └── index.ts            # Interfaces y enums TypeScript
+├── views/
+│   ├── DashboardView.vue
+│   ├── ProductosView.vue
+│   ├── MovimientosView.vue
+│   ├── InventarioView.vue
+│   ├── ReportesView.vue
+│   ├── BuscarView.vue
+│   └── ConfiguracionView.vue
+├── App.vue
+└── main.ts
+```
+
+---
+
+## Instalación y uso
 
 ```bash
-# Instalar dependencias
 npm install
-
-# Ejecutar en modo desarrollo
-npm run dev
-
-# Compilar para producción
-npm run build
+npm run dev       # desarrollo (http://localhost:5173)
+npm run build     # producción
 ```
 
-## 📁 Estructura del Proyecto
+---
 
-```
-vue-app/
-├── components/           # Componentes Vue
-│   ├── AppSidebar.vue   # Sidebar colapsable
-│   ├── AppHeader.vue    # Header con info de usuario
-│   ├── ActionBar.vue    # Botones CRUD
-│   ├── InventoryTable.vue  # Tabla de inventario
-│   └── ArticuloModal.vue   # Modal para operaciones
-├── types/               # Tipos TypeScript
-│   └── index.ts
-├── services/            # Servicios API
-│   └── api.ts          # Axios API service
-├── src/
-│   └── main.ts         # Entry point
-├── App.vue             # Componente principal
-├── index.html
-├── vite.config.ts
-└── package.json
-```
+## Endpoints Flask esperados
 
-## 🔌 Conectar con tu Backend
+| Método | Ruta                           | Descripción                      |
+|--------|--------------------------------|----------------------------------|
+| GET    | `/api/resumen`                 | Estadísticas del dashboard       |
+| GET    | `/api/stock`                   | Lista completa de productos+stock|
+| GET    | `/api/listas`                  | Unidades y grupos disponibles    |
+| GET    | `/api/productos/buscar?q=`     | Búsqueda por texto               |
+| GET    | `/api/productos/buscar-codigo?codigo=` | Sugerencias autocomplete |
+| POST   | `/api/productos`               | Registrar nuevo producto         |
+| POST   | `/api/movimientos`             | Registrar movimiento             |
+| GET    | `/api/historial`               | Historial filtrado               |
+| GET    | `/api/exportar-stock`          | Exportar CSV (devuelve `{url}`)  |
+| POST   | `/api/inicializar`             | Inicializar sistema              |
+| GET    | `/api/validar-integridad`      | Validar datos                    |
 
-Edita el archivo `services/api.ts` y cambia la URL base:
+> El proxy de Vite redirige `/api` → `http://localhost:5000` en desarrollo.
+> En producción, configurar nginx o el mismo Flask para servir la app.
 
-```typescript
-const API_URL = "https://tu-backend.com/api";
-```
+---
 
-O crea un archivo `.env`:
+## Estructura esperada de respuestas Flask
 
-```
-VITE_API_URL=https://tu-backend.com/api
-```
+```python
+# GET /api/resumen
+{ "totalProductos": 10, "totalMovimientos": 50, "sinStock": 2,
+  "stockBajo": 3, "valorTotalInventario": 150.0, "movimientosUltimoMes": 12 }
 
-## 📋 Características
+# GET /api/stock  →  lista de:
+{ "codigo": "P001", "nombre": "Tornillo", "unidad": "Unidades",
+  "grupo": "General", "stockMin": 10, "cantidad": 25,
+  "estado": "Normal" }   # "Normal" | "Stock Bajo" | "Sin Stock"
 
-- ✅ **Sidebar colapsable** con navegación por secciones
-- ✅ **CRUD completo** (Crear, Actualizar, Buscar, Retirar, Agregar, Eliminar)
-- ✅ **Tabla de inventario** con selección múltiple
-- ✅ **Modales** para todas las operaciones
-- ✅ **Gestión de stock** con control de cantidades
-- ✅ **Visibilidad por rol** (admin, usuario, visualizador)
-- ✅ **TypeScript** para type safety
-- ✅ **CSS puro** con estilos modernos
-- ✅ **Axios** para peticiones HTTP
+# GET /api/listas
+{ "unidades": ["Unidades", "Kilogramos", ...], "grupos": ["General", ...] }
 
-## 🎨 Personalización
+# POST /api/productos  →  { "mensaje": "Producto registrado correctamente." }
+# POST /api/movimientos → { "mensaje": "Movimiento registrado correctamente." }
 
-Los estilos están en cada componente `.vue` dentro de `<style scoped>`. Puedes personalizar:
+# GET /api/historial?fechaDesde=2024-01-01&fechaHasta=2024-12-31&tipo=
+# → lista de: { "codigo", "fecha", "tipo", "cantidad", "producto",
+#               "observaciones", "usuario" }
 
-- Colores en las clases CSS
-- Tamaños de fuente
-- Espaciados y márgenes
-- Transiciones y animaciones
-
-## 📡 API Endpoints
-
-El servicio espera los siguientes endpoints:
-
-- `GET /api/articulos` - Listar artículos (opcional: `?q=busqueda`)
-- `POST /api/articulos` - Crear artículo
-- `PUT /api/articulos` - Actualizar artículo
-- `DELETE /api/articulos?ids=1,2,3` - Eliminar artículos
-- `PATCH /api/articulos` - Ajustar stock (agregar/retirar)
-
-## 👤 Usuario de Ejemplo
-
-Usuario simulado en `App.vue`:
-
-```typescript
-{
-  username: "carlos.mendez",
-  nombre: "Carlos Mendez",
-  rol: "admin",
-  localidad: "Ciudad de Mexico"
-}
+# GET /api/exportar-stock → { "url": "https://..." }
+# POST /api/inicializar   → { "mensaje": "..." }
+# GET /api/validar-integridad → { "errores": [] }
 ```
 
-Puedes modificarlo o conectarlo con tu sistema de autenticación.
+---
+
+## Configurar Flask para CORS (requerido)
+
+```python
+from flask import Flask
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+```
+
+```bash
+pip install flask-cors
+```
