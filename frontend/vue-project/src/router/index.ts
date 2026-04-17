@@ -64,14 +64,12 @@ const router = createRouter({
 
 // Opcional: Guardia de navegación para proteger las rutas de ARSA
 router.beforeEach((to, from, next) => {
-  const publicPages = ['/login'];
-  const authRequired = !publicPages.includes(to.path);
-  const loggedIn = localStorage.getItem('user-token'); // O tu lógica de Pinia
+  const authRequired = localStorage.getItem('refresh_token');
+  const loggedIn = localStorage.getItem('access_token'); // O tu lógica de Pinia
 
-  if (authRequired && !loggedIn) {
-    return next('/login');
+  if (to.path === '/login' && authRequired && loggedIn) {
+    return next('/dashboard'); // Redirige al dashboard si ya estás autenticado
   }
-
   next();
 });
 
