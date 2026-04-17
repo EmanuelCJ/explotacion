@@ -105,3 +105,8 @@ export interface AppMessage {
   text: string
   type: MessageType
 }
+
+export interface auth {
+  username: string
+  password: string
+}

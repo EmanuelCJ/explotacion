@@ -17,7 +17,11 @@
  */
 
 import axios from 'axios'
+
+// ─── Tipos de datos ───────────────────────────────────────────────────────────
+
 import type {
+  auth,
   Resumen,
   ProductoStock,
   ProductoSugerencia,
@@ -30,9 +34,20 @@ import type {
 } from '@/types'
 
 const http = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL,
   headers: { 'Content-Type': 'application/json' }
 })
+
+
+
+// ─── Autenticación (si se implementa) ─────────────────────────────────────── 
+
+export async function auth(username: string, password: string): Promise<auth> {
+  const { data } = await http.post<auth>('/api/auth/login', {
+    parameters: { username, password }
+  })
+  return data
+}
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 

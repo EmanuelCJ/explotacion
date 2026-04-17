@@ -64,6 +64,7 @@ const router = createRouter({
 
 // Opcional: Guardia de navegación para proteger las rutas de ARSA
 router.beforeEach((to, from, next) => {
+  
   const authRequired = localStorage.getItem('refresh_token');
   const loggedIn = localStorage.getItem('access_token'); // O tu lógica de Pinia
 
