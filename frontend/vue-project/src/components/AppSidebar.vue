@@ -44,8 +44,9 @@ function handleLogout() {
     </ul>
     <!-- Botón Logout fijo abajo -->
     <div class="logout-container">
+      
       <button class="logout-button" @click="handleLogout">
-        🚪 Logout
+        Cierre de sesión
       </button>
     </div>
   </nav>

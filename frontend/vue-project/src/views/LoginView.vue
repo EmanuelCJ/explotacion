@@ -15,14 +15,15 @@
         <!-- Logo / Nombre empresa -->
         <div class="brand-area">
           <div class="brand-icon">
-            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <img v-if="bgImage" :src="logoaguas" alt="Logo" class="logo-image" width="50px" />
+            <!-- <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="20" cy="20" r="18" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"/>
               <path d="M12 20 L20 12 L28 20 L20 28 Z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
               <circle cx="20" cy="20" r="4" fill="rgba(255,255,255,0.6)"/>
-            </svg>
+            </svg> -->
           </div>
-          <h2 class="brand-name">LOGO DE LA EMPRESA</h2>
-          <p class="brand-tagline">Bienvenido de nuevo</p>
+          <h2 class="brand-name">Aguas Rionegrinas SA</h2>
+          <p class="brand-tagline">Explotacion de recursos hídricos</p>
         </div>
 
         <!-- Separador -->
@@ -125,6 +126,7 @@ import axios from 'axios'
 import router from '@/router'
 import { auth } from '@/api/inventario'
 import puente from '@/assets/portadapuente.jpg'
+import logoaguas from '@/assets/a CIR.png'
 
 // ─── Estado ────────────────────────────────────────────────────────────────
 const form = reactive({ username: '', password: '' })
@@ -133,6 +135,7 @@ const isLoading = ref(false)
 const errorMsg = ref('')
 const showPassword = ref(false)
 const bgImage = ref(puente)   // URL de la imagen de fondo cargada por el usuario
+const iconImage = ref(logoaguas)    // URL de la imagen del logo cargada por el usuario
 const bgInput = ref(null)
 // const connection = inventario() // Instancia de la API de inventario (si necesitas hacer llamadas desde aquí)
 
