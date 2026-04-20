@@ -78,7 +78,8 @@ def login():
         
         # Crear respuesta
         response = make_response(jsonify({
-            'message': 'Login exitoso',
+            'status': 200,
+            'message': 'login exitoso',
             'usuario': {
                 'id': usuario['id_usuario'],
                 'nombre': usuario['nombre'],
@@ -202,6 +203,7 @@ def get_current_user():
     if not usuario:
         return jsonify({'error': 'Usuario no encontrado'}), 404
 
+    
     return jsonify({
         'usuario': {
             'id': usuario['id_usuario'],
@@ -213,7 +215,7 @@ def get_current_user():
             'rol': usuario['roles'].split(',')[0] if usuario.get('roles') else 'usuario',
             'localidad': usuario.get('localidad_nombre'),
             'activo': usuario['activo'],
-            'permisos': usuario['permisos']
+            'permisos': [p['nombre'] for p in usuario.get('permisos', [])]
         }
     }), 200
 

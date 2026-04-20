@@ -116,21 +116,6 @@
         <p class="card-footer">Sistema de gestión corporativo</p>
       </div>
     </div>
-
-    <!-- Input oculto para cambiar imagen de fondo (botón de cámara) -->
-    <input
-      ref="bgInput"
-      type="file"
-      accept="image/*"
-      class="hidden-input"
-      @change="onBgChange"
-    />
-    <button class="bg-change-btn" @click="$refs.bgInput.click()" title="Cambiar imagen de fondo">
-      <svg viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
-      </svg>
-      <span>Cambiar fondo</span>
-    </button>
   </div>
 </template>
 
@@ -138,6 +123,8 @@
 import { ref, reactive, computed } from 'vue'
 import axios from 'axios'
 import router from '@/router'
+import { auth } from '@/api/inventario'
+import puente from '@/assets/portadapuente.jpg'
 
 // ─── Estado ────────────────────────────────────────────────────────────────
 const form = reactive({ username: '', password: '' })
@@ -145,8 +132,10 @@ const focus = reactive({ username: false, password: false })
 const isLoading = ref(false)
 const errorMsg = ref('')
 const showPassword = ref(false)
-const bgImage = ref(null)   // URL de la imagen de fondo cargada por el usuario
+const bgImage = ref(puente)   // URL de la imagen de fondo cargada por el usuario
 const bgInput = ref(null)
+// const connection = inventario() // Instancia de la API de inventario (si necesitas hacer llamadas desde aquí)
+
 
 // ─── URL base de la API Flask ────────────────────────────────────────────
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
@@ -186,32 +175,20 @@ async function handleLogin() {
   isLoading.value = true
 
   try {
-    const response = await axios.post(
-      `${API_URL}/api/auth/login`,
-      { username: form.username, password: form.password },
-      { withCredentials: true }   // importante para que las cookies se guarden
-    )
 
-    const { access_token, refresh_token, username } = response.data
-
-    // Guardar tokens si la API también los manda en el body (además de cookies)
-    if (access_token)  localStorage.setItem('access_token', access_token)
-    if (refresh_token) localStorage.setItem('refresh_token', refresh_token)
-    if (username)      localStorage.setItem('username', username)
-
-    // Redirigir al dashboard (ajusta la ruta según tu router)
-    router.push('/')
-
-    console.log('Login exitoso ✓', response.data)
-
+    // Llamada a la función de autenticación osea al backend Flask
+    const response = await auth(form.username, form.password)
+    
+    if (response['status'] === 200) {
+      // Login exitoso, redirigir a la página principal
+      router.push('/Home')
+      console.log( response['usuario']) // aca deberia guardar la info en store
+    } else {
+      errorMsg.value = response['error']
+    }
   } catch (err) {
     if (err.response) {
-      errorMsg.value =
-        err.response.data?.message ||
-        err.response.data?.error ||
-        `Error ${err.response.status}: credenciales inválidas`
-    } else if (err.request) {
-      errorMsg.value = 'No se pudo conectar con el servidor. Verificá tu conexión.'
+      errorMsg.value = err.response.data.error || 'No se recibió respuesta del servidor. Verificá tu conexión.'
     } else {
       errorMsg.value = 'Ocurrió un error inesperado.'
     }
@@ -341,11 +318,11 @@ async function handleLogin() {
   height: 1px;
   background: linear-gradient(
     90deg,
-    transparent 0%,
+    transparent 10%,
     rgba(125,211,252,0.3) 30%,
     rgba(255,255,255,0.15) 50%,
     rgba(125,211,252,0.3) 70%,
-    transparent 100%
+    transparent 50%
   );
   margin-bottom: 1.8rem;
 }
@@ -394,7 +371,6 @@ async function handleLogin() {
   color: var(--text-primary);
   outline: none;
   transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
-  -webkit-appearance: none;
 }
 .glass-input::placeholder { color: rgba(255,255,255,0.25); }
 .glass-input:focus {

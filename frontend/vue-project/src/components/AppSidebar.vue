@@ -1,22 +1,31 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
+import { logout } from '@/api/inventario'
 
 const router = useRouter()
 const route = useRoute()
 
+
 const navItems = [
-  { name: 'dashboard',      label: 'Dashboard',       icon: '📊' },
-  { name: 'productos',      label: 'Nuevo Producto',  icon: '📦' },
-  { name: 'movimientos',    label: 'Movimientos',     icon: '📋' },
-  { name: 'inventario',     label: 'Inventario',      icon: '🗃️' },
-  { name: 'reportes',       label: 'Reportes',        icon: '📈' },
-  { name: 'buscar',         label: 'Buscar',          icon: '🔍' },
-  { name: 'configuracion',  label: 'Configuración',   icon: '⚙️' }
+  { name: 'dashboard', label: 'Dashboard', icon: '📊' },
+  { name: 'productos', label: 'Nuevo Producto', icon: '📦' },
+  { name: 'movimientos', label: 'Movimientos', icon: '📋' },
+  { name: 'inventario', label: 'Inventario', icon: '🗃️' },
+  { name: 'reportes', label: 'Reportes', icon: '📈' },
+  { name: 'buscar', label: 'Buscar', icon: '🔍' },
+  { name: 'configuracion', label: 'Configuración', icon: '⚙️' }
 ] as const
 
 function isActive(name: string): boolean {
   return route.name === name
 }
+
+function handleLogout() {
+  logout().then(() => {
+    router.push({ name: 'login' })
+  })
+}
+
 </script>
 
 <template>
@@ -27,18 +36,21 @@ function isActive(name: string): boolean {
     </div>
     <ul class="nav-menu">
       <li v-for="item in navItems" :key="item.name" class="nav-item">
-        <a
-          class="nav-link"
-          :class="{ active: isActive(item.name) }"
-          @click="router.push({ name: item.name })"
-        >
+        <a class="nav-link" :class="{ active: isActive(item.name) }" @click="router.push({ name: item.name })">
           <span class="nav-icon">{{ item.icon }}</span>
           {{ item.label }}
         </a>
       </li>
     </ul>
+    <!-- Botón Logout fijo abajo -->
+    <div class="logout-container">
+      <button class="logout-button" @click="handleLogout">
+        🚪 Logout
+      </button>
+    </div>
   </nav>
 </template>
+
 
 <style scoped>
 .sidebar {
@@ -47,15 +59,16 @@ function isActive(name: string): boolean {
   color: #fff;
   flex-shrink: 0;
   overflow-y: auto;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .sidebar-header {
   padding: 22px 20px;
   background: #1c5f7b;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   text-align: center;
 }
 
@@ -74,6 +87,7 @@ function isActive(name: string): boolean {
 .nav-menu {
   list-style: none;
   padding: 16px 0;
+  flex-grow: 1;
 }
 
 .nav-item {
@@ -84,7 +98,7 @@ function isActive(name: string): boolean {
   display: flex;
   align-items: center;
   padding: 11px 14px;
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
   border-radius: 8px;
   transition: background 0.2s, color 0.2s, transform 0.2s;
   cursor: pointer;
@@ -93,7 +107,7 @@ function isActive(name: string): boolean {
 }
 
 .nav-link:hover {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
   transform: translateX(4px);
 }
@@ -111,6 +125,29 @@ function isActive(name: string): boolean {
   text-align: center;
 }
 
+.logout-container {
+  margin-top: auto; /* empuja el botón hacia abajo */
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.logout-button {
+  width: 100%;
+  padding: 12px;
+  background: #e74c3c;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.logout-button:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
@@ -121,6 +158,9 @@ function isActive(name: string): boolean {
     z-index: 1000;
     transition: left 0.3s;
   }
-  .sidebar.open { left: 0; }
+
+  .sidebar.open {
+    left: 0;
+  }
 }
 </style>

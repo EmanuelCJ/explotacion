@@ -110,3 +110,40 @@ export interface auth {
   username: string
   password: string
 }
+
+interface ResponseServer {
+  mensaje: string
+}
+interface ResponseError {
+  error: string
+  detail?: string
+}
+
+// El servidor puede responder con éxito y error para manejarlo mejor en el frontend.
+export type Response = ResponseServer | ResponseError
+
+export interface Usuario {
+  id: number
+  nombre: string
+  apellido: string
+  username: string
+  email?: string
+  rol: string
+  localidad?: string
+  permisos: string[]
+}
+
+export type MeResponse = Usuario | ResponseError
+
+interface AuthSuccess {
+  status: number
+  message: string
+  usuario: Usuario
+}
+
+interface AuthError {
+  error: string
+}
+
+export type AuthResponse = AuthSuccess | AuthError
+

@@ -21,7 +21,9 @@ import axios from 'axios'
 // ─── Tipos de datos ───────────────────────────────────────────────────────────
 
 import type {
-  auth,
+  AuthResponse,
+  Response,
+  MeResponse,
   Resumen,
   ProductoStock,
   ProductoSugerencia,
@@ -33,21 +35,45 @@ import type {
   FiltrosHistorial
 } from '@/types'
 
+
 const http = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  headers: { 'Content-Type': 'application/json' }
+  withCredentials: true, // guarda cookies para sesiones autenticadas
+  headers: {
+    'Content-Type': 'application/json'
+  }
 })
 
-
-
 // ─── Autenticación (si se implementa) ─────────────────────────────────────── 
-
-export async function auth(username: string, password: string): Promise<auth> {
-  const { data } = await http.post<auth>('/api/auth/login', {
-    parameters: { username, password }
+export async function auth(username: string, password: string): Promise<AuthResponse> {
+  const { data } = await http.post<AuthResponse>('/api/auth/login', {
+    username,
+    password
   })
   return data
 }
+// ─── Cerrar sesión ─────────────────────────────────────────────────────────
+export async function logout(): Promise<Response> {
+  return await http.post('/api/auth/logout')
+}
+// ─── Info del Usuario actual ───────────────────────────────
+export async function me(): Promise<MeResponse> {
+  return await http.get('/api/auth/me')
+}
+// ─── Verificar sesión activa (para proteger rutas) ─────────────────────────
+export async function verificar(): Promise<Response> {
+  return await http.get('/api/auth/verify')
+}
+// ─── Cambio de contraseña ─────────────────────────────────────────────────
+export async function cambioPassword(oldPassword: string, newPassword: string): Promise<void> {
+  const { data } = await http.post('/api/auth/password', { oldPassword, newPassword })
+  return data
+}
+// ─── Refrescar token de sesión (si se implementa refresh tokens cada vez que expire) ─────────────
+export async function refresh(): Promise<Response> {
+  return await http.post('/api/auth/refresh')
+}
+
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
