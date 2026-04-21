@@ -114,6 +114,7 @@ export interface auth {
 interface ResponseServer {
   mensaje: string
 }
+
 interface ResponseError {
   error: string
   detail?: string

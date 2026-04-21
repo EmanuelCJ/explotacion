@@ -171,18 +171,25 @@ async function handleLogin() {
   try {
     const response = await auth(form.username, form.password)
 
+    console.log("respuesta del login:", response)
+
     if (response['status'] === 200) {
       router.push('/Home')
       console.log(response['usuario'])
-    } else {
+    } else  {
       errorMsg.value = response['error']
     }
   } catch (err) {
-    errorMsg.value = err.response?.data?.error
-      || 'No se pudo conectar con el servidor. Es posible que esté en mantenimiento.'
-  } finally {
-    isLoading.value = false
-  }
+  const serverError = err.response?.data?.error;
+
+    if (serverError && serverError.includes("cannot access local variable 'connection' where it is not associated with a value")) {
+      errorMsg.value = "La base de datos esta en mantenimiento. Consulte con departamento de sistemas.";
+    } else if (err.code === 'ERR_NETWORK') {
+      errorMsg.value = "El servidor no responde. Es posible que esté en mantenimiento. Consulte con departamento de sistemas.";
+    } else {
+      errorMsg.value = serverError || 'Error de conexión inesperado.';
+    }
+}
 }
 </script>
 
@@ -193,12 +200,12 @@ async function handleLogin() {
 /* ─── Variables ─────────────────────────────────────────────────────────── */
 :root {
   --accent:       #7dd3fc;
-  --text-primary: rgba(255, 255, 255, 0.98); 
+  --text-primary: rgba(255, 255, 255, 0.88); 
   --text-muted:   rgba(255, 255, 255, 0.78);
-  --input-bg:     rgba(255, 255, 255, 0.09);
+  --input-bg:     rgba(255, 255, 255, 0.98);
   --input-border: rgba(255, 255, 255, 0.22);
   --input-focus:  rgba(125, 211, 252, 0.60);
-  --card-bg:      rgba(10, 14, 35, 0.90);
+  --card-bg:      rgba(255, 255, 255, 0.6);
   --card-border:  rgba(255, 255, 255, 0.20);
   --error-text:   rgba(255, 255, 255, 0.98);
   --error-bg:     rgba(239, 68, 68, 0.25);
@@ -238,19 +245,6 @@ async function handleLogin() {
   z-index: 0;
 }
 
-/* ─── Partículas ─────────────────────────────────────────────────────────── */
-/* .particles { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
-.particle {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(125, 211, 252, 0.22);
-  animation: floatUp 8s ease-in-out infinite;
-}
-@keyframes floatUp {
-  0%, 100% { transform: translateY(0)     scale(1);   opacity: 0.28; }
-  50%       { transform: translateY(-38px) scale(1.3); opacity: 0.65; }
-} */
-
 /* ─── Wrapper ────────────────────────────────────────────────────────────── */
 .login-wrapper {
   position: relative;
@@ -268,10 +262,10 @@ async function handleLogin() {
 
 /* ─── Card ───────────────────────────────────────────────────────────────── */
 .glass-card {
-  background: var(--card-bg);
-  /* backdrop-filter: blur(28px) saturate(180%); 
-  -webkit-backdrop-filter: blur(28px) saturate(180%);*/
-  backdrop-filter:none; /* Evita problemas de rendimiento en móviles antiguos */
+  background: rgba(15, 23, 42, 0.4) !important;
+  backdrop-filter: blur(28px) saturate(180%); 
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  /*backdrop-filter:none;  Evita problemas de rendimiento en móviles antiguos */
   border: 1px solid var(--card-border);
   border-radius: clamp(16px, 3vw, 24px);
   padding: clamp(24px, 5vw, 44px) clamp(20px, 5vw, 44px) clamp(20px, 4vw, 36px);
@@ -304,7 +298,7 @@ async function handleLogin() {
   font-size: clamp(0.95rem, 2.5vw, 1.15rem);
   font-weight: 700;
   letter-spacing: 0.18em;
-  color: var(--text-primary);
+  color: rgba(255, 255, 255, 0.88) !important;
   text-transform: uppercase;
   margin: 0 0 0.3rem;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
@@ -312,7 +306,7 @@ async function handleLogin() {
 }
 .brand-tagline {
   font-size: clamp(0.72rem, 1.8vw, 0.82rem);
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.88) !important;
   margin: 0;
   letter-spacing: 0.05em;
 }
@@ -422,7 +416,7 @@ async function handleLogin() {
   border-radius: 10px;
   padding: 10px 13px;
   font-size: clamp(0.78rem, 1.8vw, 0.84rem);
-  color: var(--error-text);
+  color: rgba(255, 255, 255, 0.88) !important;
   line-height: 1.45;
   word-break: break-word;
 }

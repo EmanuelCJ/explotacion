@@ -38,10 +38,10 @@ import type {
 
 const http = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true, // guarda cookies para sesiones autenticadas
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: true // guarda cookies para sesiones autenticadas
 })
 
 // ─── Autenticación (si se implementa) ─────────────────────────────────────── 
@@ -50,11 +50,14 @@ export async function auth(username: string, password: string): Promise<AuthResp
     username,
     password
   })
+
   return data
 }
 // ─── Cerrar sesión ─────────────────────────────────────────────────────────
-export async function logout(): Promise<Response> {
-  return await http.post('/api/auth/logout')
+export async function logout(): Promise<void> {
+  const { data } = await http.post('/api/auth/logout')
+  return data
+
 }
 // ─── Info del Usuario actual ───────────────────────────────
 export async function me(): Promise<MeResponse> {

@@ -116,6 +116,8 @@ def login():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+    
 
 
 @auth_bp.route('/logout', methods=['POST'])
