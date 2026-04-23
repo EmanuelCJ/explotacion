@@ -195,7 +195,7 @@ class AuthService:
     @staticmethod
     def logout(usuario_id: int, ip_address: str = None) -> bool:
         """
-        Registrar logout en auditoría
+        Registrar logout (deslogueo) en auditoría
         
         Args:
             usuario_id: ID del usuario
@@ -213,5 +213,5 @@ class AuthService:
             'id_usuario': usuario_id,
             'ip_address': ip_address
         })
-        
+                
         return True

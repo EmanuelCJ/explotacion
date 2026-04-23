@@ -1,36 +1,36 @@
 import { defineStore } from 'pinia'
-import { auth , me , verificar } from '../api/inventario'
-
+import { auth, verificar , logout } from '@/api/inventario'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null as null | User,
+    user: null as any,
     isAuthenticated: false,
+    initialized: false // 🔥 importante para el guard
   }),
 
   actions: {
-    async status() {
+    async fetchUser() {
       try {
-        const {res} = await verificar()
-        if (res["valid"] === true) {
-          this.isAuthenticated = true
-        } else {
-          this.isAuthenticated = false
-        }
+        const { data } = await verificar()
+        this.user = data
+        this.isAuthenticated = true
       } catch {
         this.user = null
         this.isAuthenticated = false
+      } finally {
+        this.initialized = true
       }
     },
 
     async login(username: string, password: string) {
-      const { usuario } =await auth(username, password)
-      this.user = usuario
-      await this.status()
+      await auth(username, password)
+      await this.fetchUser()
     },
 
     async logout() {
-      await axios.post('/api/auth/logout')
+      try {
+        await logout()
+      } catch {}
       this.user = null
       this.isAuthenticated = false
     }

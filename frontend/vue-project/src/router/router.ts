@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore' // Asegúrate de tener esta tienda para la autenticación
 import HomeView from '@/views/HomeView.vue' // El nuevo archivo que creaste con el contenido anterior de App.vue
-import LoginView from '@/views/LoginView.vue'
+import LoginView from '@/views/LoginView.vue' // Asegúrate de tener esta vista para el login
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,66 +13,77 @@ const router = createRouter({
       meta: { title: 'Acceso al Sistema' }
     },
     {
-      path: '/Home',
+      path: '/home/',
+      name: 'home',
       component: HomeView, // Este actúa como contenedor con Sidebar
       children: [
         {
-          path: '', // Ruta raíz (redirecciona o muestra dashboard)
+          path: 'dashboard', // Ruta raíz (redirecciona o muestra dashboard)
           name: 'dashboard',
           component: () => import('@/views/DashboardView.vue'),
-          meta: { title: 'Dashboard General', icon: '📊' }
+          meta: { requiresAuth: true , title: 'Dashboard General', icon: '📊' }
         },
         {
           path: 'productos',
           name: 'productos',
           component: () => import('@/views/ProductosView.vue'),
-          meta: { title: 'Gestión de Productos', icon: '📦' }
+          meta: {requiresAuth: true , title: 'Gestión de Productos', icon: '📦' }
         },
         {
           path: 'movimientos',
           name: 'movimientos',
           component: () => import('@/views/MovimientosView.vue'),
-          meta: { title: 'Movimientos', icon: '📋' }
+          meta: { requiresAuth: true, title: 'Movimientos', icon: '📋' }
         },
         {
           path: 'inventario',
           name: 'inventario',
           component: () => import('@/views/InventarioView.vue'),
-          meta: { title: 'Control de Inventario', icon: '📊' }
+          meta: { requiresAuth: true, title: 'Control de Inventario', icon: '📊' }
         },
         {
           path: 'reportes',
           name: 'reportes',
           component: () => import('@/views/ReportesView.vue'),
-          meta: { title: 'Reportes y Análisis', icon: '📈' }
+          meta: { requiresAuth: true, title: 'Reportes y Análisis', icon: '📈' }
         },
         {
           path: 'buscar',
           name: 'buscar',
           component: () => import('@/views/BuscarView.vue'),
-          meta: { title: 'Búsqueda de Productos', icon: '🔍' }
+          meta: { requiresAuth: true, title: 'Búsqueda de Productos', icon: '🔍' }
         },
         {
           path: 'configuracion',
           name: 'configuracion',
           component: () => import('@/views/ConfiguracionView.vue'),
-          meta: { title: 'Configuración del Sistema', icon: '⚙️' }
+          meta: { requiresAuth: true, title: 'Configuración del Sistema', icon: '⚙️' }
         }
       ]
     }
   ]
 })
 
-// Opcional: Guardia de navegación para proteger las rutas de ARSA
-router.beforeEach((to, from, next) => {
-  
-  const authRequired = localStorage.getItem('refresh_token');
-  const loggedIn = localStorage.getItem('access_token'); // O tu lógica de Pinia
+router.beforeEach(async (to) => {
 
-  if (to.path === '/login' && authRequired && loggedIn) {
-    return next('/dashboard'); // Redirige al dashboard si ya estás autenticado
+  const auth = useAuthStore()
+
+  // 1. Si no sabemos si está logueado → preguntamos al backend
+  if (!auth.user) {
+    await auth.fetchUser()
   }
-  next();
-});
+
+  // 2. Si la ruta requiere auth y NO está logueado → afuera
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return '/login'
+  }
+
+  // 3. Si está logueado y quiere ir a login → redirigir
+  if (to.path === '/login' && auth.isAuthenticated) {
+    return '/'
+  }
+
+  return true
+})
 
 export default router

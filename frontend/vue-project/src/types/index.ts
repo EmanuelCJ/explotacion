@@ -8,10 +8,10 @@ export enum TipoMovimiento {
   AJUSTE = 'AJUSTE'
 }
 
-export enum EstadoStock {
-  NORMAL = 'Normal',
-  BAJO = 'Stock Bajo',
-  SIN_STOCK = 'Sin Stock'
+export enum activo {
+  NORMAL = 1,
+  BAJO = 2,
+  SIN_STOCK = 3
 }
 
 // ─── Modelos ──────────────────────────────────────────────────────────────────
@@ -19,15 +19,16 @@ export enum EstadoStock {
 export interface Producto {
   codigo: string
   nombre: string
-  unidad: string
-  grupo: string
-  stockMin: number
-  fechaCreacion?: string
+  unidad_medida?: string
+  id_categoria: number
+  stock_minimo: number
+  descripcion: string
+  costo?: number
 }
 
 export interface ProductoStock extends Producto {
   cantidad: number
-  estado: EstadoStock
+  estado: activo
 }
 
 export interface ProductoSugerencia {

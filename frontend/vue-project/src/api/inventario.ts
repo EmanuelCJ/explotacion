@@ -1,19 +1,5 @@
 /**
- * Capa de servicio que conecta con la API REST de Flask.
- * Todos los endpoints asumen base URL "/api" (proxiada a http://localhost:5000).
- *
- * Endpoints esperados en Flask:
- *   GET  /api/resumen
- *   GET  /api/stock
- *   GET  /api/listas
- *   GET  /api/productos/buscar?q=<texto>
- *   GET  /api/productos/buscar-codigo?codigo=<codigo>
- *   POST /api/productos            { codigo, nombre, unidad, grupo, stockMin }
- *   POST /api/movimientos          { codigo, fecha, tipo, cantidad, observaciones }
- *   GET  /api/historial?fechaDesde=&fechaHasta=&tipo=
- *   GET  /api/exportar-stock       → { url: string }
- *   POST /api/inicializar
- *   GET  /api/validar-integridad
+  * Archivo: src/api/inventario.ts
  */
 
 import axios from 'axios'
@@ -25,7 +11,7 @@ import type {
   Response,
   MeResponse,
   Resumen,
-  ProductoStock,
+  Producto,
   ProductoSugerencia,
   Listas,
   Movimiento,
@@ -50,9 +36,9 @@ export async function auth(username: string, password: string): Promise<AuthResp
     username,
     password
   })
-
   return data
 }
+
 // ─── Cerrar sesión ─────────────────────────────────────────────────────────
 export async function logout(): Promise<void> {
   const { data } = await http.post('/api/auth/logout')
@@ -87,8 +73,8 @@ export async function obtenerResumen(): Promise<Resumen> {
 
 // ─── Stock / Inventario ───────────────────────────────────────────────────────
 
-export async function obtenerStock(): Promise<ProductoStock[]> {
-  const { data } = await http.get<ProductoStock[]>('/stock')
+export async function obtenerStock(): Promise<Producto[]>{
+  const { data } = await http.get<Producto[]>('/api/productos/stock')
   return data
 }
 

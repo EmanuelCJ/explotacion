@@ -117,8 +117,6 @@ def login():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-    
-
 
 @auth_bp.route('/logout', methods=['POST'])
 @jwt_required_cookie()
@@ -135,7 +133,7 @@ def logout():
         ip_address = get_client_ip()
         
         # Registrar logout en auditoría (opcional) posiblemente borrar
-        #AuthService.logout(usuario_id, ip_address)
+        AuthService.logout(usuario_id, ip_address)
         
         # Crear respuesta
         response = make_response(jsonify({'message': 'Logout exitoso'}), 200)

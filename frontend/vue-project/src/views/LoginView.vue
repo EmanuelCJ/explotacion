@@ -125,9 +125,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup >
 import { ref, reactive, computed } from 'vue'
-import router from '@/router'
+import router from '@/router/router'
 import { auth } from '@/api/inventario'
 import puente from '@/assets/portadapuente.jpg'
 import logoaguas from '@/assets/a CIR.png'
@@ -174,20 +174,21 @@ async function handleLogin() {
     console.log("respuesta del login:", response)
 
     if (response['status'] === 200) {
-      router.push('/Home')
-      console.log(response['usuario'])
+      router.push('/home/')
+      //console.log(response['usuario'])
     } else  {
       errorMsg.value = response['error']
     }
+
   } catch (err) {
   const serverError = err.response?.data?.error;
 
-    if (serverError && serverError.includes("cannot access local variable 'connection' where it is not associated with a value")) {
-      errorMsg.value = "La base de datos esta en mantenimiento. Consulte con departamento de sistemas.";
+    if (serverError && serverError.includes("'NoneType' object has no attribute 'close'")) {
+      errorMsg.value = "La base de datos esta en mantenimiento. Consulte con el departamento de sistemas.";
     } else if (err.code === 'ERR_NETWORK') {
-      errorMsg.value = "El servidor no responde. Es posible que esté en mantenimiento. Consulte con departamento de sistemas.";
+      errorMsg.value = "Error de conexión con el servidor.";
     } else {
-      errorMsg.value = serverError || 'Error de conexión inesperado.';
+      errorMsg.value = serverError || 'El servidor no responde. Es posible que esté en mantenimiento. Consulte con el departamento de sistemas.';
     }
 }
 }
@@ -373,7 +374,6 @@ async function handleLogin() {
   color:  rgba(255, 255, 255, 0.95);
   outline: none;
   transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
-  -webkit-appearance: none;
 }
 .glass-input::placeholder { color: rgba(255, 255, 255, 0.45); }
 .glass-input:focus {
