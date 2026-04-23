@@ -8,8 +8,9 @@ import axios from 'axios'
 
 import type {
   AuthResponse,
-  Response,
+  RefreshResponse,
   MeResponse,
+  VerificarResponse,
   Resumen,
   Producto,
   ProductoSugerencia,
@@ -50,8 +51,9 @@ export async function me(): Promise<MeResponse> {
   return await http.get('/api/auth/me')
 }
 // ─── Verificar sesión activa (para proteger rutas) ─────────────────────────
-export async function verificar(): Promise<Response> {
-  return await http.get('/api/auth/verify')
+export async function verificar(): Promise<VerificarResponse> {
+  const { data } = await http.get('/api/auth/verify')
+  return data
 }
 // ─── Cambio de contraseña ─────────────────────────────────────────────────
 export async function cambioPassword(oldPassword: string, newPassword: string): Promise<void> {
@@ -59,11 +61,11 @@ export async function cambioPassword(oldPassword: string, newPassword: string): 
   return data
 }
 // ─── Refrescar token de sesión (si se implementa refresh tokens cada vez que expire) ─────────────
-export async function refresh(): Promise<Response> {
+export async function refresh(): Promise<RefreshResponse> {
   return await http.post('/api/auth/refresh')
 }
 
-
+  
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export async function obtenerResumen(): Promise<Resumen> {

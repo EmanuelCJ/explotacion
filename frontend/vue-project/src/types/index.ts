@@ -107,23 +107,18 @@ export interface AppMessage {
   type: MessageType
 }
 
+
+// ─── auth-interfaz ───────────────────────────────────────────────────────────────
+
+// Interfaz login
 export interface auth {
   username: string
   password: string
 }
 
-interface ResponseServer {
-  mensaje: string
-}
+// ─── Usuario-interfaz ───────────────────────────────────────────────────────────────
 
-interface ResponseError {
-  error: string
-  detail?: string
-}
-
-// El servidor puede responder con éxito y error para manejarlo mejor en el frontend.
-export type Response = ResponseServer | ResponseError
-
+// Modelo para crear un nuevo usuario
 export interface Usuario {
   id: number
   nombre: string
@@ -135,17 +130,52 @@ export interface Usuario {
   permisos: string[]
 }
 
-export type MeResponse = Usuario | ResponseError
+// ─── respuesta-servidor-interfaz ───────────────────────────────────────────────────────────────
 
-interface AuthSuccess {
-  status: number
-  message: string
-  usuario: Usuario
+// Esta interfaz contesta el servidor 
+interface ResponseError {
+  error: string
+  detail?: string
 }
+
+interface Refresh {
+  mensaje: string
+}
+
+// Para obtener respuesta del servidor a enpoint refresh.
+export type RefreshResponse = Refresh | ResponseError
 
 interface AuthError {
   error: string
 }
+interface Auth {
+  status: number
+  message: string
+  usuario: Usuario
+}
+// Para obtener respuesta del servidor a enpoint auth.
+export type AuthResponse = Auth | AuthError | ResponseError
 
-export type AuthResponse = AuthSuccess | AuthError
+interface Me {
+  usuario: Usuario
+}
 
+interface MeError {
+  error: string
+  detail: string
+}
+// Para obtener respueta del servidor a enpoint me.
+export type MeResponse = Me | MeError | ResponseError
+
+interface Verificar {
+  message: string,
+  usuario_id: string,
+  valid: boolean
+}
+ interface VerificarError {
+  valid: boolean,
+  error: string
+}
+
+// para verificar la sesión activa, el servidor puede responder con éxito o error dependiendo de si la sesión es válida o no.
+export type  VerificarResponse = Verificar | VerificarError | ResponseError

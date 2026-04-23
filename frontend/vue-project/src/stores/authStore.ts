@@ -11,7 +11,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async fetchUser() {
       try {
-        const { data } = await verificar()
+        const data = await verificar()
         this.user = data
         this.isAuthenticated = true
       } catch {
