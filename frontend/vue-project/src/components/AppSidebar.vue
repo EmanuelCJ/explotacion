@@ -22,8 +22,16 @@ function isActive(name: string): boolean {
 }
 
 function handleLogout() {
-  authStore.logout().then(() => {
-    router.push({ name: 'login' })
+  authStore.logout().then((result) => {
+    if (result === true) {
+      router.push({ name: 'home' })
+    } else {
+      console.error('Logout failed:', result)
+      alert('Error al cerrar sesión: ' + result)
+    }
+  }).catch((err) => {
+    console.error('Logout error:', err)
+    alert('Error al cerrar sesión: ' + err)
   })
 }
 

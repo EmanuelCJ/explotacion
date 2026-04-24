@@ -127,7 +127,7 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { useAuthStore } from '@/stores/authStore'
+import {useAuthStore}  from '@/stores/authStore'
 import router from '@/router/router'
 
 // ─── Estado ──────────────────────────────────────────────────────────────
@@ -147,14 +147,13 @@ async function handleLogin() {
     const response = await authStore.login(form.username, form.password)
     // Redirigir a home o dashboard después del login exitoso
     console.log("respuesta del login:", response)
-    router.push('/home/')
+    router.push({ name: 'home' })
   } catch (err: any) {
     const serverError = err.response?.data?.error;
-
     if (serverError && serverError.includes("'NoneType' object has no attribute 'close'")) {
       errorMsg.value = "La base de datos esta en mantenimiento. Consulte con el departamento de sistemas.";
     } else if (err.code === 'ERR_NETWORK') {
-      errorMsg.value = "Error de conexión con el servidor.";
+      errorMsg.value = "El servidor no responde. Es posible que esté en mantenimiento. Consulte con el departamento de sistemas.";
     } else {
       errorMsg.value = serverError || 'El servidor no responde. Es posible que esté en mantenimiento. Consulte con el departamento de sistemas.';
     }

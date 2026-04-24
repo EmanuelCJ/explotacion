@@ -179,3 +179,15 @@ interface Verificar {
 
 // para verificar la sesión activa, el servidor puede responder con éxito o error dependiendo de si la sesión es válida o no.
 export type  VerificarResponse = Verificar | VerificarError | ResponseError
+
+interface logout {
+  mensaje: string
+}
+
+interface LogoutError {
+  error: string
+  detail: string
+}
+
+// respuesta del servidor al endpoint logout, puede ser un mensaje de éxito o un error.
+export type LogoutResponse = logout | LogoutError

@@ -15,7 +15,7 @@ class Config:
 
     JWT_COOKIE_SECURE = False  # True en producción (HTTPS)
     JWT_COOKIE_HTTPONLY = True
-    JWT_COOKIE_SAMESITE = "Lax"
+    JWT_COOKIE_SAMESITE = "none"  # 'Lax' o 'Strict' en producción
     JWT_COOKIE_CSRF_PROTECT = False  # luego lo activamos
 
     JWT_ACCESS_TOKEN_EXPIRES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES", 900))

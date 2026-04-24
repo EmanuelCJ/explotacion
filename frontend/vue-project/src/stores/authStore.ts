@@ -31,9 +31,11 @@ export const useAuthStore = defineStore('auth', {
     async logout() {
       try {
         await logout()
-      } catch {}
-      this.user = null
-      this.isAuthenticated = false
+        this.user = null
+        this.isAuthenticated = false
+      } catch (err : any) {
+        return err.response?.data || 'Error al cerrar sesión'
+      }
     }
   }
 })
