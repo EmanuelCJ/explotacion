@@ -1,12 +1,12 @@
 <template>
-  <div class="login-page" :style="backgroundStyle">
+  <div class="login-page bg-puente ">
     <!-- Overlay oscuro sobre la imagen -->
     <div class="bg-overlay" />
 
-    <!-- Partículas decorativas -->
+    <!-- Partículas decorativas
     <div class="particles">
       <span v-for="n in 12" :key="n" class="particle" :style="particleStyle(n)" />
-    </div>
+    </div> -->
 
     <!-- Card flotante glassmorphism -->
     <div class="login-wrapper">
@@ -15,7 +15,7 @@
         <!-- Logo / Nombre empresa -->
         <div class="brand-area">
           <div class="brand-icon">
-            <img :src="logoaguas" alt="Logo" class="logo-image" />
+            <img src="@/assets/logoaguas.png" alt="Logo" class="logo-image" />
           </div>
           <h2 class="brand-name">Aguas Rionegrinas SA</h2>
           <p class="brand-tagline">Explotación de recursos hídricos</p>
@@ -125,12 +125,10 @@
   </div>
 </template>
 
-<script setup >
-import { ref, reactive, computed } from 'vue'
+<script setup lang="ts">
+import { ref, reactive } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
 import router from '@/router/router'
-import { auth } from '@/api/inventario'
-import puente from '@/assets/portadapuente.jpg'
-import logoaguas from '@/assets/a CIR.png'
 
 // ─── Estado ──────────────────────────────────────────────────────────────
 const form         = reactive({ username: '', password: '' })
@@ -138,50 +136,20 @@ const focus        = reactive({ username: false, password: false })
 const isLoading    = ref(false)
 const errorMsg     = ref('')
 const showPassword = ref(false)
-const bgImage      = ref(puente)
-
-// ─── Fondo dinámico ──────────────────────────────────────────────────────
-const backgroundStyle = computed(() => ({
-  backgroundImage: bgImage.value
-    ? `url(${bgImage.value})`
-    : 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-}))
-
-// ─── Partículas ───────────────────────────────────────────────────────────
-function particleStyle(n) {
-  const sizes  = [4, 6, 3, 8, 5, 4, 7, 3, 6, 4, 5, 8]
-  const delays = [0, 1.2, 2.4, 0.6, 3, 1.8, 0.3, 2.1, 3.6, 1.5, 2.7, 0.9]
-  return {
-    width:          `${sizes[n - 1]}px`,
-    height:         `${sizes[n - 1]}px`,
-    left:           `${(n * 8.3)  % 100}%`,
-    top:            `${(n * 13.7) % 100}%`,
-    animationDelay: `${delays[n - 1]}s`,
-  }
-}
+const authStore    = useAuthStore()
 
 // ─── Login ────────────────────────────────────────────────────────────────
 async function handleLogin() {
   if (isLoading.value || !form.username || !form.password) return
   errorMsg.value = ''
   isLoading.value = true
-
   try {
-    const response = await auth(form.username, form.password)
-
+    const response = await authStore.login(form.username, form.password)
+    // Redirigir a home o dashboard después del login exitoso
     console.log("respuesta del login:", response)
-
-    if (response['status'] === 200) {
-      router.push('/home/')
-      //console.log(response['usuario'])
-    } else  {
-      errorMsg.value = response['error']
-    }
-
-  } catch (err) {
-  const serverError = err.response?.data?.error;
+    router.push('/home/')
+  } catch (err: any) {
+    const serverError = err.response?.data?.error;
 
     if (serverError && serverError.includes("'NoneType' object has no attribute 'close'")) {
       errorMsg.value = "La base de datos esta en mantenimiento. Consulte con el departamento de sistemas.";
@@ -190,7 +158,9 @@ async function handleLogin() {
     } else {
       errorMsg.value = serverError || 'El servidor no responde. Es posible que esté en mantenimiento. Consulte con el departamento de sistemas.';
     }
-}
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
@@ -215,6 +185,15 @@ async function handleLogin() {
 
 /* ─── Reset ──────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
+
+/* imagen */
+.bg-puente {
+  background-image: url('@/assets/portadapuente.jpg');
+  background-size: cover;
+  background-position: center;
+  width: 100%;
+  height: 100vh; /* ocupa toda la pantalla */
+}
 
 /* ─── Página ─────────────────────────────────────────────────────────────── */
 .login-page {

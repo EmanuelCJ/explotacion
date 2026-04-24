@@ -7,7 +7,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: '/login',
       name: 'login',
       component: LoginView,
       meta: { title: 'Acceso al Sistema' }
@@ -15,6 +15,7 @@ const router = createRouter({
     {
       path: '/home/',
       name: 'home',
+      meta: { requiresAuth: true },
       component: HomeView, // Este actúa como contenedor con Sidebar
       children: [
         {

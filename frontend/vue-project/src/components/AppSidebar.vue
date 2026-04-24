@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
-import { logout } from '@/api/inventario'
+import { useAuthStore } from '@/stores/authStore'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 
 
 const navItems = [
@@ -21,7 +22,7 @@ function isActive(name: string): boolean {
 }
 
 function handleLogout() {
-  logout().then(() => {
+  authStore.logout().then(() => {
     router.push({ name: 'login' })
   })
 }
