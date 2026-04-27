@@ -25,12 +25,12 @@ class ProductoService:
         Args:
             data (dict): {
                 'nombre': str,
-                'codigo': str,
                 'descripcion': str,
                 'id_categoria': int,
                 'costo': float (opcional),
                 'unidad_medida': str (opcional),
-                'stock_minimo': int
+                'stock_minimo': int,
+                "id_lugar": int
             }
             usuario_id: ID del usuario que crea el producto
 
@@ -55,6 +55,10 @@ class ProductoService:
         if not categoria['activo']:
             raise Exception("La categoría está inactiva")
 
+        # consultar si el id_lugar es válido para esa localidad Revisar si es necesario
+        if not LocalidadDAO.validar_lugar_localidad(data['id_lugar'], localidad['id_localidad']):
+            raise Exception("El lugar no pertenece a la localidad del usuario")
+        
         #crear codigo unicos a partir del nombre del producto y el nombre de la categoria
         data['codigo'] =  generar_codigo_producto(data['nombre'], categoria['nombre'])
 

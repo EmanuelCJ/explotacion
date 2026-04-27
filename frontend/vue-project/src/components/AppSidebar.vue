@@ -8,12 +8,13 @@ const authStore = useAuthStore()
 
 
 const navItems = [
-  { name: 'dashboard', label: 'Dashboard', icon: '📊' },
   { name: 'productos', label: 'Nuevo Producto', icon: '📦' },
-  { name: 'movimientos', label: 'Movimientos', icon: '📋' },
   { name: 'inventario', label: 'Inventario', icon: '🗃️' },
-  { name: 'reportes', label: 'Reportes', icon: '📈' },
   { name: 'buscar', label: 'Buscar', icon: '🔍' },
+  { name: 'dashboard', label: 'Dashboard', icon: '📊' },
+  { name: 'movimientos', label: 'Movimientos', icon: '📋' },
+  { name: 'reportes', label: 'Reportes', icon: '📈' },
+  { name: 'usuarios', label: 'Usuarios', icon: '👥' },
   { name: 'configuracion', label: 'Configuración', icon: '⚙️' }
 ] as const
 
@@ -21,18 +22,9 @@ function isActive(name: string): boolean {
   return route.name === name
 }
 
-function handleLogout() {
-  authStore.logout().then((result) => {
-    if (result === true) {
-      router.push({ name: 'home' })
-    } else {
-      console.error('Logout failed:', result)
-      alert('Error al cerrar sesión: ' + result)
-    }
-  }).catch((err) => {
-    console.error('Logout error:', err)
-    alert('Error al cerrar sesión: ' + err)
-  })
+async function handleLogout() {
+  await authStore.logout()
+  router.push('/') 
 }
 
 </script>
@@ -40,7 +32,7 @@ function handleLogout() {
 <template>
   <nav class="sidebar">
     <div class="sidebar-header">
-      <h1>QASO SYSTEM</h1>
+      <h1>Explotacion</h1>
       <p class="subtitle">Control de Inventario</p>
     </div>
     <ul class="nav-menu">
@@ -83,7 +75,7 @@ function handleLogout() {
 }
 
 .sidebar-header h1 {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: 0.5px;
 }
@@ -112,7 +104,7 @@ function handleLogout() {
   border-radius: 8px;
   transition: background 0.2s, color 0.2s, transform 0.2s;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   user-select: none;
 }
 

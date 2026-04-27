@@ -203,4 +203,19 @@ class LocalidadDAO:
             print(f"Error counting lugares: {e}")
             raise
 
-    
+    @staticmethod
+    def validar_lugar_localidad(lugar_id: int, localidad_id: int) -> bool:
+        """Validar que un lugar pertenece a una localidad"""
+        try:
+            with ConectDB.get_cursor() as cursor:
+                query = """
+                    SELECT COUNT(*) as count 
+                    FROM lugares 
+                    WHERE id_lugar = %s AND id_localidad = %s AND activo = 1
+                """
+                cursor.execute(query, (lugar_id, localidad_id))
+                result = cursor.fetchone()
+                return result['count'] > 0
+        except Exception as e:
+            print(f"Error validating lugar-localidad: {e}")
+            raise

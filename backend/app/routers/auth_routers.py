@@ -9,6 +9,7 @@ from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
     set_access_cookies,
+    set_refresh_cookies,
     get_jwt_identity,
     unset_jwt_cookies
 )
@@ -92,25 +93,27 @@ def login():
             }
         }), 200)
         
-        # Configurar cookies HttpOnly
-        # IMPORTANTE: httponly=True para que JavaScript no pueda acceder
-        response.set_cookie(
-            'access_token',
-            value=access_token,
-            httponly=True,
-            secure=False,  # True en producción con HTTPS
-            samesite='Lax',
-            max_age=3600  # 1 hora en segundos
-        )
+        # # Configurar cookies HttpOnly
+        # # IMPORTANTE: httponly=True para que JavaScript no pueda acceder
+        # response.set_cookie(
+        #     'access_token',
+        #     value=access_token,
+        #     httponly=True,
+        #     secure=False,  # True en producción con HTTPS
+        #     samesite='Lax',
+        #     max_age=3600  # 1 hora en segundos
+        # )
         
-        response.set_cookie(
-            'refresh_token',
-            value=refresh_token,
-            httponly=True,
-            secure=False,
-            samesite='Lax',
-            max_age=2592000  # 30 días en segundos
-        )
+        # response.set_cookie(
+        #     'refresh_token',
+        #     value=refresh_token,
+        #     httponly=True,
+        #     secure=False,
+        #     samesite='Lax',
+        #     max_age=2592000  # 30 días en segundos
+        # )
+        set_access_cookies(response, access_token)
+        set_refresh_cookies(response, refresh_token)
         
         return response
         
@@ -119,7 +122,6 @@ def login():
     
 
 @auth_bp.route('/logout', methods=['POST'])
-@jwt_required_cookie()
 def logout():
     """
     Cerrar sesión del usuario
@@ -128,13 +130,7 @@ def logout():
     Returns:
         200: Logout exitoso
     """
-    try:
-        usuario_id = get_jwt_identity()
-        ip_address = get_client_ip()
-        
-        # Registrar logout en auditoría (opcional) posiblemente borrar
-        AuthService.logout(usuario_id, ip_address)
-        
+    try:        
         # Crear respuesta
         response = make_response(jsonify({'message': 'Logout exitoso'}), 200)
         

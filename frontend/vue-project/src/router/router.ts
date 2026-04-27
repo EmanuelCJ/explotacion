@@ -16,50 +16,58 @@ const router = createRouter({
       path: '/home',
       name: 'home',
       meta: { requiresAuth: true },
-      component: HomeView, // Este actúa como contenedor con Sidebar
+      component: HomeView,
+      redirect: '/home/productos',
       children: [
         {
-          path: '/dashboard', // Ruta raíz (redirecciona o muestra dashboard)
-          name: 'dashboard',
-          component: () => import('@/views/DashboardView.vue'),
-          meta: { requiresAuth: true , title: 'Dashboard General', icon: '📊' }
-        },
-        {
-          path: '/productos',
-          name: 'productos',
-          component: () => import('@/views/ProductosView.vue'),
-          meta: {requiresAuth: true , title: 'Gestión de Productos', icon: '📦' }
-        },
-        {
-          path: '/movimientos',
-          name: 'movimientos',
-          component: () => import('@/views/MovimientosView.vue'),
-          meta: { requiresAuth: true, title: 'Movimientos', icon: '📋' }
-        },
-        {
-          path: '/inventario',
+          path: 'inventario',
           name: 'inventario',
           component: () => import('@/views/InventarioView.vue'),
           meta: { requiresAuth: true, title: 'Control de Inventario', icon: '📊' }
         },
         {
-          path: '/reportes',
+          path: 'dashboard', // Ruta raíz (redirecciona o muestra dashboard)
+          name: 'dashboard',
+          component: () => import('@/views/DashboardView.vue'),
+          meta: { requiresAuth: true, title: 'Dashboard General', icon: '📊' }
+        },
+        {
+          path: 'productos',
+          name: 'productos',
+          component: () => import('@/views/ProductosView.vue'),
+          meta: { requiresAuth: true, title: 'Gestión de Productos', icon: '📦' }
+        },
+        {
+          path: 'movimientos',
+          name: 'movimientos',
+          component: () => import('@/views/MovimientosView.vue'),
+          meta: { requiresAuth: true, title: 'Movimientos', icon: '📋' }
+        },
+        {
+          path: 'reportes',
           name: 'reportes',
           component: () => import('@/views/ReportesView.vue'),
           meta: { requiresAuth: true, title: 'Reportes y Análisis', icon: '📈' }
         },
         {
-          path: '/buscar',
+          path: 'buscar',
           name: 'buscar',
           component: () => import('@/views/BuscarView.vue'),
           meta: { requiresAuth: true, title: 'Búsqueda de Productos', icon: '🔍' }
         },
         {
-          path: '/configuracion',
+          path: 'configuracion',
           name: 'configuracion',
           component: () => import('@/views/ConfiguracionView.vue'),
           meta: { requiresAuth: true, title: 'Configuración del Sistema', icon: '⚙️' }
-        }
+        },
+        {
+          path: 'usuarios',
+          name: 'usuarios',
+          component: () => import('@/views/UsuariosView.vue'),
+          meta: { requiresAuth: true, title: 'Gestión de Usuarios', icon: '👥' }
+        },
+
       ]
     }
   ]
@@ -69,8 +77,7 @@ router.beforeEach(async (to) => {
 
   const auth = useAuthStore()
 
-  // 1. Si no sabemos si está logueado → preguntamos al backend
-  if (!auth.user) {
+  if (!auth.initialized) {
     await auth.fetchUser()
   }
 
@@ -81,7 +88,7 @@ router.beforeEach(async (to) => {
 
   // 3. Si está logueado y quiere ir a login → redirigir
   if (to.path === '/' && auth.isAuthenticated) {
-    return '/home/'
+    return '/home'
   }
 
   return true

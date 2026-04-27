@@ -45,7 +45,6 @@ export async function auth(username: string, password: string): Promise<AuthResp
 export async function logout(): Promise<LogoutResponse> {
   const { data } = await http.post('/api/auth/logout')
   return data
-
 }
 
 // ─── Info del Usuario actual ───────────────────────────────
