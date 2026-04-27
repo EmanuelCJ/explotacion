@@ -93,25 +93,6 @@ def login():
             }
         }), 200)
         
-        # # Configurar cookies HttpOnly
-        # # IMPORTANTE: httponly=True para que JavaScript no pueda acceder
-        # response.set_cookie(
-        #     'access_token',
-        #     value=access_token,
-        #     httponly=True,
-        #     secure=False,  # True en producción con HTTPS
-        #     samesite='Lax',
-        #     max_age=3600  # 1 hora en segundos
-        # )
-        
-        # response.set_cookie(
-        #     'refresh_token',
-        #     value=refresh_token,
-        #     httponly=True,
-        #     secure=False,
-        #     samesite='Lax',
-        #     max_age=2592000  # 30 días en segundos
-        # )
         set_access_cookies(response, access_token)
         set_refresh_cookies(response, refresh_token)
         

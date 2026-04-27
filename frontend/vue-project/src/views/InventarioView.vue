@@ -3,22 +3,118 @@ import { ref, computed, onMounted } from 'vue'
 import AppMessage from '@/components/AppMessage.vue'
 import { obtenerStock, exportarStockCSV } from '@/api/inventario'
 import type { ProductoStock, AppMessage as Msg } from '@/types'
-import { EstadoStock } from '@/types'
+import { activo } from '@/types'
 
-const stock = ref<ProductoStock[]>([])
+const stock = ref([])
 const msg = ref<Msg | null>(null)
 const cargando = ref(false)
 const soloAlertas = ref(false)
 
+
+const productos = [
+    {
+        "nombre": "Filtro de agua doméstico",
+        "codigo": "HIDFIL1234",
+        "descripcion": "Filtro para purificación de agua en hogares",
+        "id_categoria": 1,
+        "costo": 2500.50,
+        "unidad_medida": "unidad",
+        "stock_minimo": 10
+    },
+    {
+        "nombre": "Tanque de almacenamiento 500L",
+        "codigo": "HIDTAN5678",
+        "descripcion": "Tanque plástico para almacenamiento de agua potable",
+        "id_categoria": 2,
+        "costo": 12000.00,
+        "unidad_medida": "litros",
+        "stock_minimo": 5
+    },
+    {
+        "nombre": "Bomba sumergible",
+        "codigo": "HIDBOM4321",
+        "descripcion": "Bomba eléctrica para extracción de agua subterránea",
+        "id_categoria": 3,
+        "costo": 8500.75,
+        "unidad_medida": "unidad",
+        "stock_minimo": 3
+    },
+    {
+        "nombre": "Manguera reforzada 20m",
+        "codigo": "HIDMAN8765",
+        "descripcion": "Manguera flexible para riego y conducción de agua",
+        "id_categoria": 4,
+        "costo": 3200.00,
+        "unidad_medida": "metro",
+        "stock_minimo": 15
+    },
+    {
+        "nombre": "Purificador portátil",
+        "codigo": "HIDPUR1357",
+        "descripcion": "Dispositivo portátil para potabilizar agua en viajes",
+        "id_categoria": 5,
+        "costo": 1800.00,
+        "unidad_medida": "unidad",
+        "stock_minimo": 8
+    },
+    {
+        "nombre": "Bidón de agua 20L",
+        "codigo": "HIDBID2468",
+        "descripcion": "Bidón plástico reutilizable para transporte de agua",
+        "id_categoria": 6,
+        "costo": 600.00,
+        "unidad_medida": "litros",
+        "stock_minimo": 20
+    },
+    {
+        "nombre": "Regador manual",
+        "codigo": "HIDREG9753",
+        "descripcion": "Regador de mano para jardinería",
+        "id_categoria": 7,
+        "costo": 450.00,
+        "unidad_medida": "unidad",
+        "stock_minimo": 12
+    },
+    {
+        "nombre": "Canilla metálica",
+        "codigo": "HIDCAN8642",
+        "descripcion": "Grifo metálico para instalaciones de agua",
+        "id_categoria": 8,
+        "costo": 750.00,
+        "unidad_medida": "unidad",
+        "stock_minimo": 25
+    },
+    {
+        "nombre": "Kit de riego por goteo",
+        "codigo": "HIDKIT7531",
+        "descripcion": "Sistema completo de riego eficiente para huertas",
+        "id_categoria": 9,
+        "costo": 5400.00,
+        "unidad_medida": "unidad",
+        "stock_minimo": 6
+    },
+    {
+        "nombre": "Medidor de caudal",
+        "codigo": "HIDMED1597",
+        "descripcion": "Instrumento para medir el flujo de agua",
+        "id_categoria": 10,
+        "costo": 2200.00,
+        "unidad_medida": "unidad",
+        "stock_minimo": 4
+    }
+]
+
+
+
 const stockFiltrado = computed(() =>
   soloAlertas.value
-    ? stock.value.filter(p => p.estado !== EstadoStock.NORMAL)
+    ? stock.value.filter(p => p.estado !== activo.NORMAL)
     : stock.value
 )
 
 function rowClass(p: ProductoStock): string {
-  if (p.estado === EstadoStock.SIN_STOCK) return 'row-zero'
-  if (p.estado === EstadoStock.BAJO) return 'row-low'
+  if (p.estado === activo.SIN_STOCK) return 'row-zero'
+  if (p.estado === activo.BAJO) return 'row-low'
   return ''
 }
 
@@ -28,7 +124,13 @@ async function cargarStock() {
   try {
     cargando.value = true
     msg.value = null
-    stock.value = await obtenerStock()
+    stock.value = productos.map(p => ({
+      ...p,
+      cantidad: Math.floor(Math.random() * 20), // Simula stock actual
+      estado: p.stock_minimo === 0 ? activo.NORMAL :
+              (Math.floor(Math.random() * 20) < p.stock_minimo ? activo.SIN_STOCK :
+              (Math.floor(Math.random() * 20) < p.stock_minimo * 2 ? activo.BAJO : activo.NORMAL))
+    }))
   } catch {
     msg.value = { text: 'Error al cargar el inventario.', type: 'error' }
   } finally {
@@ -82,7 +184,7 @@ async function exportar() {
               <th>Código</th>
               <th>Nombre</th>
               <th>Unidad</th>
-              <th>Grupo</th>
+              <th>Descripción</th>
               <th>Stock Mín.</th>
               <th>Stock Actual</th>
               <th>Estado</th>
@@ -92,9 +194,9 @@ async function exportar() {
             <tr v-for="p in stockFiltrado" :key="p.codigo" :class="rowClass(p)">
               <td>{{ p.codigo }}</td>
               <td>{{ p.nombre }}</td>
-              <td>{{ p.unidad }}</td>
-              <td>{{ p.grupo }}</td>
-              <td>{{ p.stockMin }}</td>
+              <td>{{ p.unidad_medida }}</td>
+              <td>{{ p.descripcion }}</td>
+              <td>{{ p.stock_minimo }}</td>
               <td>{{ p.cantidad }}</td>
               <td>{{ p.estado }}</td>
             </tr>
