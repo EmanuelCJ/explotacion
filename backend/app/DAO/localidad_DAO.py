@@ -159,7 +159,8 @@ class LocalidadDAO:
     def delete(localidad_id: int) -> bool:
         """Eliminar (soft delete) localidad"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "UPDATE localidades SET activo = 0 WHERE id_localidad = %s"
                 cursor.execute(query, (localidad_id,))
                 return cursor.rowcount > 0
@@ -171,7 +172,8 @@ class LocalidadDAO:
     def exists_nombre(nombre: str, exclude_id: int = None) -> bool:
         """Verificar si existe una localidad con ese nombre"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = "SELECT COUNT(*) as count FROM localidades WHERE nombre = %s"
                 params = [nombre]
                 
@@ -190,7 +192,8 @@ class LocalidadDAO:
     def count_lugares(localidad_id: int) -> int:
         """Contar lugares de una localidad"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT COUNT(*) as count 
                     FROM lugares 
@@ -207,7 +210,8 @@ class LocalidadDAO:
     def validar_lugar_localidad(lugar_id: int, localidad_id: int) -> bool:
         """Validar que un lugar pertenece a una localidad"""
         try:
-            with ConectDB.get_cursor() as cursor:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
                 query = """
                     SELECT COUNT(*) as count 
                     FROM lugares 
@@ -218,4 +222,21 @@ class LocalidadDAO:
                 return result['count'] > 0
         except Exception as e:
             print(f"Error validating lugar-localidad: {e}")
+            raise
+        
+    @staticmethod
+    def lugares_en_localidad(id_localidad: int) -> dict:
+        """Obtener todos los lugares de una localidad"""
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor(dictionary=True) as cursor:
+                query = """
+                    SELECT * FROM lugares 
+                    WHERE id_localidad = %s AND activo = 1
+                """
+                cursor.execute(query, ( id_localidad,))
+                result = cursor.fetchall()
+                return result
+        except Exception as e:
+            print(f"Error obteniendo lugares de la localidad: {e}")
             raise

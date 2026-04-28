@@ -12,6 +12,7 @@ import type {
   MeResponse,
   VerificarResponse,
   LogoutResponse,
+  Usuario,
   Resumen,
   Producto,
   ProductoSugerencia,
@@ -93,12 +94,12 @@ export async function registrarProducto(payload: NuevoProductoPayload): Promise<
   return data.mensaje
 }
 
-export async function buscarProducto(texto: string): Promise<ProductoStock[]> {
-  const { data } = await http.get<ProductoStock[]>('/productos/buscar', {
-    params: { q: texto }
-  })
-  return data
-}
+// export async function buscarProducto(texto: string): Promise<ProductoStock[]> {
+//   const { data } = await http.get<ProductoStock[]>('/productos/buscar', {
+//     params: { q: texto }
+//   })
+//   return data
+// }
 
 export async function buscarProductoPorCodigo(codigo: string): Promise<ProductoSugerencia[]> {
   const { data } = await http.get<ProductoSugerencia[]>('/productos/buscar-codigo', {
@@ -138,4 +139,9 @@ export async function inicializarSistema(): Promise<string> {
 export async function validarIntegridad(): Promise<ValidacionIntegridad> {
   const { data } = await http.get<ValidacionIntegridad>('/validar-integridad')
   return data
+}
+
+// ─── Usuarios ───────────────────────────────────────────────────────────
+export async function mostrarUsuario(): Promise<Usuario[]> {
+  return await http.get('/api/usuarios/')
 }

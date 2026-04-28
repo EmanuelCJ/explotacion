@@ -105,7 +105,6 @@ const productos = [
 ]
 
 
-
 const stockFiltrado = computed(() =>
   soloAlertas.value
     ? stock.value.filter(p => p.estado !== activo.NORMAL)

@@ -1,24 +1,23 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import AppMessage from '@/components/AppMessage.vue'
-import { obtenerStock, exportarStockCSV } from '@/api/inventario'
-import type { ProductoStock, AppMessage as Msg } from '@/types'
-import { EstadoStock } from '@/types'
+import { mostrarUsuario } from '@/api/inventario'
+import type { Usuario, AppMessage as Msg } from '@/types'
 
-const stock = ref<ProductoStock[]>([])
+const usuarios = ref<Usuario[]>([])
 const msg = ref<Msg | null>(null)
 const cargando = ref(false)
 const soloAlertas = ref(false)
 
-const stockFiltrado = computed(() =>
+const usuariosFiltrados = computed(() =>
   soloAlertas.value
-    ? stock.value.filter(p => p.estado !== EstadoStock.NORMAL)
-    : stock.value
+    ? usuarios.value.filter(u => u.estado !== EstadoUsuario.NORMAL)
+    : usuarios.value
 )
 
-function rowClass(p: ProductoStock): string {
-  if (p.estado === EstadoStock.SIN_STOCK) return 'row-zero'
-  if (p.estado === EstadoStock.BAJO) return 'row-low'
+function rowClass(u: Usuario): string {
+  if (u.estado === EstadoUsuario.SIN_STOCK) return 'row-zero'
+  if (u.estado === EstadoUsuario.BAJO) return 'row-low'
   return ''
 }
 
@@ -28,7 +27,7 @@ async function cargarStock() {
   try {
     cargando.value = true
     msg.value = null
-    stock.value = await obtenerStock()
+    usuarios.value = await mostrarUsuario()
   } catch {
     msg.value = { text: 'Error al cargar el inventario.', type: 'error' }
   } finally {
@@ -37,17 +36,17 @@ async function cargarStock() {
 }
 
 async function exportar() {
-  try {
-    const url = await exportarStockCSV()
-    if (url) {
-      window.open(url, '_blank')
-      msg.value = { text: 'Stock exportado exitosamente.', type: 'success' }
-    } else {
-      msg.value = { text: 'Error al generar el archivo de exportación.', type: 'error' }
-    }
-  } catch {
-    msg.value = { text: 'Error al exportar.', type: 'error' }
-  }
+  // try {
+  //   const url = await exportarStockCSV()
+  //   if (url) {
+  //     window.open(url, '_blank')
+  //     msg.value = { text: 'Stock exportado exitosamente.', type: 'success' }
+  //   } else {
+  //     msg.value = { text: 'Error al generar el archivo de exportación.', type: 'error' }
+  //   }
+  // } catch {
+  //   msg.value = { text: 'Error al exportar.', type: 'error' }
+  // }
 }
 </script>
 
@@ -75,7 +74,7 @@ async function exportar() {
 
       <p v-if="cargando" class="loading">Cargando inventario...</p>
 
-      <div v-else-if="stockFiltrado.length > 0" class="table-container">
+      <div v-else-if="usuariosFiltrados.length > 0" class="table-container">
         <table>
           <thead>
             <tr>
@@ -89,14 +88,15 @@ async function exportar() {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="p in stockFiltrado" :key="p.codigo" :class="rowClass(p)">
-              <td>{{ p.codigo }}</td>
-              <td>{{ p.nombre }}</td>
-              <td>{{ p.unidad }}</td>
-              <td>{{ p.grupo }}</td>
-              <td>{{ p.stockMin }}</td>
-              <td>{{ p.cantidad }}</td>
-              <td>{{ p.estado }}</td>
+            <tr v-for="u in usuariosFiltrados" :key="u.codigo" :class="rowClass(u)">
+              <td>{{ u.codigo }}</td>
+              <td>{{ u.nombre }}</td>
+              <td>{{ u.username }}</td>
+              <td>{{ u.roles }}</td>
+              <td>{{ u.email }}</td>
+              <td>{{ u.apellido }}</td>
+              <td>{{ u.created_at }}</td>
+              <td>{{ u.activo }}</td>
             </tr>
           </tbody>
         </table>

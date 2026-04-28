@@ -145,7 +145,8 @@ class UsuarioDAO:
             connection = ConectDB.get_connection()
             with connection.cursor(dictionary=True) as cursor:
                 query = """
-                    SELECT u.id_usuario, 
+                    SELECT 
+                    u.id_usuario, 
                     u.id_usuario,
                     u.username,
                     u.nombre, 
@@ -154,8 +155,9 @@ class UsuarioDAO:
                     u.legajo,
                     u.email,
                     u.created_at,
-                    u.updated_at, l.nombre as localidad_nombre,
-                           GROUP_CONCAT(r.nombre) as roles
+                    u.updated_at, 
+                    l.nombre as localidad_nombre,
+                    GROUP_CONCAT(r.nombre) as roles
                     FROM usuarios u
                     LEFT JOIN localidades l ON u.id_localidad = l.id_localidad
                     LEFT JOIN usuarios_roles ur ON u.id_usuario = ur.id_usuario

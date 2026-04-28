@@ -32,6 +32,7 @@ def get_usuarios():
 @jwt_required_cookie()
 @require_permiso('ver_usuarios')
 def get_all_usuarios():
+    """Obtener todos los usuarios sin paginación"""
     usuarios = UsuarioService.get_all_sin_paginacion()
     return jsonify(usuarios), 200
 

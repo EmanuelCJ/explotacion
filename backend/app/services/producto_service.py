@@ -55,7 +55,7 @@ class ProductoService:
         if not categoria['activo']:
             raise Exception("La categoría está inactiva")
 
-        # consultar si el id_lugar es válido para esa localidad Revisar si es necesario
+        # Consultar si el id_lugar es válido para esa localidad
         if not LocalidadDAO.validar_lugar_localidad(data['id_lugar'], localidad['id_localidad']):
             raise Exception("El lugar no pertenece a la localidad del usuario")
         
