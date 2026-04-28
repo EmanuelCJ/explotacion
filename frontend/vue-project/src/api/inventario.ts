@@ -15,6 +15,7 @@ import type {
   Usuario,
   Resumen,
   Producto,
+  editarProducto,
   ProductoSugerencia,
   Listas,
   Movimiento,
@@ -77,8 +78,8 @@ export async function obtenerResumen(): Promise<Resumen> {
 
 // ─── Stock / Inventario ───────────────────────────────────────────────────────
 
-export async function obtenerStock(): Promise<Producto[]>{
-  const { data } = await http.get<Producto[]>('/api/productos/stock')
+export async function obtenerStock(): Promise<{ stock: Producto[] }> {
+  const { data } = await http.get<{ stock: Producto[] }>('/api/productos/stock')
   return data
 }
 
@@ -94,7 +95,7 @@ export async function registrarProducto(payload: NuevoProductoPayload): Promise<
   return data.mensaje
 }
 
-// export async function buscarProducto(texto: string): Promise<ProductoStock[]> {
+// export async function buscarProducto(texto: string): Promise<editarProducto> {
 //   const { data } = await http.get<ProductoStock[]>('/productos/buscar', {
 //     params: { q: texto }
 //   })
@@ -107,6 +108,12 @@ export async function buscarProductoPorCodigo(codigo: string): Promise<ProductoS
   })
   return data
 }
+
+export async function actualizarProducto(productoSeleccionado : Producto): Promise<Producto> {
+  const { data } = await http.put<{ mensaje: string }>(`/productos/editar/${productoSeleccionado.id_producto}`, productoSeleccionado)
+  return data
+}
+
 
 // ─── Movimientos ──────────────────────────────────────────────────────────────
 

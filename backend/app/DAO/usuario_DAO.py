@@ -203,6 +203,7 @@ class UsuarioDAO:
                     u.created_at,
                     u.updated_at,
                     l.nombre AS localidad_nombre,
+                    l.id_localidad,
                     GROUP_CONCAT(r.nombre) AS roles
                     FROM usuarios u
                     LEFT JOIN localidades l ON u.id_localidad = l.id_localidad

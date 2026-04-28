@@ -38,7 +38,7 @@ def stock_localidad():
             return jsonify({'error': 'Usuario no encontrado o no esta activo'}), 404
         
         # Obtener el stock del producto en la localidad del usuario
-        stock = ProductoService.get_stock_en_localidad(usuario['localidad_nombre'])
+        stock = ProductoService.get_stock_en_localidad(usuario['id_localidad'])
         
         #respuesta con el stock del producto en la localidad
         return jsonify({
@@ -68,7 +68,7 @@ def stock_categoria(categoria_id):
         if usuario['activo'] == 0:
             return jsonify({'error': 'Usuario no encontrado o no esta activo'}), 404
 
-        stock_categoria = ProductoService.get_stock_categoria(usuario['localidad_nombre'], categoria_id)
+        stock_categoria = ProductoService.get_stock_categoria(usuario['id_localidad'], categoria_id)
         
         #respuesta con el stock del producto por categoría en la localidad
         return jsonify({

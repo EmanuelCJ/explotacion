@@ -1,120 +1,29 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import AppMessage from '@/components/AppMessage.vue'
 import { obtenerStock, exportarStockCSV } from '@/api/inventario'
-import type { ProductoStock, AppMessage as Msg } from '@/types'
-import { activo } from '@/types'
+import type { Producto, AppMessage as Msg } from '@/types'
+import { activo_producto } from '@/types'
 
-const stock = ref([])
+const data = ref<{ stock: Producto[] }>({ stock: [] })
 const msg = ref<Msg | null>(null)
 const cargando = ref(false)
 const soloAlertas = ref(false)
+const productoSeleccionado = ref<Producto | null>(null)
 
 
-const productos = [
-    {
-        "nombre": "Filtro de agua doméstico",
-        "codigo": "HIDFIL1234",
-        "descripcion": "Filtro para purificación de agua en hogares",
-        "id_categoria": 1,
-        "costo": 2500.50,
-        "unidad_medida": "unidad",
-        "stock_minimo": 10
-    },
-    {
-        "nombre": "Tanque de almacenamiento 500L",
-        "codigo": "HIDTAN5678",
-        "descripcion": "Tanque plástico para almacenamiento de agua potable",
-        "id_categoria": 2,
-        "costo": 12000.00,
-        "unidad_medida": "litros",
-        "stock_minimo": 5
-    },
-    {
-        "nombre": "Bomba sumergible",
-        "codigo": "HIDBOM4321",
-        "descripcion": "Bomba eléctrica para extracción de agua subterránea",
-        "id_categoria": 3,
-        "costo": 8500.75,
-        "unidad_medida": "unidad",
-        "stock_minimo": 3
-    },
-    {
-        "nombre": "Manguera reforzada 20m",
-        "codigo": "HIDMAN8765",
-        "descripcion": "Manguera flexible para riego y conducción de agua",
-        "id_categoria": 4,
-        "costo": 3200.00,
-        "unidad_medida": "metro",
-        "stock_minimo": 15
-    },
-    {
-        "nombre": "Purificador portátil",
-        "codigo": "HIDPUR1357",
-        "descripcion": "Dispositivo portátil para potabilizar agua en viajes",
-        "id_categoria": 5,
-        "costo": 1800.00,
-        "unidad_medida": "unidad",
-        "stock_minimo": 8
-    },
-    {
-        "nombre": "Bidón de agua 20L",
-        "codigo": "HIDBID2468",
-        "descripcion": "Bidón plástico reutilizable para transporte de agua",
-        "id_categoria": 6,
-        "costo": 600.00,
-        "unidad_medida": "litros",
-        "stock_minimo": 20
-    },
-    {
-        "nombre": "Regador manual",
-        "codigo": "HIDREG9753",
-        "descripcion": "Regador de mano para jardinería",
-        "id_categoria": 7,
-        "costo": 450.00,
-        "unidad_medida": "unidad",
-        "stock_minimo": 12
-    },
-    {
-        "nombre": "Canilla metálica",
-        "codigo": "HIDCAN8642",
-        "descripcion": "Grifo metálico para instalaciones de agua",
-        "id_categoria": 8,
-        "costo": 750.00,
-        "unidad_medida": "unidad",
-        "stock_minimo": 25
-    },
-    {
-        "nombre": "Kit de riego por goteo",
-        "codigo": "HIDKIT7531",
-        "descripcion": "Sistema completo de riego eficiente para huertas",
-        "id_categoria": 9,
-        "costo": 5400.00,
-        "unidad_medida": "unidad",
-        "stock_minimo": 6
-    },
-    {
-        "nombre": "Medidor de caudal",
-        "codigo": "HIDMED1597",
-        "descripcion": "Instrumento para medir el flujo de agua",
-        "id_categoria": 10,
-        "costo": 2200.00,
-        "unidad_medida": "unidad",
-        "stock_minimo": 4
-    }
-]
-
-
-const stockFiltrado = computed(() =>
-  soloAlertas.value
-    ? stock.value.filter(p => p.estado !== activo.NORMAL)
-    : stock.value
-)
-
-function rowClass(p: ProductoStock): string {
-  if (p.estado === activo.SIN_STOCK) return 'row-zero'
-  if (p.estado === activo.BAJO) return 'row-low'
+function rowClass(p: Producto): string {
+  if (p.activo === activo_producto.Activo) return 'row-low'
+  if (p.activo === activo_producto.NoActivo) return 'row-zero'
   return ''
+}
+
+// Función para seleccionar
+function seleccionarParaEditar(p: Producto) {
+  // Clonamos el objeto para no editar directamente la fila de la tabla 
+  // hasta que confirmemos los cambios
+  productoSeleccionado.value = { ...p }
+  console.log('Editando producto:', productoSeleccionado.value)
 }
 
 onMounted(() => cargarStock())
@@ -123,13 +32,9 @@ async function cargarStock() {
   try {
     cargando.value = true
     msg.value = null
-    stock.value = productos.map(p => ({
-      ...p,
-      cantidad: Math.floor(Math.random() * 20), // Simula stock actual
-      estado: p.stock_minimo === 0 ? activo.NORMAL :
-              (Math.floor(Math.random() * 20) < p.stock_minimo ? activo.SIN_STOCK :
-              (Math.floor(Math.random() * 20) < p.stock_minimo * 2 ? activo.BAJO : activo.NORMAL))
-    }))
+    const respuesta = await obtenerStock()
+    data.value = respuesta
+    console.log('Stock actual:', data.value)
   } catch {
     msg.value = { text: 'Error al cargar el inventario.', type: 'error' }
   } finally {
@@ -150,6 +55,25 @@ async function exportar() {
     msg.value = { text: 'Error al exportar.', type: 'error' }
   }
 }
+
+// Función para guardar (esto llamaría a tu API después)
+async function guardarCambios() {
+  if (!productoSeleccionado.value) return
+
+  try {
+    cargando.value = true
+    // Aquí llamarías a: await actualizarProducto(productoSeleccionado.value)
+    msg.value = { text: 'Producto actualizado con éxito', type: 'success' }
+    productoSeleccionado.value = null // Cerramos el formulario
+    await cargarStock() // Refrescamos la lista
+  } catch {
+    msg.value = { text: 'Error al actualizar', type: 'error' }
+  } finally {
+    cargando.value = false
+  }
+}
+
+
 </script>
 
 <template>
@@ -163,58 +87,151 @@ async function exportar() {
         <button class="btn btn-success" @click="exportar">
           📥 Exportar CSV
         </button>
-        <button
-          class="btn"
-          :class="soloAlertas ? 'btn-warning' : 'btn-secondary'"
-          @click="soloAlertas = !soloAlertas"
-        >
+        <button class="btn" :class="soloAlertas ? 'btn-warning' : 'btn-secondary'" @click="soloAlertas = !soloAlertas">
           {{ soloAlertas ? '📋 Mostrar Todo' : '⚠️ Solo Alertas' }}
         </button>
+
       </div>
 
       <AppMessage v-if="msg" :text="msg.text" :type="msg.type" />
 
       <p v-if="cargando" class="loading">Cargando inventario...</p>
 
-      <div v-else-if="stockFiltrado.length > 0" class="table-container">
+      <div v-else-if="data.stock.length > 0" class="table-container">
         <table>
           <thead>
             <tr>
+              <th>ID</th>
               <th>Código</th>
               <th>Nombre</th>
               <th>Unidad</th>
-              <th>Descripción</th>
-              <th>Stock Mín.</th>
+              <th>Ubicación</th>
               <th>Stock Actual</th>
               <th>Estado</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="p in stockFiltrado" :key="p.codigo" :class="rowClass(p)">
+            <tr v-for="p in data.stock" :key="p.codigo" :class="rowClass(p)">
+              <td>{{ p.id_producto }}</td>
               <td>{{ p.codigo }}</td>
               <td>{{ p.nombre }}</td>
               <td>{{ p.unidad_medida }}</td>
               <td>{{ p.descripcion }}</td>
-              <td>{{ p.stock_minimo }}</td>
-              <td>{{ p.cantidad }}</td>
-              <td>{{ p.estado }}</td>
+              <td>{{ p.stock }}</td>
+              <td>{{ p.activo ? 'Activo' : 'Inactivo' }}</td>
+              <td>
+                <button class="btn-edit" @click="seleccionarParaEditar(p)">
+                  ✏️ Editar
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
-
       <div v-else-if="!cargando" class="empty">
         {{ soloAlertas ? 'No hay alertas de stock activas.' : 'No hay productos registrados.' }}
       </div>
+      <div v-if="productoSeleccionado" class="edit-overlay">
+        <div class="edit-card">
+          <h3>Editar Producto: {{ productoSeleccionado.nombre }}</h3>
+
+          <div class="form-group">
+            <label>Nombre:</label>
+            <input v-model="productoSeleccionado.nombre" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Unidad de Medida:</label>
+            <input v-model="productoSeleccionado.unidad_medida" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Ubicación:</label>
+            <input v-model="productoSeleccionado.descripcion" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Stock Actual:</label>
+            <input v-model="productoSeleccionado.stock" type="number" />
+          </div>
+
+          <div class="form-group">
+            <label>Estado:</label>
+            <select v-model="productoSeleccionado.activo">
+              <option :value="activo_producto.Activo">Activo</option>
+              <option :value="activo_producto.NoActivo">Inactivo</option>
+            </select>
+          </div>
+
+          <div class="edit-actions">
+            <button class="btn btn-success" @click="guardarCambios">Guardar</button>
+            <button class="btn btn-secondary" @click="productoSeleccionado = null">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <style scoped>
-.loading, .empty {
+.loading,
+.empty {
   text-align: center;
   padding: 24px;
   color: #6c757d;
   font-style: italic;
+}
+
+
+.btn-edit {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.edit-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  min-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 1.5rem;
 }
 </style>

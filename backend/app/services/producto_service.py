@@ -103,11 +103,11 @@ class ProductoService:
         return producto_id
     
     @staticmethod
-    def get_stock_categoria(localidad_nombre: str, categoria_id: int) -> dict:
+    def get_stock_categoria(localidad_id: int, categoria_id: int) -> dict:
         """Obtener stock total de productos por categoría en una localidad"""
 
         #verificar que existe la localidad
-        localidad = LocalidadDAO.get_by_nombre(localidad_nombre)
+        localidad = LocalidadDAO.get_by_id(localidad_id)
         if not localidad:
             raise Exception("Localidad no encontrada")
         
@@ -124,12 +124,12 @@ class ProductoService:
         if not categoria['activo']:
             raise Exception("La categoría está inactiva")
         
-        return ProductoDAO.get_stock_categoria(localidad_nombre, categoria_id)
+        return ProductoDAO.get_stock_categoria(localidad_id, categoria_id)
     
     @staticmethod
-    def get_stock_en_localidad(localidad_nombre: str) -> dict:
+    def get_stock_en_localidad(localidad_id: int) -> dict:
         """Obtener stock de todos los productos en una localidad"""
-        return ProductoDAO.get_stock_en_localidad(localidad_nombre)
+        return ProductoDAO.get_stock_en_localidad(localidad_id)
 
     @staticmethod
     def get_all(page=1, limit=20, categoria_id=None, activo=None, search=None):
@@ -199,8 +199,8 @@ class ProductoService:
                 'descripcion': f"Producto actualizado: {producto_actual['nombre']}",
                 'datos_anteriores': {
                     'nombre': producto_actual['nombre'],
-                    'codigo': producto_actual.get('codigo'),
-                    'costo': producto_actual.get('costo')
+                    'codigo': producto_actual['codigo'],
+                    'costo': producto_actual['costo']
                 },
                 'datos_nuevos': data,
                 'id_usuario': usuario_id

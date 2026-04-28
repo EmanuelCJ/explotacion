@@ -8,27 +8,39 @@ export enum TipoMovimiento {
   AJUSTE = 'AJUSTE'
 }
 
-export enum activo {
-  NORMAL = 1,
-  BAJO = 2,
-  SIN_STOCK = 3
+export enum activo_producto {
+  Activo = 1,
+  NoActivo = 2
 }
 
 // ─── Modelos ──────────────────────────────────────────────────────────────────
 
 export interface Producto {
-  codigo: string
-  nombre: string
-  unidad_medida?: string
-  id_categoria: number
-  stock_minimo: number
-  descripcion: string
-  costo?: number
+  activo: number,
+  codigo: string,
+  costo: number,
+  created_at?: string,
+  descripcion: string,
+  id_categoria: number,
+  id_lugar?: number,
+  id_producto: number,
+  lugar?: string,
+  nombre: string,
+  stock: number,
+  stock_minimo?: number,
+  unidad_medida: string,
+  updated_at?: string
 }
 
-export interface ProductoStock extends Producto {
-  cantidad: number
-  estado: activo
+export interface editarProducto {
+  nombre: string,
+  codigo: string,
+  costo : number,
+  unidad_medida: string,
+  id_categoria: number,
+  stock_minimo: number,
+  descripcion: string,
+  activo: number
 }
 
 export interface ProductoSugerencia {
