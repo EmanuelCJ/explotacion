@@ -114,11 +114,11 @@ th, td {
   font-size: 0.875rem;
 }
 th {
-  background: #f0f8fc;
+  background: #aaaaaa;
   font-weight: 600;
-  color: #2e86ab;
+  color: black;
 }
-tr:hover td { background: #f8fbfd; }
+tr:hover td { background: #C0C0C0; }
 
 /* ── Status rows ─────────────────────────────────────────────────────────── */
 .row-normal td  { background: #d4edda; color: #155724; }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import AppMessage from '@/components/AppMessage.vue'
-import { obtenerStock, exportarStockCSV , actualizarProducto} from '@/api/inventario'
+import { obtenerStock, exportarStockCSV, actualizarProducto } from '@/api/inventario'
 import type { Producto, AppMessage as Msg } from '@/types'
 import { activo_producto } from '@/types'
 
@@ -10,6 +10,7 @@ const msg = ref<Msg | null>(null)
 const cargando = ref(false)
 const soloAlertas = ref(false)
 const productoSeleccionado = ref<Producto | null>(null)
+let productoOriginal: Producto | null = null // Para comparar cambios
 
 
 function rowClass(p: Producto): string {
@@ -18,12 +19,11 @@ function rowClass(p: Producto): string {
   return ''
 }
 
-// Función para seleccionar
 function seleccionarParaEditar(p: Producto) {
-  // Clonamos el objeto para no editar directamente la fila de la tabla 
-  // hasta que confirmemos los cambios
-  productoSeleccionado.value = { ...p }
-  console.log('Editando producto:', productoSeleccionado.value)
+  // Guardamos una copia limpia para comparar después
+  productoOriginal = JSON.parse(JSON.stringify(p))
+  // Clonamos para la edición reactiva
+  productoSeleccionado.value = JSON.parse(JSON.stringify(p))
 }
 
 onMounted(() => cargarStock())
@@ -34,7 +34,6 @@ async function cargarStock() {
     msg.value = null
     const respuesta = await obtenerStock()
     data.value = respuesta
-    console.log('Stock actual:', data.value)
   } catch {
     msg.value = { text: 'Error al cargar el inventario.', type: 'error' }
   } finally {
@@ -58,16 +57,44 @@ async function exportar() {
 
 // Función para guardar (esto llamaría API para actualizar el producto)
 async function guardarCambios() {
-  if (!productoSeleccionado.value) return
+  if (!productoSeleccionado.value || !productoOriginal) return
+
+  // 1. Confirmación
+  const confirmar = confirm(`¿Estás seguro de que deseas actualizar el producto "${productoOriginal.nombre}"?`)
+  if (!confirmar) return
+
+  // 2. Identificar solo lo que cambió
+  const cambios: Partial<Producto> = {
+    id_producto: productoSeleccionado.value.id_producto // El ID siempre es necesario
+  }
+
+  let hayCambios = false
+  const camposAEditar = ['nombre', 'descripcion', 'id_categoria', 'costo', 'unidad_medida', 'stock_minimo', 'activo'] as const
+
+  camposAEditar.forEach(campo => {
+    if (productoSeleccionado.value![campo] !== productoOriginal![campo]) {
+      cambios[campo] = productoSeleccionado.value![campo] as any
+      hayCambios = true
+    }
+  })
+  if (!hayCambios) {
+    msg.value = { text: 'No se detectaron cambios para guardar.', type: 'info' }
+    productoSeleccionado.value = null
+    return
+  }
 
   try {
     cargando.value = true
-    await actualizarProducto(productoSeleccionado.value)
+    // Enviamos solo el objeto con los cambios (dentro del array que pide tu API)
+    await actualizarProducto(cambios.id_producto!, cambios)
+
     msg.value = { text: 'Producto actualizado con éxito', type: 'success' }
-    productoSeleccionado.value = null // Cerramos el formulario
-    await cargarStock() // Refrescamos la lista
-  } catch {
-    msg.value = { text: 'Error al actualizar', type: 'error' }
+
+    productoSeleccionado.value = null
+
+    await cargarStock()
+  } catch (error) {
+    msg.value = { text: 'Error al actualizar el producto.', type: 'error' }
   } finally {
     cargando.value = false
   }
@@ -104,9 +131,10 @@ async function guardarCambios() {
               <th>ID</th>
               <th>Código</th>
               <th>Nombre</th>
+              <th>categoria</th>
               <th>Unidad</th>
               <th>Ubicación</th>
-              <th>Stock Actual</th>
+              <th>Stock Minimo</th>
               <th>Estado</th>
             </tr>
           </thead>
@@ -115,9 +143,10 @@ async function guardarCambios() {
               <td>{{ p.id_producto }}</td>
               <td>{{ p.codigo }}</td>
               <td>{{ p.nombre }}</td>
+              <td>{{ p.nombre_categoria }}</td>
               <td>{{ p.unidad_medida }}</td>
-              <td>{{ p.descripcion }}</td>
-              <td>{{ p.stock }}</td>
+              <td>{{ p.descripcion_lugar }}</td>
+              <td>{{ p.stock_minimo }}</td>
               <td>{{ p.activo ? 'Activo' : 'Inactivo' }}</td>
               <td>
                 <button class="btn-edit" @click="seleccionarParaEditar(p)">
@@ -131,38 +160,54 @@ async function guardarCambios() {
       <div v-else-if="!cargando" class="empty">
         {{ soloAlertas ? 'No hay alertas de stock activas.' : 'No hay productos registrados.' }}
       </div>
+      <!-- campos posibles para editar : 'nombre', 'descripcion', 'id_categoria', 
+                           'costo', 'unidad_medida', 'stock_minimo', 'activo' -->
       <div v-if="productoSeleccionado" class="edit-overlay">
         <div class="edit-card">
           <h3>Editar Producto: {{ productoSeleccionado.nombre }}</h3>
 
-          <div class="form-group">
-            <label>Nombre:</label>
-            <input v-model="productoSeleccionado.nombre" type="text" />
-          </div>
-          <div class="form-group">
-            <label>Unidad de Medida:</label>
-            <input v-model="productoSeleccionado.unidad_medida" type="text" />
-          </div>
-          <div class="form-group">
-            <label>Ubicación:</label>
-            <input v-model="productoSeleccionado.descripcion" type="text" />
-          </div>
-          <div class="form-group">
-            <label>Stock Actual:</label>
-            <input v-model="productoSeleccionado.stock" type="number" />
-          </div>
+          <div class="grid-form">
+            <div class="form-group">
+              <label>Nombre:</label>
+              <input v-model="productoSeleccionado.nombre" type="text" />
+            </div>
 
-          <div class="form-group">
-            <label>Estado:</label>
-            <select v-model="productoSeleccionado.activo">
-              <option :value="activo_producto.Activo">Activo</option>
-              <option :value="activo_producto.NoActivo">Inactivo</option>
-            </select>
+            <div class="form-group">
+              <label>Costo:</label>
+              <input v-model.number="productoSeleccionado.costo" type="number" step="0.01" />
+            </div>
+
+            <div class="form-group">
+              <label>Stock Mínimo:</label>
+              <input v-model.number="productoSeleccionado.stock_minimo" type="number" />
+            </div>
+
+            <div class="form-group">
+              <label>Unidad:</label>
+              <input v-model="productoSeleccionado.unidad_medida" type="text" />
+            </div>
+
+            <div class="form-group">
+              <label>Ubicación (Descripción):</label>
+              <input v-model="productoSeleccionado.descripcion" type="text" />
+            </div>
+
+            <div class="form-group">
+              <label>Estado:</label>
+              <select v-model="productoSeleccionado.activo">
+                <option :value="activo_producto.Activo">Activo</option>
+                <option :value="activo_producto.NoActivo">Inactivo</option>
+              </select>
+            </div>
           </div>
 
           <div class="edit-actions">
-            <button class="btn btn-success" @click="guardarCambios">Guardar</button>
-            <button class="btn btn-secondary" @click="productoSeleccionado = null">Cancelar</button>
+            <button class="btn btn-success" :disabled="cargando" @click="guardarCambios">
+              {{ cargando ? 'Guardando...' : '✅ Confirmar Cambios' }}
+            </button>
+            <button class="btn btn-secondary" @click="productoSeleccionado = null">
+              ❌ Cancelar
+            </button>
           </div>
         </div>
       </div>
@@ -172,7 +217,6 @@ async function guardarCambios() {
 </template>
 
 <style scoped>
-
 /* Algunas propiedades de estilo estan en el main.css */
 
 .loading,

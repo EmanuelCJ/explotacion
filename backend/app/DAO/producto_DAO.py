@@ -61,12 +61,13 @@ class ProductoDAO:
             connection = ConectDB.get_connection()
             with connection.cursor(dictionary=True) as cursor:
                 query = """
-                    SELECT p.*,la.id_lugar as id_lugar, la.nombre as lugar, la.descripcion , COALESCE(SUM(pl.cantidad), 0) as stock
+                    SELECT p.*,la.id_lugar, la.nombre as nombre_lugar, la.descripcion as descripcion_lugar,c.nombre as nombre_categoria, COALESCE(SUM(pl.cantidad), 0) as stock
                     FROM productos p
                     INNER JOIN productos_localidad pl ON p.id_producto = pl.id_producto
                     INNER JOIN localidades l ON pl.id_localidad = l.id_localidad
-                    inner join lugares la on l.id_localidad = la.id_localidad
-                    WHERE l.id_localidad = %s and p.activo = 1
+                    INNER JOIN lugares la on l.id_localidad = la.id_localidad
+                    INNER JOIN categorias c on p.id_categoria = c.id_categoria 
+                    WHERE l.id_localidad = %s
                     GROUP BY p.id_producto
                 """
                 cursor.execute(query, (localidad_id,))

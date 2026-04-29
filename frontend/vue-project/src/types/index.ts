@@ -10,7 +10,7 @@ export enum TipoMovimiento {
 
 export enum activo_producto {
   Activo = 1,
-  NoActivo = 2
+  NoActivo = 0
 }
 
 // ─── Modelos ──────────────────────────────────────────────────────────────────
@@ -19,28 +19,29 @@ export interface Producto {
   activo: number,
   codigo: string,
   costo: number,
-  created_at?: string,
-  descripcion: string,
+  descripcion:string,
+  created_at: string,
+  descripcion_lugar: string,
   id_categoria: number,
-  id_lugar?: number,
+  nombre_categoria: string,
+  id_lugar: number,
   id_producto: number,
-  lugar?: string,
+  nombre_lugar: string,
   nombre: string,
   stock: number,
-  stock_minimo?: number,
+  stock_minimo: number,
   unidad_medida: string,
-  updated_at?: string
+  updated_at: string
 }
 
 export interface editarProducto {
-  nombre: string,
-  codigo: string,
-  costo : number,
-  unidad_medida: string,
-  id_categoria: number,
-  stock_minimo: number,
-  descripcion: string,
-  activo: number
+  nombre?: string,
+  costo ?: number,
+  unidad_medida?: string,
+  id_categoria?: number,
+  stock_minimo?: number,
+  descripcion?: string,
+  activo?: number
 }
 
 export interface ProductoSugerencia {

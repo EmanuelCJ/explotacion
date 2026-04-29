@@ -175,36 +175,37 @@ class ProductoService:
         producto_actual = ProductoDAO.get_by_id(producto_id)
         if not producto_actual:
             raise Exception("Producto no encontrado")
-
-        # # Validar código si se está cambiando
-        # if 'codigo' in data and data['codigo']:
-        #     if ProductoDAO.exists_codigo(data['codigo'], producto_id):
-        #         raise Exception(f"El código '{data['codigo']}' ya existe")
+        
 
         # Validar categoría si se está cambiando
         if 'id_categoria' in data:
             categoria = CategoriaDAO.get_by_id(data['id_categoria'])
             if not categoria:
                 raise Exception("Categoría no encontrada")
+        
+        ip_user = get_client_ip()
+        username = UsuarioDAO.username(usuario_id)
 
         # Actualizar
         success = ProductoDAO.update(producto_id, data)
 
         if success:
-            # Registrar en auditoría
-            AuditoriaDAO.create({
-                'entidad': 'Producto',
-                'id_entidad': producto_id,
-                'accion': 'update',
-                'descripcion': f"Producto actualizado: {producto_actual['nombre']}",
-                'datos_anteriores': {
-                    'nombre': producto_actual['nombre'],
-                    'codigo': producto_actual['codigo'],
-                    'costo': producto_actual['costo']
-                },
-                'datos_nuevos': data,
-                'id_usuario': usuario_id
-            })
+
+                print(producto_actual)
+                # Registrar en auditoría
+                # AuditoriaDAO.create({
+                #     'entidad': 'Producto',
+                #     'id_entidad': producto_id,
+                #     'accion': 'update',
+                #     'descripcion': f"Producto actualizado: {producto_actual['']}",
+                #     'datos_anteriores': {
+                #         producto_actual
+                #     },
+                #     'datos_nuevos': { data },
+                #     'id_usuario': usuario_id,
+                #     'user_agent': username,
+                #     'ip_address': ip_user
+                # })
 
         return success
 
