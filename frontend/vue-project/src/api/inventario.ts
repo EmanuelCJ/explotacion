@@ -15,7 +15,6 @@ import type {
   Usuario,
   Resumen,
   Producto,
-  editarProducto,
   ProductoSugerencia,
   Listas,
   Movimiento,
@@ -109,8 +108,8 @@ export async function buscarProductoPorCodigo(codigo: string): Promise<ProductoS
   return data
 }
 
-export async function actualizarProducto(productoSeleccionado : Producto): Promise<Producto> {
-  const { data } = await http.put<{ mensaje: string }>(`/productos/editar/${productoSeleccionado.id_producto}`, productoSeleccionado)
+export async function actualizarProducto(productoSeleccionado : Array<Producto>): Promise<Producto> {
+  const { data } = await http.put(`/api/productos/editar/${productoSeleccionado[0].id_producto}`, productoSeleccionado[0])
   return data
 }
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import AppMessage from '@/components/AppMessage.vue'
-import { obtenerStock, exportarStockCSV } from '@/api/inventario'
+import { obtenerStock, exportarStockCSV , actualizarProducto} from '@/api/inventario'
 import type { Producto, AppMessage as Msg } from '@/types'
 import { activo_producto } from '@/types'
 
@@ -13,7 +13,7 @@ const productoSeleccionado = ref<Producto | null>(null)
 
 
 function rowClass(p: Producto): string {
-  if (p.activo === activo_producto.Activo) return 'row-low'
+  if (p.activo === activo_producto.Activo) return 'row-normal'
   if (p.activo === activo_producto.NoActivo) return 'row-zero'
   return ''
 }
@@ -56,13 +56,13 @@ async function exportar() {
   }
 }
 
-// Función para guardar (esto llamaría a tu API después)
+// Función para guardar (esto llamaría API para actualizar el producto)
 async function guardarCambios() {
   if (!productoSeleccionado.value) return
 
   try {
     cargando.value = true
-    // Aquí llamarías a: await actualizarProducto(productoSeleccionado.value)
+    await actualizarProducto(productoSeleccionado.value)
     msg.value = { text: 'Producto actualizado con éxito', type: 'success' }
     productoSeleccionado.value = null // Cerramos el formulario
     await cargarStock() // Refrescamos la lista
@@ -172,6 +172,9 @@ async function guardarCambios() {
 </template>
 
 <style scoped>
+
+/* Algunas propiedades de estilo estan en el main.css */
+
 .loading,
 .empty {
   text-align: center;
@@ -179,7 +182,6 @@ async function guardarCambios() {
   color: #6c757d;
   font-style: italic;
 }
-
 
 .btn-edit {
   background: #007bff;

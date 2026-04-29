@@ -176,10 +176,10 @@ class ProductoService:
         if not producto_actual:
             raise Exception("Producto no encontrado")
 
-        # Validar código si se está cambiando
-        if 'codigo' in data and data['codigo']:
-            if ProductoDAO.exists_codigo(data['codigo'], producto_id):
-                raise Exception(f"El código '{data['codigo']}' ya existe")
+        # # Validar código si se está cambiando
+        # if 'codigo' in data and data['codigo']:
+        #     if ProductoDAO.exists_codigo(data['codigo'], producto_id):
+        #         raise Exception(f"El código '{data['codigo']}' ya existe")
 
         # Validar categoría si se está cambiando
         if 'id_categoria' in data:
