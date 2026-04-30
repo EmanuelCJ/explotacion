@@ -4,10 +4,11 @@ Inicialización y registro de routers
 """
 
 from flask import Flask
+
 from dotenv import load_dotenv
 
 from .config import Config
-from .extensions import jwt, cors
+from .extensions import jwt, cors, limiter
 
 # Blueprints
 from .routers.auth_routers import auth_bp
@@ -22,6 +23,8 @@ def create_app():
     load_dotenv()
 
     app = Flask(__name__)
+
+    
     app.config.from_object(Config)
 
     # Extensiones
@@ -33,6 +36,9 @@ def create_app():
         origins=app.config["CORS_ORIGINS"]
     )
 
+    #limitacion de rutas para prevenir denegacion de servicios
+    limiter.init_app(app)
+    
     # Blueprints
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(usuario_bp, url_prefix="/api/usuarios")
@@ -52,6 +58,13 @@ def create_app():
     @app.errorhandler(500)
     def internal_error(error):
         return {'error': 'Error interno del servidor'}, 500
+
+    @app.errorhandler(429)
+    def ratelimit_handler(e):
+        return {
+        "error": "Demasiadas solicitudes",
+        "detalle": str(e.description)
+        }, 429
     
     # JWT Error handlers
     @jwt.unauthorized_loader
