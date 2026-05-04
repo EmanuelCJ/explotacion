@@ -142,6 +142,21 @@ export interface Usuario {
   localidad?: string
   permisos: string[]
 }
+// modelo para obtener info del usuario
+export interface UsuarioData {
+  id_usuario: number
+  nombre: string
+  apellido: string
+  username: string
+  email?: string
+  rol: string
+  localidad_nombre?: string
+  permisos: string[],
+  activo?: number,
+  legajo?: number,
+  roles?: string,
+  created_at?: string
+}
 
 // ─── respuesta-servidor-interfaz ───────────────────────────────────────────────────────────────
 
@@ -169,16 +184,18 @@ interface Auth {
 // Para obtener respuesta del servidor a enpoint auth.
 export type AuthResponse = Auth | AuthError | ResponseError
 
-interface Me {
-  usuario: Usuario
+export interface Me {
+  usuario: UsuarioData
+  rol: string
+  username: string
 }
 
 interface MeError {
   error: string
-  detail: string
+  detail?: string
 }
 // Para obtener respueta del servidor a enpoint me.
-export type MeResponse = Me | MeError | ResponseError
+export type MeResponse = Me | MeError
 
 interface Verificar {
   message: string,
@@ -199,8 +216,21 @@ interface logout {
 
 interface LogoutError {
   error: string
-  detail: string
+  detail?: string
 }
 
 // respuesta del servidor al endpoint logout, puede ser un mensaje de éxito o un error.
 export type LogoutResponse = logout | LogoutError
+
+// respuesta de api/usuarios/
+interface UsuariosData {
+  usuarios: UsuarioData[]
+}
+// el enpoint devuelve error
+interface UsuariosError {
+  error: string
+  detail?: string
+}
+
+export type UsuariosResponse = UsuariosData | UsuariosError
+

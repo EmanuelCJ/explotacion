@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import AppMessage from '@/components/AppMessage.vue'
 import { obtenerStock, exportarStockCSV, actualizarProducto } from '@/api/inventario'
 import type { Producto, AppMessage as Msg } from '@/types'
 import { activo_producto } from '@/types'
+import { useUsuarioStore } from '@/stores/UsuarioStore'
 
 const data = ref<{ stock: Producto[] }>({ stock: [] })
 const msg = ref<Msg | null>(null)
@@ -12,6 +13,8 @@ const soloAlertas = ref(false)
 const productoSeleccionado = ref<Producto | null>(null)
 let productoOriginal: Producto | null = null // Para comparar cambios
 
+const usuarioStore = useUsuarioStore()
+const usuario = computed(() => usuarioStore.usuario)
 
 function rowClass(p: Producto): string {
   if (p.activo === activo_producto.Activo) return 'row-normal'
@@ -26,6 +29,12 @@ function seleccionarParaEditar(p: Producto) {
   productoSeleccionado.value = JSON.parse(JSON.stringify(p))
 }
 
+// info del usuario al montar el componente
+onMounted(() => {
+  usuarioStore.fetchUsuario()
+})
+
+// carga los datos al montar la vista
 onMounted(() => cargarStock())
 
 async function cargarStock() {
@@ -69,6 +78,8 @@ async function guardarCambios() {
   }
 
   let hayCambios = false
+  
+  //estos son los campos posibles para editar
   const camposAEditar = ['nombre', 'descripcion', 'id_categoria', 'costo', 'unidad_medida', 'stock_minimo', 'activo'] as const
 
   camposAEditar.forEach(campo => {
@@ -105,7 +116,7 @@ async function guardarCambios() {
 
 <template>
   <div class="card">
-    <div class="card-header">🗃️ Stock Actual</div>
+    <div class="card-header">🗃️ Stock Actual - localidad {{ usuario?.localidad_nombre }} </div>
     <div class="card-body">
       <div class="actions">
         <button class="btn btn-primary" :disabled="cargando" @click="cargarStock">
@@ -128,7 +139,6 @@ async function guardarCambios() {
         <table>
           <thead>
             <tr>
-              <th>ID</th>
               <th>Código</th>
               <th>Nombre</th>
               <th>categoria</th>
@@ -140,7 +150,6 @@ async function guardarCambios() {
           </thead>
           <tbody>
             <tr v-for="p in data.stock" :key="p.codigo" :class="rowClass(p)">
-              <td>{{ p.id_producto }}</td>
               <td>{{ p.codigo }}</td>
               <td>{{ p.nombre }}</td>
               <td>{{ p.nombre_categoria }}</td>
@@ -160,8 +169,6 @@ async function guardarCambios() {
       <div v-else-if="!cargando" class="empty">
         {{ soloAlertas ? 'No hay alertas de stock activas.' : 'No hay productos registrados.' }}
       </div>
-      <!-- campos posibles para editar : 'nombre', 'descripcion', 'id_categoria', 
-                           'costo', 'unidad_medida', 'stock_minimo', 'activo' -->
       <div v-if="productoSeleccionado" class="edit-overlay">
         <div class="edit-card">
           <h3>Editar Producto: {{ productoSeleccionado.nombre }}</h3>

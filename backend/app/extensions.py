@@ -1,8 +1,18 @@
+
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_jwt_extended import get_jwt_identity
+import os
+#cargar las variables de entorno desde el archivo .env
+from dotenv import load_dotenv
+
+#
+dia = os.getenv("DIA")
+hora = os.getenv("HORA")
+minuto = os.getenv("MINUTOS")
+
 
 def limiter_key():
     try:
@@ -20,6 +30,6 @@ cors = CORS()
 # #Limitador de peticiones
 limiter = Limiter(
     key_func=limiter_key,
-    default_limits=["200 per day", "20 per hour"]
+    default_limits=[dia, hora]
 )
             

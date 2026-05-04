@@ -1,11 +1,20 @@
 <script setup lang="ts">
+import { onMounted, computed} from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useUsuarioStore } from '@/stores/UsuarioStore'
 import { useAuthStore } from '@/stores/authStore'
 
 const router = useRouter()
 const route = useRoute()
-const authStore = useAuthStore()
+const usuarioStore = useUsuarioStore() //Store de usuarios
+const authStore = useAuthStore() // Store de login auth
 
+// info del usuario al montar el componente
+onMounted(() => {
+  usuarioStore.fetchUsuario()
+})
+
+const usuario = computed(() => usuarioStore.usuario)
 
 const navItems = [
   { name: 'productos', label: 'Nuevo Producto', icon: '📦' },
@@ -32,7 +41,7 @@ async function handleLogout() {
 <template>
   <nav class="sidebar">
     <div class="sidebar-header">
-      <h1>Explotacion</h1>
+      <h1>Bienvenido {{ usuario?.nombre }} </h1>
       <p class="subtitle">Control de Inventario</p>
     </div>
     <ul class="nav-menu">

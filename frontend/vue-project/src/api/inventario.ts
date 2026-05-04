@@ -13,7 +13,7 @@ import type {
   VerificarResponse,
   LogoutResponse,
   editarProducto,
-  Usuario,
+  UsuariosResponse,
   Resumen,
   Producto,
   ProductoSugerencia,
@@ -51,8 +51,10 @@ export async function logout(): Promise<LogoutResponse> {
 
 // ─── Info del Usuario actual ───────────────────────────────
 export async function me(): Promise<MeResponse> {
-  return await http.get('/api/auth/me')
+  const { data } = await http.get<MeResponse>('/api/auth/me')
+  return data
 }
+
 // ─── Verificar sesión activa (para proteger rutas) ─────────────────────────
 export async function verificar(): Promise<VerificarResponse> {
   const { data } = await http.get('/api/auth/verify')
@@ -68,7 +70,7 @@ export async function refresh(): Promise<RefreshResponse> {
   return await http.post('/api/auth/refresh')
 }
 
-  
+
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export async function obtenerResumen(): Promise<Resumen> {
@@ -149,6 +151,7 @@ export async function validarIntegridad(): Promise<ValidacionIntegridad> {
 }
 
 // ─── Usuarios ───────────────────────────────────────────────────────────
-export async function mostrarUsuario(): Promise<Usuario[]> {
-  return await http.get('/api/usuarios/')
+export async function obtenerUsuarios(): Promise<UsuariosResponse> {
+  const { data } = await http.get<UsuariosResponse>('/api/usuarios/')
+  return data
 }

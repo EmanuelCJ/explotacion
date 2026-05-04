@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { auth, verificar, logout } from '@/api/inventario'
+import { auth, verificar, logout} from '@/api/inventario'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -36,6 +36,6 @@ export const useAuthStore = defineStore('auth', {
       } catch (err : any) {
         return err.response?.data || 'Error al cerrar sesión'
       }
-    }
+    },
   }
 })

@@ -214,11 +214,8 @@ def update_producto(id):
         if not data:
             return jsonify({'error': 'Datos requeridos'}), 400
         
-
         # Actualizar
         success = ProductoService.update(id, data, usuario_id)
-
-        # success = True
 
         if success:
             return jsonify({'message': 'Producto actualizado exitosamente'}), 200

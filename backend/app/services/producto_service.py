@@ -191,21 +191,21 @@ class ProductoService:
 
         if success:
 
-                print(producto_actual)
+                print(data)
                 # Registrar en auditoría
-                # AuditoriaDAO.create({
-                #     'entidad': 'Producto',
-                #     'id_entidad': producto_id,
-                #     'accion': 'update',
-                #     'descripcion': f"Producto actualizado: {producto_actual['']}",
-                #     'datos_anteriores': {
-                #         producto_actual
-                #     },
-                #     'datos_nuevos': { data },
-                #     'id_usuario': usuario_id,
-                #     'user_agent': username,
-                #     'ip_address': ip_user
-                # })
+                AuditoriaDAO.create({
+                    'entidad': 'Producto',
+                    'id_entidad': producto_id,
+                    'accion': 'update',
+                    'descripcion': f"Producto actualizado: " + producto_actual['nombre'],
+                    'datos_anteriores': {
+                        producto_actual
+                    },
+                    'datos_nuevos': data ,
+                    'id_usuario': usuario_id,
+                    'user_agent': username,
+                    'ip_address': ip_user
+                })
 
         return success
 
