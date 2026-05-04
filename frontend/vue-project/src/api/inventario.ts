@@ -14,6 +14,8 @@ import type {
   LogoutResponse,
   editarProducto,
   UsuariosResponse,
+  CreateResponse,
+  UpdateResponse,
   Resumen,
   Producto,
   ProductoSugerencia,
@@ -22,7 +24,9 @@ import type {
   ValidacionIntegridad,
   NuevoProductoPayload,
   NuevoMovimientoPayload,
-  FiltrosHistorial
+  FiltrosHistorial,
+  UsuarioData,
+  localidadesResponse
 } from '@/types'
 
 
@@ -151,7 +155,27 @@ export async function validarIntegridad(): Promise<ValidacionIntegridad> {
 }
 
 // ─── Usuarios ───────────────────────────────────────────────────────────
+
 export async function obtenerUsuarios(): Promise<UsuariosResponse> {
   const { data } = await http.get<UsuariosResponse>('/api/usuarios/')
+  return data
+}
+
+export async function crearUsuarios(): Promise<CreateResponse> {
+  const { data } = await http.get<CreateResponse>('/api/usuario/create')
+  return data
+}
+
+export async function updateUsuario(id_usuario: number, cambios: Partial<UsuarioData>) {
+  const { data } = await http.put<UpdateResponse>(
+    `/api/usuario/update/${id_usuario}`,
+    cambios
+  )
+  return data
+}
+
+// ─── localidades ───────────────────────────────────────────────────────────
+export async function obtenerLocalidades(){
+  const { data } = await http.get<localidadesResponse>('/api/localidades/')
   return data
 }

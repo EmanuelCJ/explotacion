@@ -1,19 +1,24 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import AppMessage from '@/components/AppMessage.vue'
-import { obtenerUsuarios } from '@/api/inventario'
-import type { UsuarioData, AppMessage as Msg } from '@/types'
+import { obtenerUsuarios, updateUsuario, obtenerLocalidades } from '@/api/inventario'
+import type { UsuarioData, AppMessage as Msg, localidad } from '@/types'
 
 const usuarios = ref<UsuarioData[]>([])
 const msg = ref<Msg | null>(null)
 const cargando = ref(false)
 const busqueda = ref('')
+const localidades = ref<localidad>()
+
+const usuarioSeleccionado = ref<UsuarioData | null>(null)
+let usuarioOriginal: UsuarioData | null = null
 
 // ===============================
 // CARGAR USUARIOS
 // ===============================
 onMounted(() => {
   mostrarUsuarios()
+  cargarLocalidades()
 })
 
 async function mostrarUsuarios() {
@@ -23,38 +28,106 @@ async function mostrarUsuarios() {
 
     const response = await obtenerUsuarios()
 
-    if ("usuarios" in response) {
-      usuarios.value = response.usuarios   // 👈 array de usuarios
+    if ('usuarios' in response) {
+      usuarios.value = response.usuarios
     } else {
       usuarios.value = []
-      msg.value = { text: response.error ?? "Error desconocido", type: "error" }
+      msg.value = { text: response.error ?? 'Error desconocido', type: 'error' }
     }
 
-  } catch (error) {
+  } catch {
     usuarios.value = []
-    msg.value = { text: "Error al cargar usuarios.", type: "error" }
+    msg.value = { text: 'Error al cargar usuarios.', type: 'error' }
+  } finally {
+    cargando.value = false
+  }
+}
+
+async function cargarLocalidades() {
+  try {
+    const res = await obtenerLocalidades() // tu endpoint
+    localidades.value = res.localidades || res
+  } catch {
+    msg.value = { text: 'Error al cargar localidades', type: 'error' }
+  }
+}
+
+
+// ===============================
+// EDITAR USUARIO
+// ===============================
+function editarUsuario(u: UsuarioData) {
+  usuarioOriginal = JSON.parse(JSON.stringify(u))
+  usuarioSeleccionado.value = JSON.parse(JSON.stringify(u))
+}
+
+// ===============================
+// GUARDAR CAMBIOS
+// ===============================
+async function guardarCambios() {
+  if (!usuarioSeleccionado.value || !usuarioOriginal) return
+
+  const confirmar = confirm(
+    `¿Actualizar usuario "${usuarioOriginal.nombre}"?`
+  )
+  if (!confirmar) return
+
+  const cambios: Partial<UsuarioData> = {
+    id_usuario: usuarioSeleccionado.value.id_usuario
+  }
+
+  let hayCambios = false
+
+  const camposAEditar = [
+    'nombre',
+    'apellido',
+    'username',
+    'email',
+    'legajo',
+    'id_localidad',
+    'id_rol'
+  ] as const
+
+  camposAEditar.forEach(campo => {
+    if (usuarioSeleccionado.value![campo] !== usuarioOriginal![campo]) {
+      cambios[campo] = usuarioSeleccionado.value![campo] as any
+      hayCambios = true
+    }
+  })
+
+  if (!hayCambios) {
+    msg.value = { text: 'No se detectaron cambios.', type: 'info' }
+    usuarioSeleccionado.value = null
+    return
+  }
+
+  try {
+    cargando.value = true
+
+    await updateUsuario(cambios.id_usuario!, cambios)
+
+    msg.value = { text: 'Usuario actualizado correctamente.', type: 'success' }
+
+    usuarioSeleccionado.value = null
+    await mostrarUsuarios()
+
+  } catch {
+    msg.value = { text: 'Error al actualizar usuario.', type: 'error' }
   } finally {
     cargando.value = false
   }
 }
 
 // ===============================
-// FILTRO BUSQUEDA
+// FILTRO
 // ===============================
 const usuariosFiltrados = computed(() => {
   return usuarios.value.filter(u =>
     `${u.nombre} ${u.apellido} ${u.username} ${u.legajo}`
       .toLowerCase()
-      .includes(busqueda.value.toLowerCase()))
+      .includes(busqueda.value.toLowerCase())
+  )
 })
-
-// ===============================
-// EDITAR (placeholder por ahora)
-// ===============================
-function editarUsuario(u: UsuarioData) {
-  console.log('Editar usuario:', u)
-  // después lo conectamos con FormCard
-}
 </script>
 
 <template>
@@ -77,6 +150,73 @@ function editarUsuario(u: UsuarioData) {
       <!-- MENSAJES -->
       <AppMessage v-if="msg" :text="msg.text" :type="msg.type" />
 
+      <div v-if="usuarioSeleccionado" class="edit-overlay">
+        <div class="edit-card">
+          <h3>Editar Usuario: {{ usuarioSeleccionado.nombre }}</h3>
+
+          <div class="grid-form">
+
+            <div class="form-group">
+              <label>Nombre:</label>
+              <input v-model="usuarioSeleccionado.nombre" type="text" />
+            </div>
+
+            <div class="form-group">
+              <label>Apellido:</label>
+              <input v-model="usuarioSeleccionado.apellido" type="text" />
+            </div>
+
+            <div class="form-group">
+              <label>Username:</label>
+              <input v-model="usuarioSeleccionado.username" type="text" />
+            </div>
+
+            <div class="form-group">
+              <label>Email:</label>
+              <input v-model="usuarioSeleccionado.email" type="email" />
+            </div>
+
+            <div class="form-group">
+              <label>Legajo:</label>
+              <input v-model.number="usuarioSeleccionado.legajo" type="number" />
+            </div>
+
+            <label>Localidad:</label>
+
+            <select v-model="usuarioSeleccionado.id_localidad">
+              <option disabled value="">Seleccione una localidad</option>
+
+              <option v-for="loc in localidades" :key="loc.id_localidad" :value="loc.id_localidad">
+                {{ loc.nombre }}
+              </option>
+            </select>
+
+            <div class="form-group">
+              <label>ID Rol:</label>
+              <input v-model.number="usuarioSeleccionado.id_rol" type="number" />
+            </div>
+
+            <div class="form-group">
+              <label>Estado:</label>
+              <select v-model="usuarioSeleccionado.activo">
+                <option :value="1">Activo</option>
+                <option :value="0">Inactivo</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="edit-actions">
+            <button class="btn btn-success" :disabled="cargando" @click="guardarCambios">
+              {{ cargando ? 'Guardando...' : '✅ Confirmar Cambios' }}
+            </button>
+
+            <button class="btn btn-secondary" @click="usuarioSeleccionado = null">
+              ❌ Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
       <!-- LOADING -->
       <p v-if="cargando" class="loading">
         Cargando usuarios...
@@ -86,7 +226,6 @@ function editarUsuario(u: UsuarioData) {
       <div v-else-if="usuariosFiltrados.length > 0" class="card-grid">
         <div v-for="u in usuariosFiltrados" :key="u.id_usuario" class="user-card">
 
-          <!-- HEADER -->
           <div class="user-header">
             <h3>{{ u.nombre }} {{ u.apellido }}</h3>
 
@@ -95,16 +234,14 @@ function editarUsuario(u: UsuarioData) {
             </span>
           </div>
 
-          <!-- BODY -->
           <div class="user-body">
-            <p><strong>Usuario:</strong> {{ u.username }}</p>
-            <p><strong>Email:</strong> {{ u.email }}</p>
-            <p><strong>Legajo:</strong> {{ u.legajo }}</p>
-            <p><strong>Rol:</strong> {{ u.roles }}</p>
-            <p><strong>Localidad:</strong> {{ u.localidad_nombre}}</p>
+            <p><strong>Usuario: </strong> {{ u.username }}</p>
+            <p><strong>Email: </strong> {{ u.email }}</p>
+            <p><strong>Legajo: </strong> {{ u.legajo }}</p>
+            <p><strong>Rol: </strong> {{ u.roles }}</p>
+            <p><strong>Localidad: </strong> {{ u.localidad_nombre }}</p>
           </div>
 
-          <!-- ACTIONS -->
           <div class="user-actions">
             <button class="btn-edit" @click="editarUsuario(u)">
               ✏️ Editar
@@ -124,9 +261,6 @@ function editarUsuario(u: UsuarioData) {
 </template>
 
 <style scoped>
-/* =========================
-   GENERALES
-========================= */
 .loading,
 .empty {
   text-align: center;
@@ -135,34 +269,34 @@ function editarUsuario(u: UsuarioData) {
   font-style: italic;
 }
 
-/* =========================
-   ACCIONES
-========================= */
-.actions {
+.btn-edit {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
-  gap: 10px;
-  margin-bottom: 16px;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
-.input-search {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  flex: 1;
-}
-
-/* =========================
-   GRID
-========================= */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
 }
 
-/* =========================
-   CARD
-========================= */
 .user-card {
   background: white;
   border-radius: 10px;
@@ -175,30 +309,16 @@ function editarUsuario(u: UsuarioData) {
   transform: translateY(-3px);
 }
 
-/* =========================
-   HEADER
-========================= */
 .user-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
 }
 
-.user-header h3 {
-  font-size: 16px;
-}
-
-/* =========================
-   BODY
-========================= */
 .user-body p {
   margin: 4px 0;
   font-size: 14px;
 }
 
-/* =========================
-   BADGE
-========================= */
 .badge {
   padding: 4px 8px;
   border-radius: 6px;
@@ -214,24 +334,43 @@ function editarUsuario(u: UsuarioData) {
   background: #dc3545;
 }
 
-/* =========================
-   ACTIONS
-========================= */
 .user-actions {
   margin-top: 10px;
   text-align: right;
 }
 
-.btn-edit {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
+.edit-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  min-width: 320px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.btn-edit:hover {
-  background: #0056b3;
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 1.5rem;
+  justify-content: flex-end;
 }
 </style>

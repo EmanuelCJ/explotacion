@@ -17,6 +17,7 @@ from .routers.producto_routers import producto_bp
 from .routers.movimiento_routers import movimiento_bp
 from .routers.envio_routers import envio_bp
 from .routers.auditoria_routers import auditoria_bp
+from .routers.localidades_routers import localidades_bp 
 
 def create_app():
     
@@ -46,6 +47,7 @@ def create_app():
     app.register_blueprint(movimiento_bp, url_prefix="/api/movimientos")
     app.register_blueprint(envio_bp, url_prefix="/api/envios")
     app.register_blueprint(auditoria_bp, url_prefix="/api/auditoria")
+    app.register_blueprint(localidades_bp, url_prefix="/api/localidades")
 
     
     # ========================================

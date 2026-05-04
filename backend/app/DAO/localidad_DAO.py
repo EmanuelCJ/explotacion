@@ -47,12 +47,12 @@ class LocalidadDAO:
             connection.close() #cierra la conexion
     
     @staticmethod
-    def get_all(activo=None):
+    def get_all(activo=None) -> dict:
         """Obtener todas las localidades"""
         try:
             connection = ConectDB.get_connection()
-            with connection.cursor() as cursor:
-                query = "SELECT * FROM localidades WHERE 1=1"
+            with connection.cursor(dictionary=True) as cursor:
+                query = "SELECT id_localidad, nombre FROM localidades WHERE 1=1"
                 params = []
                 
                 if activo is not None:

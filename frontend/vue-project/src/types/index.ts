@@ -149,7 +149,8 @@ export interface UsuarioData {
   apellido: string
   username: string
   email?: string
-  rol: string
+  id_localidad?: number
+  id_rol?: number,
   localidad_nombre?: string
   permisos: string[],
   activo?: number,
@@ -234,3 +235,43 @@ interface UsuariosError {
 
 export type UsuariosResponse = UsuariosData | UsuariosError
 
+
+interface createUsuarioResponse {
+  message: string,
+  success: Boolean,
+  usuario_id: number
+}
+
+interface createUsuarioError {
+  error: string
+  detail?: string
+}
+
+export type CreateResponse = createUsuarioResponse | createUsuarioError
+
+interface updateSeccess{
+  message: string
+}
+
+interface updateError{
+  error: string,
+  detail?: string
+}
+
+export type UpdateResponse = updateSeccess | updateError
+
+export interface localidad{
+  id_localidad: number,
+  nombre: string
+}
+
+interface localidadesSuccess{
+  localidad : localidad[]
+}
+
+interface localidadesError{
+  error: string,
+  detail?: string
+}
+
+export type localidadesResponse = localidadesSuccess | localidadesError
