@@ -265,13 +265,9 @@ export interface localidad{
   nombre: string
 }
 
-interface localidadesSuccess{
-  localidad : localidad[]
-}
-
 interface localidadesError{
   error: string,
   detail?: string
 }
 
-export type localidadesResponse = localidadesSuccess | localidadesError
+export type localidadesResponse = localidad[] | localidadesError

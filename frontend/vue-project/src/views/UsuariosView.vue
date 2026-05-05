@@ -8,13 +8,13 @@ const usuarios = ref<UsuarioData[]>([])
 const msg = ref<Msg | null>(null)
 const cargando = ref(false)
 const busqueda = ref('')
-const localidades = ref<localidad>()
+const localidades = ref<localidad[]>([])
 
 const usuarioSeleccionado = ref<UsuarioData | null>(null)
 let usuarioOriginal: UsuarioData | null = null
 
 // ===============================
-// CARGAR USUARIOS
+// CARGAR USUARIOS y TRAE LOCALIDADES
 // ===============================
 onMounted(() => {
   mostrarUsuarios()
@@ -43,12 +43,23 @@ async function mostrarUsuarios() {
   }
 }
 
+async function crearNuevoUsuario(){
+  //logica para crear nuevo usuario
+}
+
 async function cargarLocalidades() {
   try {
-    const res = await obtenerLocalidades() // tu endpoint
-    localidades.value = res.localidades || res
+    const response = await obtenerLocalidades()
+
+    if (Array.isArray(response)) {
+      localidades.value = response
+    } else {
+      console.error(response.error)
+      localidades.value = [] // evita que quede undefined
+    }
   } catch {
     msg.value = { text: 'Error al cargar localidades', type: 'error' }
+    localidades.value = []
   }
 }
 
@@ -123,7 +134,7 @@ async function guardarCambios() {
 // ===============================
 const usuariosFiltrados = computed(() => {
   return usuarios.value.filter(u =>
-    `${u.nombre} ${u.apellido} ${u.username} ${u.legajo}`
+    `${u.nombre} ${u.apellido} ${u.username} ${u.legajo} ${u.localidad_nombre}`
       .toLowerCase()
       .includes(busqueda.value.toLowerCase())
   )
@@ -140,6 +151,9 @@ const usuariosFiltrados = computed(() => {
 
       <!-- ACCIONES -->
       <div class="actions">
+        <button class="btn btn-primary" @click="crearNuevoUsuario" :disabled="cargando">
+          {{ cargando ? 'Cargando...' : '👥 Crear Usuario' }}
+        </button>
         <button class="btn btn-primary" @click="mostrarUsuarios" :disabled="cargando">
           {{ cargando ? 'Cargando...' : '🔄 Actualizar' }}
         </button>
@@ -181,19 +195,14 @@ const usuariosFiltrados = computed(() => {
               <input v-model.number="usuarioSeleccionado.legajo" type="number" />
             </div>
 
-            <label>Localidad:</label>
-
-            <select v-model="usuarioSeleccionado.id_localidad">
-              <option disabled value="">Seleccione una localidad</option>
-
-              <option v-for="loc in localidades" :key="loc.id_localidad" :value="loc.id_localidad">
-                {{ loc.nombre }}
-              </option>
-            </select>
-
             <div class="form-group">
-              <label>ID Rol:</label>
-              <input v-model.number="usuarioSeleccionado.id_rol" type="number" />
+              <label>Localidad:  {{ usuarioSeleccionado.localidad_nombre }}</label>
+              <select v-model="usuarioSeleccionado.id_localidad">
+                <option disabled value="">Seleccione una localidad</option>
+                <option v-for="loc in localidades" :key="loc.id_localidad" :value="loc.id_localidad">
+                  {{ loc.nombre }}
+                </option>
+              </select>
             </div>
 
             <div class="form-group">

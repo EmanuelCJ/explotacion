@@ -175,7 +175,7 @@ export async function updateUsuario(id_usuario: number, cambios: Partial<Usuario
 }
 
 // ─── localidades ───────────────────────────────────────────────────────────
-export async function obtenerLocalidades(){
+export async function obtenerLocalidades(): Promise<localidadesResponse>{
   const { data } = await http.get<localidadesResponse>('/api/localidades/')
   return data
 }
