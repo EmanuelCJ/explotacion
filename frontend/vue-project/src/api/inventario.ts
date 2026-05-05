@@ -30,7 +30,7 @@ import type {
 } from '@/types'
 
 
-const http = axios.create({
+export const http = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
     'Content-Type': 'application/json'

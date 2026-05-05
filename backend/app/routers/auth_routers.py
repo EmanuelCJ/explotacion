@@ -68,13 +68,13 @@ def login():
                 'rol': usuario['roles'].split(',')[0] if usuario.get('roles') else 'usuario',
                 'localidad_id': usuario['id_localidad']
             },
-            expires_delta=timedelta(hours=1)  # 1 hora
+            #expires_delta=timedelta(hours=1)  # 1 hora esta configurado archivo .config
         )
         
         # Refresh token
         refresh_token = create_refresh_token(
             identity=str(usuario['id_usuario']),
-            expires_delta=timedelta(days=30)  # 30 días
+            #expires_delta=timedelta(days=15)  # 30 días esta configurado archivo .config
         )
         
         # Crear respuesta
@@ -123,17 +123,13 @@ def logout():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
+# Este enpoint renueva el access_token que se guarda en el cookie
 @auth_bp.route('/refresh', methods=['POST'])
 @refresh_required_cookie()
 def refresh():
-    """
-    Renovar access token usando refresh token
-    """
     try:
         usuario_id = get_jwt_identity()
 
-        # Validar que el usuario aún exista
         usuario = AuthService.get_user_by_id(usuario_id)
 
         if not usuario:
@@ -142,7 +138,6 @@ def refresh():
         if not usuario.get('activo'):
             return jsonify({'error': 'Usuario inactivo'}), 403
 
-        # Crear nuevo access token
         access_token = create_access_token(
             identity=str(usuario['id_usuario']),
             additional_claims={
@@ -150,24 +145,16 @@ def refresh():
                 'rol': usuario['roles'].split(',')[0] if usuario.get('roles') else 'usuario',
                 'localidad_id': usuario['id_localidad']
             },
-            expires_delta=timedelta(hours=1)  # 1 hora
+            expires_delta=timedelta(hours=1)
         )
 
         response = jsonify({'message': 'Token renovado'})
-        response.set_cookie(
-            'access_token',
-            value=access_token,
-            httponly=True,
-            secure=False,  # True en producción con HTTPS
-            samesite='Lax',
-            max_age=3600  # 1 hora en segundos
-        )
+        set_access_cookies(response, access_token)
 
         return response, 200
 
-    except Exception as e:
+    except Exception:
         return jsonify({'error': 'Error interno'}), 500
-
 
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required_cookie()

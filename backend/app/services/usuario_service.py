@@ -179,7 +179,7 @@ class UsuarioService:
         admin_username = UsuarioDAO.username(admin_id)
         
         if success:
-            # Registrar en auditoría
+            #Registrar en auditoría
             AuditoriaDAO.create({
                 'entidad': 'Usuario',
                 'id_entidad': usuario_id,

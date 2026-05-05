@@ -89,6 +89,7 @@ async function guardarCambios() {
 
   let hayCambios = false
 
+  // Son los campos posible habilitados por el backend
   const camposAEditar = [
     'nombre',
     'apellido',
