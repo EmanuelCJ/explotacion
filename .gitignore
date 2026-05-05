@@ -6,9 +6,7 @@ frontend/dist/
 __pycache__/
 *.pyc
 backend/.venv/
-backend/.env/
+backend/.env
 
 # Ignorar todos los .env
 *.env
-
-#ignora el archivo de Excel
