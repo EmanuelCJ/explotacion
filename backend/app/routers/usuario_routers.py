@@ -117,25 +117,28 @@ def create_usuario():
         'usuario_id': usuario_id
     }), 201
 
-@usuario_bp.route('/update/<int:id_usuario>', methods=['PUT'])
+@usuario_bp.route('/update/<int:id>', methods=['PUT'])
 @jwt_required_cookie()
 @require_permiso('editar_usuarios')
 @require_role('admin')
-def update_usuario(id_usuario):
+def update_usuario(id):
     """Actualizar usuario"""
 
     admin_id = get_current_user_id()
     data = request.get_json()
 
+    
     # Validar que el campo "usuario_id" esté presente en el JSON
-    if id_usuario is None:
-        return jsonify({'error': 'El campo "id_usuario" es obligatorio'}), 400
+    if id is None:
+        return jsonify({'error': 'El campo "id" es obligatorio'}), 400
     
     # 1. Verifica si el JSON llegó, si tiene contenido y si el ID está presente
     if not data or len(data) == 0:
         return jsonify({'error': 'No se enviaron datos en la solicitud'}), 400
     
-    success = UsuarioService.update(id_usuario, data, admin_id)
+    print("INFO",data,id)
+    
+    success = UsuarioService.update(id, data, admin_id)
 
     if success:
         return jsonify({'message': 'Usuario actualizado correctamente'}), 200
