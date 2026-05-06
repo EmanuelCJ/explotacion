@@ -19,7 +19,7 @@ export interface Producto {
   activo: number,
   codigo: string,
   costo: number,
-  descripcion:string,
+  descripcion: string,
   created_at: string,
   descripcion_lugar: string,
   id_categoria: number,
@@ -36,7 +36,7 @@ export interface Producto {
 
 export interface editarProducto {
   nombre?: string,
-  costo ?: number,
+  costo?: number,
   unidad_medida?: string,
   id_categoria?: number,
   stock_minimo?: number,
@@ -203,13 +203,13 @@ interface Verificar {
   usuario_id: string,
   valid: boolean
 }
- interface VerificarError {
+interface VerificarError {
   valid: boolean,
   error: string
 }
 
 // para verificar la sesión activa, el servidor puede responder con éxito o error dependiendo de si la sesión es válida o no.
-export type  VerificarResponse = Verificar | VerificarError | ResponseError
+export type VerificarResponse = Verificar | VerificarError | ResponseError
 
 interface logout {
   mensaje: string
@@ -235,6 +235,18 @@ interface UsuariosError {
 
 export type UsuariosResponse = UsuariosData | UsuariosError
 
+export interface usuariomodel {
+  'nombre':string,
+  'apellido':string,
+  'username':string,
+  'email':string,
+  'legajo':number,
+  'password': string,
+  'id_localidad':number,
+  'id_rol':number,
+  'activo'?: number
+}
+
 
 interface createUsuarioResponse {
   message: string,
@@ -249,25 +261,38 @@ interface createUsuarioError {
 
 export type CreateResponse = createUsuarioResponse | createUsuarioError
 
-interface updateSeccess{
+interface updateSeccess {
   message: string
 }
 
-interface updateError{
+interface updateError {
   error: string,
   detail?: string
 }
 
 export type UpdateResponse = updateSeccess | updateError
 
-export interface localidad{
+export interface localidad {
   id_localidad: number,
   nombre: string
 }
 
-interface localidadesError{
+interface localidadesError {
   error: string,
   detail?: string
 }
 
 export type localidadesResponse = localidad[] | localidadesError
+
+export interface roles {
+  'id_rol':number,
+  'nombre': string,
+  'descripcion': string,
+}
+
+interface rolesError {
+  error: string,
+  detail?: string
+}
+
+export type get_roles = roles[] | rolesError

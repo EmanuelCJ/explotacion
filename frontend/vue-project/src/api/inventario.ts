@@ -16,6 +16,7 @@ import type {
   UsuariosResponse,
   CreateResponse,
   UpdateResponse,
+  get_roles,
   Resumen,
   Producto,
   ProductoSugerencia,
@@ -168,7 +169,7 @@ export async function crearUsuarios(): Promise<CreateResponse> {
 
 export async function updateUsuario(id_usuario: number, cambios: Partial<UsuarioData>) {
   const { data } = await http.put<UpdateResponse>(
-    `/api/usuario/update/${id_usuario}`,
+    `/api/usuarios/update/${id_usuario}`,
     cambios
   )
   return data
@@ -178,4 +179,13 @@ export async function updateUsuario(id_usuario: number, cambios: Partial<Usuario
 export async function obtenerLocalidades(): Promise<localidadesResponse>{
   const { data } = await http.get<localidadesResponse>('/api/localidades/')
   return data
+}
+
+// ─── roles del sistema ───────────────────────────────────────────────────────────
+export async function obtenerRoles() :Promise<get_roles>{
+
+  const {data} = await http.get<get_roles>('/api/roles/')
+  
+  return data
+
 }

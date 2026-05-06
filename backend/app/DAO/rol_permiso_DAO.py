@@ -10,6 +10,31 @@ class RolDAO:
     """Data Access Object para la tabla roles"""
     
     @staticmethod
+    def get(activo=None) -> list:
+        """Obtener todos los roles"""
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor() as cursor:
+                query = "SELECT id_rol, nombre, descripcion FROM roles WHERE 1=1"
+                params = []
+                
+                if activo is not None:
+                    query += " AND activo = %s"
+                    params.append(activo)
+                
+                query += " ORDER BY nivel"
+                cursor.execute(query, params)
+                return cursor.fetchall()
+        except Exception as e:
+            print(f"Error getting roles: {e}")
+            raise
+        finally:
+            connection.close()
+    
+
+
+
+    @staticmethod
     def get_all(activo=None) -> list:
         """Obtener todos los roles"""
         try:

@@ -127,16 +127,22 @@ def update_usuario(id):
     admin_id = get_current_user_id()
     data = request.get_json()
 
-    
-    # Validar que el campo "usuario_id" esté presente en el JSON
-    if id is None:
-        return jsonify({'error': 'El campo "id" es obligatorio'}), 400
-    
-    # 1. Verifica si el JSON llegó, si tiene contenido y si el ID está presente
-    if not data or len(data) == 0:
-        return jsonify({'error': 'No se enviaron datos en la solicitud'}), 400
-    
-    print("INFO",data,id)
+    #campos permitodos para editar
+    campos_permitidos = {
+        'nombre',
+        'apellido',
+        'username',
+        'email',
+        'legajo',
+        'id_localidad',
+        'id_rol',
+        'activo'
+    }
+
+    data_filtrada = {k: v for k, v in data.items() if k in campos_permitidos}
+
+    if not data_filtrada:
+        return jsonify({'error': 'No hay campos válidos para actualizar'}), 400
     
     success = UsuarioService.update(id, data, admin_id)
 
@@ -172,7 +178,7 @@ def asignar_rol():
     else:
         return jsonify({'error': 'No se pudo asignar el rol'}), 500
 
-#se rol_id por que no era necesario, cada usuario debe tener un rol asignado
+#Se rol_id por que no era necesario, cada usuario debe tener un rol asignado
 @usuario_bp.route('/quitar-rol', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('asignar_roles')

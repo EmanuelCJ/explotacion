@@ -169,6 +169,7 @@ async function guardarCambios() {
       <div v-else-if="!cargando" class="empty">
         {{ soloAlertas ? 'No hay alertas de stock activas.' : 'No hay productos registrados.' }}
       </div>
+      
       <div v-if="productoSeleccionado" class="edit-overlay">
         <div class="edit-card">
           <h3>Editar Producto: {{ productoSeleccionado.nombre }}</h3>
