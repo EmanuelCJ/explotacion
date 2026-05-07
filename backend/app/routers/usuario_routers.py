@@ -31,6 +31,7 @@ def get_usuarios():
 @usuario_bp.route('/', methods=['GET'])
 @jwt_required_cookie()
 @require_permiso('ver_usuarios')
+@require_role('admin')
 def get_all_usuarios():
     """Obtener todos los usuarios sin paginación"""
     usuarios = UsuarioService.get_all_sin_paginacion()
