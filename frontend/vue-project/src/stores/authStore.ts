@@ -1,41 +1,95 @@
 import { defineStore } from 'pinia'
-import { auth, verificar, logout} from '@/api/inventario'
+import { auth, verificar, logout, me } from '@/api/inventario'
+import type { UsuarioData, MeResponse } from '@/types'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null as any,
+    usuario: null as UsuarioData | null,
+    rol: null as string | any,
+    username: null as string | null,
+    error: null as string | null,
     isAuthenticated: false,
-    initialized: false // 🔥 importante para el guard
+    initialized: false
   }),
 
+  getters: {
+    hasRoles: (state) => {
+      return (roles: readonly string[]) => {
+        if (!state.isAuthenticated) return false
+        if (!state.rol) return false
+
+        return roles.includes(state.rol)
+      }
+    }
+  },
+
   actions: {
+    // Esta función verifica la sesión (ej: al refrescar F5)
     async fetchUser() {
       try {
-        const data = await verificar()
-        this.user = data
+        await verificar() // Verifica token/cookie
+        await this.fetchMe() // Carga rol y datos
         this.isAuthenticated = true
       } catch {
-        this.user = null
-        this.isAuthenticated = false
+        this.clearAuth()
       } finally {
         this.initialized = true
       }
     },
 
+    // Carga los detalles específicos (especialmente el ROL)
+    async fetchMe() {
+      try {
+        const response: MeResponse = await me()
+
+        console.log('ME RESPONSE:', response)
+
+        if ('usuario' in response) {
+          this.usuario = response.usuario
+
+          // 🔥 CORRECTO
+          this.rol = response.usuario.rol
+          this.username = response.usuario.username
+
+          console.log('ROL:', this.rol)
+
+          this.error = null
+        }
+      } catch (err: any) {
+        this.clearAuth()
+        this.error = err.response?.data || 'Error al obtener perfil'
+      }
+    },
+
     async login(username: string, password: string) {
-      const response = await auth(username, password)
-      await this.fetchUser()
-      return response
+      try {
+        const response = await auth(username, password)
+        // 🔥 CRUCIAL: Cargar los datos ANTES de que el router actúe
+        this.isAuthenticated = true
+        await this.fetchMe()
+        this.initialized = true
+        return response
+      } catch (error) {
+        this.clearAuth()
+        throw error
+      }
     },
 
     async logout() {
       try {
         await logout()
-        this.user = null
-        this.isAuthenticated = false
-      } catch (err : any) {
-        return err.response?.data || 'Error al cerrar sesión'
+      } finally {
+        this.clearAuth()
       }
     },
+
+    // Helper para resetear todo
+    clearAuth() {
+      this.usuario = null
+      this.rol = null
+      this.username = null
+      this.isAuthenticated = false
+      this.initialized = true
+    }
   }
 })

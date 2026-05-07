@@ -4,10 +4,11 @@ import AppMessage from '@/components/AppMessage.vue'
 import { obtenerUsuarios, updateUsuario, obtenerLocalidades, obtenerRoles } from '@/api/inventario'
 import type { UsuarioData, usuariomodel as usuarioModelCreate, AppMessage as Msg, localidad, roles } from '@/types'
 
+
 const usuarios = ref<UsuarioData[]>([])
 const msg = ref<Msg | null>(null)
 const cargando = ref(false)
-const centinela_rol = ref(false)
+
 const busqueda = ref('')
 const localidades = ref<localidad[]>([])
 const roles = ref<roles[]>([])
@@ -232,9 +233,11 @@ const usuariosFiltrados = computed(() => {
 
       <!-- ACCIONES -->
       <div class="actions">
+        <!-- <RoleGuard :roles="['admin']"> -->
         <button class="btn btn-primary" @click="crearNuevoUsuario" :disabled="cargando">
           {{ cargando ? 'Cargando...' : '👥 Crear Usuario' }}
         </button>
+        <!-- </RoleGuard> -->
 
         <button class="btn btn-primary" @click="mostrarUsuarios" :disabled="cargando">
           {{ cargando ? 'Cargando...' : '🔄 Actualizar' }}
@@ -401,7 +404,7 @@ const usuariosFiltrados = computed(() => {
             <p><strong>Usuario: </strong> {{ u.username }}</p>
             <p><strong>Email: </strong> {{ u.email }}</p>
             <p><strong>Legajo: </strong> {{ u.legajo }}</p>
-            <p><strong>Rol: </strong> {{ u.roles }}</p>
+            <p><strong>Rol: </strong> {{ u.rol }}</p>
             <p><strong>Localidad: </strong> {{ u.localidad_nombre }}</p>
           </div>
 

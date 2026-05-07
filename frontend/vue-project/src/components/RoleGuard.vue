@@ -7,12 +7,16 @@
 </template>
 
 <script setup lang="ts">
-import { useUsuarioStore } from '@/stores/UsuarioStore';
 
-const props = defineProps<{ roles: string[] }>()
+import { computed } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
 
-const usuario = useUsuarioStore()
+const props = defineProps<{ roles: readonly string[] }>()
 
-const allowed = usuario.Role(props.roles)
+const auth = useAuthStore()
+
+const allowed = computed(() => {
+  return auth.hasRoles(props.roles)
+})
 
 </script>

@@ -144,10 +144,15 @@ async function handleLogin() {
   errorMsg.value = ''
   isLoading.value = true
   try {
+    
     const response = await authStore.login(form.username, form.password)
-    // Redirigir a home o dashboard después del login exitoso
     console.log("respuesta del login:", response)
-    router.push({ name: 'home' })
+
+    if (response){
+      // Redirigir a home o dashboard después del login exitoso
+      router.push({ name: 'home' })
+    }
+    
   } catch (err: any) {
     const serverError = err.response?.data?.error;
     if (serverError && serverError.includes("'NoneType' object has no attribute 'close'")) {

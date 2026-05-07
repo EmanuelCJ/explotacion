@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { onMounted, computed} from 'vue'
+import { onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUsuarioStore } from '@/stores/UsuarioStore'
 import { useAuthStore } from '@/stores/authStore'
+import RoleGuard from './RoleGuard.vue'
+
 
 const router = useRouter()
 const route = useRoute()
@@ -17,14 +19,14 @@ onMounted(() => {
 const usuario = computed(() => usuarioStore.usuario)
 
 const navItems = [
-  { name: 'productos', label: 'Nuevo Producto', icon: '📦' },
-  { name: 'inventario', label: 'Inventario', icon: '🗃️' },
-  { name: 'buscar', label: 'Buscar', icon: '🔍' },
-  { name: 'dashboard', label: 'Dashboard', icon: '📊' },
-  { name: 'movimientos', label: 'Movimientos', icon: '📋' },
-  { name: 'reportes', label: 'Reportes', icon: '📈' },
-  { name: 'usuarios', label: 'Usuarios', icon: '👥' },
-  { name: 'configuracion', label: 'Configuración', icon: '⚙️' }
+  { name: 'productos', label: 'Nuevo Producto', icon: '📦', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
+  { name: 'inventario', label: 'Inventario', icon: '🗃️', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
+  { name: 'buscar', label: 'Buscar', icon: '🔍', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
+  { name: 'dashboard', label: 'Dashboard', icon: '📊', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
+  { name: 'movimientos', label: 'Movimientos', icon: '📋', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
+  { name: 'reportes', label: 'Reportes', icon: '📈', roles: ['admin', 'maestro'] },
+  { name: 'usuarios', label: 'Usuarios', icon: '👥', roles: ['admin'] },
+  { name: 'configuracion', label: 'Configuración', icon: '⚙️', roles: ['admin', 'maestro', 'supervisor', 'usuario'] }
 ] as const
 
 function isActive(name: string): boolean {
@@ -33,7 +35,7 @@ function isActive(name: string): boolean {
 
 async function handleLogout() {
   await authStore.logout()
-  router.push('/') 
+  router.push('/')
 }
 
 </script>
@@ -46,15 +48,17 @@ async function handleLogout() {
     </div>
     <ul class="nav-menu">
       <li v-for="item in navItems" :key="item.name" class="nav-item">
-        <a class="nav-link" :class="{ active: isActive(item.name) }" @click="router.push({ name: item.name })">
-          <span class="nav-icon">{{ item.icon }}</span>
-          {{ item.label }}
-        </a>
+        <RoleGuard :roles="item.roles">
+          <a class="nav-link" :class="{ active: isActive(item.name) }" @click="router.push({ name: item.name })">
+            <span class="nav-icon">{{ item.icon }}</span>
+            {{ item.label }}
+          </a>
+        </RoleGuard>
       </li>
     </ul>
     <!-- Botón Logout fijo abajo -->
     <div class="logout-container">
-      
+
       <button class="logout-button" @click="handleLogout">
         Cierre de sesión
       </button>
@@ -137,7 +141,8 @@ async function handleLogout() {
 }
 
 .logout-container {
-  margin-top: auto; /* empuja el botón hacia abajo */
+  margin-top: auto;
+  /* empuja el botón hacia abajo */
   padding: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }

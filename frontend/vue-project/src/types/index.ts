@@ -155,7 +155,7 @@ export interface UsuarioData {
   permisos: string[],
   activo?: number,
   legajo?: number,
-  roles?: string,
+  rol?: string,
   created_at?: string
 }
 
@@ -236,15 +236,15 @@ interface UsuariosError {
 export type UsuariosResponse = UsuariosData | UsuariosError
 
 export interface usuariomodel {
-  'nombre':string,
-  'apellido':string,
-  'username':string,
-  'email':string,
-  'legajo':number,
-  'password': string,
-  'id_localidad':number,
-  'id_rol':number,
-  'activo'?: number
+  nombre : string,
+  apellido:string,
+  username : string,
+  email: string,
+  legajo:number,
+  password : string,
+  id_localidad:number,
+  id_rol:number,
+  activo?: number,
 }
 
 

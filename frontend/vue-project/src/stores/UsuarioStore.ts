@@ -4,7 +4,7 @@ import type { UsuarioData, MeResponse } from '@/types'
 
 export const useUsuarioStore = defineStore('usuario', {
   state: () => ({
-    usuario: null as UsuarioData | any, //cambie null por any
+    usuario: null as UsuarioData | null,
     rol: null as string | null,
     username: null as string | null,
     error: null as string | null,

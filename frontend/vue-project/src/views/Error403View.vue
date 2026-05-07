@@ -27,11 +27,13 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 .error-container {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: auto;
+  width: 100vh;
   height: 100vh;
   background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
 }

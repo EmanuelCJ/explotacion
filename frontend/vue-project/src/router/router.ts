@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore' // Asegúrate de tener esta tienda para la autenticación
-import { useUsuarioStore } from '@/stores/UsuarioStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,7 +8,19 @@ const router = createRouter({
       path: '/',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
-      meta: { title: 'Acceso al Sistema' }
+      meta: {
+        title: 'Acceso al Sistema'
+      }
+    },
+    {
+      path: '/403',
+      name: '403',
+      component: () => import('@/views/Error403View.vue'),
+      meta: {
+        requiresAuth: false,
+        title: 'Error de Permisos',
+        icon: '❌',
+      }
     },
     {
       path: '/home',
@@ -109,42 +120,73 @@ const router = createRouter({
             roles: ['admin']
           }
         },
-        {
-          path: '/403',
-          name: '403',
-          component: () => import('@/views/Error403View.vue'),
-          meta: {
-            title: 'Error de Permisos',
-            icon: '❌',
-          }
-        },
       ]
     }
   ]
 })
 
+// router.beforeEach(async (to) => {
+
+//   const auth = useAuthStore()
+//   const usuario = useUsuarioStore()
+
+//   if (!auth.initialized) {
+//     await auth.fetchUser()
+//   }
+
+//   // 2. Si la ruta requiere auth y NO está logueado → afuera
+//   if (to.meta.requiresAuth && !auth.isAuthenticated) {
+//     return '/'
+//   }
+
+//   // 3. Si está logueado y quiere ir a login → redirigir
+//   if (to.path === '/' && auth.isAuthenticated) {
+//     return '/home'
+//   }
+
+//   // // 🔐 validar roles
+//   // if (to.meta.roles && !usuario.hasRoles(to.meta.roles as string[])) {
+//   //   return '/403'
+//   // }
+
+//   return true
+// })
+
 router.beforeEach(async (to) => {
-
   const auth = useAuthStore()
-  const usuario = useUsuarioStore()
 
+  // Inicializar sesión
   if (!auth.initialized) {
     await auth.fetchUser()
   }
 
-  // 2. Si la ruta requiere auth y NO está logueado → afuera
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return '/'
+  // Si está logueado y quiere ir al login
+  if (to.name === 'login' && auth.isAuthenticated) {
+    return { name: 'home' }
   }
 
-  //  // 🔐 validar roles
-  // if (to.meta.roles && !usuario.hasRole(to.meta.roles as string[])) {
-  //   return '/home'
-  // }
+  // Rutas públicas
+  if (to.name === 'login' || to.name === '403') {
+    return true
+  }
 
-  // 3. Si está logueado y quiere ir a login → redirigir
-  if (to.path === '/' && auth.isAuthenticated) {
-    return '/home'
+  // Verificar autenticación
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return { name: 'login' }
+  }
+
+  // Verificar roles
+  if (to.meta.roles) {
+    const rolesPermitidos = to.meta.roles as string[]
+
+    // ⚠️ Esperar a que exista rol
+    if (!auth.rol) {
+      await auth.fetchMe()
+    }
+
+    if (!auth.hasRoles(rolesPermitidos)) {
+      return { name: '403' }
+    }
   }
 
   return true
