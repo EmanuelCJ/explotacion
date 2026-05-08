@@ -30,7 +30,7 @@ const router = createRouter({
         roles: ['admin', 'maestro', 'supervisor', 'usuario']
       },
       component: () => import('@/views/HomeView.vue'),
-      redirect: '/home/productos',
+      redirect: '/home/dashboard',
       children: [
         {
           path: 'inventario',
@@ -124,33 +124,6 @@ const router = createRouter({
     }
   ]
 })
-
-// router.beforeEach(async (to) => {
-
-//   const auth = useAuthStore()
-//   const usuario = useUsuarioStore()
-
-//   if (!auth.initialized) {
-//     await auth.fetchUser()
-//   }
-
-//   // 2. Si la ruta requiere auth y NO está logueado → afuera
-//   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-//     return '/'
-//   }
-
-//   // 3. Si está logueado y quiere ir a login → redirigir
-//   if (to.path === '/' && auth.isAuthenticated) {
-//     return '/home'
-//   }
-
-//   // // 🔐 validar roles
-//   // if (to.meta.roles && !usuario.hasRoles(to.meta.roles as string[])) {
-//   //   return '/403'
-//   // }
-
-//   return true
-// })
 
 router.beforeEach(async (to) => {
   const auth = useAuthStore()

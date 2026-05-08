@@ -5,7 +5,7 @@ import AppMessage from '@/components/AppMessage.vue'
 import { useInventarioStore } from '@/stores/inventario'
 import { obtenerStock } from '@/api/inventario'
 import type { ProductoStock, AppMessage as Msg } from '@/types'
-import { EstadoStock } from '@/types'
+import { condicion_producto } from '@/types'
 
 const store = useInventarioStore()
 const alertas = ref<ProductoStock[]>([])
@@ -27,7 +27,7 @@ async function verAlertas() {
     msg.value = null
     const stock = await obtenerStock()
     alertas.value = stock.filter(
-      p => p.estado === EstadoStock.BAJO || p.estado === EstadoStock.SIN_STOCK
+      p => p.estado === condicion_producto.BAJO || p.estado === condicion_producto.SIN_STOCK
     )
     if (alertas.value.length === 0) {
       msg.value = { text: 'No hay alertas de stock activas. ¡Todo en orden!', type: 'success' }
@@ -101,7 +101,7 @@ async function verAlertas() {
               <tr
                 v-for="p in alertas"
                 :key="p.codigo"
-                :class="p.estado === EstadoStock.SIN_STOCK ? 'row-zero' : 'row-low'"
+                :class="p.estado === condicion_producto.SIN_STOCK ? 'row-zero' : 'row-low'"
               >
                 <td>{{ p.codigo }}</td>
                 <td>{{ p.nombre }}</td>

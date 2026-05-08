@@ -102,12 +102,13 @@ export async function registrarProducto(payload: NuevoProductoPayload): Promise<
   return data.mensaje
 }
 
-// export async function buscarProducto(texto: string): Promise<editarProducto> {
-//   const { data } = await http.get<ProductoStock[]>('/productos/buscar', {
-//     params: { q: texto }
-//   })
-//   return data
-// }
+//REVISAR
+export async function buscarProducto(texto: string){
+  const { data } = await http.get('/productos/buscar', {
+    params: { q: texto }
+  })
+  return data
+}
 
 export async function buscarProductoPorCodigo(codigo: string): Promise<ProductoSugerencia[]> {
   const { data } = await http.get<ProductoSugerencia[]>('/productos/buscar-codigo', {

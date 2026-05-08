@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import AppMessage from '@/components/AppMessage.vue'
 import { buscarProducto } from '@/api/inventario'
 import type { ProductoStock, AppMessage as Msg } from '@/types'
-import { EstadoStock } from '@/types'
+import { condicion_producto } from '@/types'
 
 const texto = ref('')
 const resultados = ref<ProductoStock[]>([])
@@ -12,8 +12,8 @@ const cargando = ref(false)
 let debounceTimer: ReturnType<typeof setTimeout>
 
 function rowClass(p: ProductoStock): string {
-  if (p.estado === EstadoStock.SIN_STOCK) return 'row-zero'
-  if (p.estado === EstadoStock.BAJO) return 'row-low'
+  if (p.estado === condicion_producto.SIN_STOCK) return 'row-zero'
+  if (p.estado === condicion_producto.BAJO) return 'row-low'
   return ''
 }
 

@@ -19,10 +19,10 @@ onMounted(() => {
 const usuario = computed(() => usuarioStore.usuario)
 
 const navItems = [
-  { name: 'productos', label: 'Nuevo Producto', icon: '📦', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
+  { name: 'dashboard', label: 'Dashboard', icon: '📊', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
   { name: 'inventario', label: 'Inventario', icon: '🗃️', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
   { name: 'buscar', label: 'Buscar', icon: '🔍', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
-  { name: 'dashboard', label: 'Dashboard', icon: '📊', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
+  { name: 'productos', label: 'Nuevo Producto', icon: '📦', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
   { name: 'movimientos', label: 'Movimientos', icon: '📋', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
   { name: 'reportes', label: 'Reportes', icon: '📈', roles: ['admin', 'maestro'] },
   { name: 'usuarios', label: 'Usuarios', icon: '👥', roles: ['admin'] },

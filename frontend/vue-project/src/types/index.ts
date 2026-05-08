@@ -12,7 +12,21 @@ export enum activo_producto {
   Activo = 1,
   NoActivo = 0
 }
-
+export enum condicion_producto{
+  BAJO,
+  NORMAL,
+  SIN_STOCK
+}
+export interface ProductoStock{
+  codigo :string,
+  nombre:string,
+  unidad:string,
+  grupo:string,
+  stockMin:string,
+  cantidad:number,
+  estado:number
+}
+ 
 // ─── Modelos ──────────────────────────────────────────────────────────────────
 
 export interface Producto {
