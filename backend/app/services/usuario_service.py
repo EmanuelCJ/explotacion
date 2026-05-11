@@ -38,6 +38,8 @@ class UsuarioService:
         """
         # Validaciones
         UsuarioService._validate_user_data(data)
+
+        print("valido")
         
         # Verificar que no exista el username
         if UsuarioDAO.exists_username(data['username']):
@@ -46,12 +48,12 @@ class UsuarioService:
         # Verificar que no exista el email
         if data.get('email') and UsuarioDAO.exists_email(data['email']):
             raise Exception(f"El email '{data['email']}' ya existe")
-        
+
         # Verificar que existe la localidad
         localidad = LocalidadDAO.get_by_id(data['id_localidad'])
         if not localidad:
             raise Exception("Localidad no encontrada")
-        
+
         # Hashear password
         password_hash = AuthService.hash_password(data['password'])
         
@@ -65,6 +67,8 @@ class UsuarioService:
             'legajo': data.get('legajo'),
             'id_localidad': data['id_localidad']
         }
+
+        print(user_data)
         
         # Crear usuario
         usuario_id = UsuarioDAO.create(user_data)
@@ -80,21 +84,22 @@ class UsuarioService:
         # Obtener User Agent para la auditoría osea quien crea el usuario
         user_agent = UsuarioDAO.username(admin_id)
 
-        # Registrar en auditoría
-        AuditoriaDAO.create({
-            'entidad': 'Usuario',
-            'id_entidad': usuario_id,
-            'accion': 'create',
-            'descripcion': f"Usuario creado: {data['username']}",
-            'ip_address': ip_user,
-            'user_agent': user_agent,
-            'datos_nuevos': {
-                'nombre': data['nombre'],
-                'apellido': data['apellido'],
-                'username': data['username'],
-                'localidad_id': data['id_localidad']
-            },
-            'id_usuario': admin_id
+        if usuario_id > 0 :    
+            # Registrar en auditoría
+            AuditoriaDAO.create({
+                'entidad': 'Usuario',
+                'id_entidad': usuario_id,
+                'accion': 'create',
+                'descripcion': f"Usuario creado: {data['username']}",
+                'ip_address': ip_user,
+                'user_agent': user_agent,
+                'datos_nuevos': {
+                    'nombre': data['nombre'],
+                    'apellido': data['apellido'],
+                    'username': data['username'],
+                    'localidad_id': data['id_localidad']
+                },
+                'id_usuario': admin_id
         })
 
         return usuario_id
@@ -109,6 +114,11 @@ class UsuarioService:
         """Obtener todos los usuarios sin paginación"""
         return UsuarioDAO.get_all_sin_paginacion()
 
+    @staticmethod
+    def get_all_localidad(id_localidad: int):
+        """Obtener todos los usuarios segun su localidad"""
+        return UsuarioDAO.get_all_localides(id_localidad)
+    
     @staticmethod
     def get_by_id(usuario_id: int) -> dict:
         """Obtener usuario por ID (sin password)"""

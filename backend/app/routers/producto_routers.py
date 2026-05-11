@@ -34,6 +34,7 @@ def stock_localidad():
         
         # Obtener el usuario para conocer su información, incluyendo la localidad
         usuario = UsuarioService.get_by_id(id_usuario)
+        
         if usuario['activo'] == 0 and usuario is None:
             return jsonify({'error': 'Usuario no encontrado o no esta activo'}), 404
         

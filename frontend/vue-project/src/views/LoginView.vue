@@ -146,7 +146,6 @@ async function handleLogin() {
   try {
     
     const response = await authStore.login(form.username, form.password)
-    console.log("respuesta del login:", response)
 
     if (response){
       // Redirigir a home o dashboard después del login exitoso

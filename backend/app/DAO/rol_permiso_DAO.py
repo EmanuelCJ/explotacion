@@ -10,11 +10,11 @@ class RolDAO:
     """Data Access Object para la tabla roles"""
     
     @staticmethod
-    def get(activo=None) -> list:
+    def get(activo=None) -> dict:
         """Obtener todos los roles"""
         try:
             connection = ConectDB.get_connection()
-            with connection.cursor() as cursor:
+            with connection.cursor(dictionary=True) as cursor:
                 query = "SELECT id_rol, nombre, descripcion FROM roles WHERE 1=1"
                 params = []
                 

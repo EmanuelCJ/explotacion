@@ -12,7 +12,7 @@ roles_bp = Blueprint('roles', __name__)
 
 @roles_bp.route('/', methods=['GET'])
 @jwt_required_cookie()
-@require_role('admin')
+@require_role('admin','maestro')
 @require_permiso('ver_usuarios')
 def get_usuarios():
 

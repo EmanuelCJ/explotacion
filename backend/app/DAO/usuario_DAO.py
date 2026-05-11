@@ -176,6 +176,52 @@ class UsuarioDAO:
         finally:
             connection.close()
 
+    @staticmethod
+    def get_all_localides(id_localidad: int) -> dict:
+        """
+        Obtener todos los usuarios sin paginación
+        
+        Returns:
+            dict: {
+                'usuarios': list
+            }
+        """
+        try:
+            connection = ConectDB.get_connection()
+            with connection.cursor(dictionary=True) as cursor:
+                query = """
+                    SELECT 
+                    u.id_usuario, 
+                    u.id_usuario,
+                    u.username,
+                    u.nombre, 
+                    u.apellido,
+                    u.activo,
+                    u.legajo,
+                    u.email,
+                    u.created_at,
+                    u.updated_at, 
+                    l.nombre as localidad_nombre,
+                    GROUP_CONCAT(r.nombre) as rol
+                    FROM usuarios u
+                    LEFT JOIN localidades l ON u.id_localidad = l.id_localidad
+                    LEFT JOIN usuarios_roles ur ON u.id_usuario = ur.id_usuario
+                    LEFT JOIN roles r ON ur.id_rol = r.id_rol
+                    WHERE l.id_localidad = %s
+                    GROUP BY u.id_usuario ORDER BY u.id_usuario DESC
+                """
+                cursor.execute(query,(id_localidad,))
+                usuarios = cursor.fetchall()
+                
+                return {
+                    'usuarios': usuarios
+                }
+        except Exception as e:
+            print(f"Error getting usuarios: {e}")
+            raise
+        finally:
+            connection.close()
+
 
     @staticmethod
     def get_id(usuario_id: int) -> dict:

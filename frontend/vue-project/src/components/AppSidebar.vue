@@ -25,7 +25,8 @@ const navItems = [
   { name: 'productos', label: 'Nuevo Producto', icon: '📦', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
   { name: 'movimientos', label: 'Movimientos', icon: '📋', roles: ['admin', 'maestro', 'supervisor', 'usuario'] },
   { name: 'reportes', label: 'Reportes', icon: '📈', roles: ['admin', 'maestro'] },
-  { name: 'usuarios', label: 'Usuarios', icon: '👥', roles: ['admin'] },
+  { name: 'gestor', label: 'Gestor Usuarios', icon: '👥', roles: ['admin'] },
+  { name: 'usuarios', label: 'Usuarios', icon: '👥', roles: ['maestro'] },
   { name: 'configuracion', label: 'Configuración', icon: '⚙️', roles: ['admin', 'maestro', 'supervisor', 'usuario'] }
 ] as const
 

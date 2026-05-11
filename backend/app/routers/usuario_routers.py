@@ -2,6 +2,7 @@
 
 from flask import Blueprint, request, jsonify
 from app.services.usuario_service import UsuarioService
+from app.middlewares.usuario_data_validation import usuario_data_validation
 from app.utils.decoradores_auth import (
     jwt_required_cookie,
     require_permiso,
@@ -28,14 +29,38 @@ def get_usuarios():
     result = UsuarioService.get_estado(page, limit, activo)
     return jsonify(result), 200
 
-@usuario_bp.route('/', methods=['GET'])
+@usuario_bp.route('/get', methods=['GET'])
 @jwt_required_cookie()
 @require_permiso('ver_usuarios')
-@require_role('admin')
+@require_role('admin','maestro')
 def get_all_usuarios():
     """Obtener todos los usuarios sin paginación"""
     usuarios = UsuarioService.get_all_sin_paginacion()
     return jsonify(usuarios), 200
+
+@usuario_bp.route('/get/localidad', methods=['GET'])
+@jwt_required_cookie()
+@require_permiso('ver_usuarios')
+@require_role('admin','maestro')
+def get_all_usuarios_localidades():
+    """Obtener todos los usuarios sin paginación"""
+
+    try:
+        # Obtener el ID del usuario desde el token JWT
+        id_usuario = get_current_user_id()
+        
+        # Obtener el usuario para conocer su información, incluyendo la localidad
+        usuario = UsuarioService.get_by_id(id_usuario)
+        
+        if usuario['activo'] == 0 and usuario is None:
+            return jsonify({'error': 'Usuario no encontrado o no esta activo'}), 404
+        
+        usuarios = UsuarioService.get_all_localidad(usuario['id_localidad'])
+        return jsonify(usuarios), 200
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 
 @usuario_bp.route('/buscar/id', methods=['GET'])
 @jwt_required_cookie()
@@ -101,7 +126,7 @@ def create_usuario():
      "username" : "subadmin",
      "email" : "ejemplo@gmail.com",
      "password" : "arsa2026",
-     "legajo" : "9999",
+     "legajo" : 9999,
      "id_localidad" : 1,
      "id_rol" : 2
     }
@@ -110,8 +135,10 @@ def create_usuario():
     
     admin_id = get_current_user_id()
     data = request.get_json()
-    
+
     usuario_id = UsuarioService.create(data, admin_id)
+
+    
     return jsonify({
         'success': True,
         'message': 'Usuario creado',

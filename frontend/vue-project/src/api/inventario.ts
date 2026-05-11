@@ -13,9 +13,10 @@ import type {
   VerificarResponse,
   LogoutResponse,
   editarProducto,
-  UsuariosResponse,
-  CreateResponse,
+  Usuarios_Response,
+  Usuario_Model,
   UpdateResponse,
+  Usuario_Create,
   get_roles,
   Resumen,
   Producto,
@@ -103,7 +104,7 @@ export async function registrarProducto(payload: NuevoProductoPayload): Promise<
 }
 
 //REVISAR
-export async function buscarProducto(texto: string){
+export async function buscarProducto(texto: string) {
   const { data } = await http.get('/productos/buscar', {
     params: { q: texto }
   })
@@ -158,13 +159,17 @@ export async function validarIntegridad(): Promise<ValidacionIntegridad> {
 
 // ─── Usuarios ───────────────────────────────────────────────────────────
 
-export async function obtenerUsuarios(): Promise<UsuariosResponse> {
-  const { data } = await http.get<UsuariosResponse>('/api/usuarios/')
+export async function obtenerUsuarios(): Promise<Usuarios_Response> {
+  const { data } = await http.get<Usuarios_Response>('/api/usuarios/get')
+  return data
+}
+export async function obtenerUsuariosPorLocalidad(): Promise<Usuarios_Response> {
+  const { data } = await http.get<Usuarios_Response>('/api/usuarios/get/localidad')
   return data
 }
 
-export async function crearUsuarios(): Promise<CreateResponse> {
-  const { data } = await http.get<CreateResponse>('/api/usuario/create')
+export async function crearUsuarios(usuario_data: Usuario_Model) {
+  const { data } = await http.post<Usuario_Create>('/api/usuarios/create', usuario_data)
   return data
 }
 
@@ -177,16 +182,16 @@ export async function updateUsuario(id_usuario: number, cambios: Partial<Usuario
 }
 
 // ─── localidades ───────────────────────────────────────────────────────────
-export async function obtenerLocalidades(): Promise<localidadesResponse>{
+export async function obtenerLocalidades(): Promise<localidadesResponse> {
   const { data } = await http.get<localidadesResponse>('/api/localidades/')
   return data
 }
 
 // ─── roles del sistema ───────────────────────────────────────────────────────────
-export async function obtenerRoles() :Promise<get_roles>{
+export async function obtenerRoles(): Promise<get_roles> {
 
-  const {data} = await http.get<get_roles>('/api/roles/')
-  
+  const { data } = await http.get<get_roles>('/api/roles/')
+
   return data
 
 }

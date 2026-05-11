@@ -117,7 +117,18 @@ const router = createRouter({
             requiresAuth: true,
             title: 'Gestión de Usuarios',
             icon: '👥',
-            roles: ['admin']
+            roles: ['admin', 'maestro']
+          }
+        },
+        {
+          path: 'gestor',
+          name: 'gestor',
+          component: () => import('@/views/GestorUsuariosView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: 'Gestión de Usuarios',
+            icon: '👥',
+            roles: ['admin', 'maestro']
           }
         },
       ]

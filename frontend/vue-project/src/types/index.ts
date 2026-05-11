@@ -238,18 +238,18 @@ interface LogoutError {
 export type LogoutResponse = logout | LogoutError
 
 // respuesta de api/usuarios/
-interface UsuariosData {
+interface Usuarios_Data {
   usuarios: UsuarioData[]
 }
 // el enpoint devuelve error
-interface UsuariosError {
+interface Usuarios_Error {
   error: string
   detail?: string
 }
 
-export type UsuariosResponse = UsuariosData | UsuariosError
+export type Usuarios_Response = Usuarios_Data | Usuarios_Error
 
-export interface usuariomodel {
+export interface Usuario_Model {
   nombre : string,
   apellido:string,
   username : string,
@@ -261,19 +261,25 @@ export interface usuariomodel {
   activo?: number,
 }
 
+interface Create_Error {
+  error: string
+  detail?: string
+}
 
-interface createUsuarioResponse {
+interface Create_Usuario_Response {
   message: string,
   success: Boolean,
   usuario_id: number
 }
+
+export type Usuario_Create = Create_Usuario_Response | Create_Error
 
 interface createUsuarioError {
   error: string
   detail?: string
 }
 
-export type CreateResponse = createUsuarioResponse | createUsuarioError
+export type CreateResponse = Create_Usuario_Response | createUsuarioError
 
 interface updateSeccess {
   message: string
