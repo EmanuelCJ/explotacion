@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import AppMessage from '@/components/AppMessage.vue'
-import { obtenerUsuarios, updateUsuario, obtenerLocalidades, obtenerRoles, crearUsuarios } from '@/api/inventario'
+import { obtenerUsuarios, updateUsuario, obtenerLocalidades, obtenerRoles, crearUsuarios, rolAsignar as RolAsignar, rolQuitar } from '@/api/inventario'
 import type { UsuarioData, Usuario_Model, AppMessage as Msg, localidad, roles } from '@/types'
 import RoleGuard from '@/components/RoleGuard.vue'
 
@@ -327,21 +327,9 @@ async function asignarRol() {
 
     cargando.value = true
 
-    const response = await fetch(
-      '/api/usuarios/asignar-rol',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          usuario_id: usuarioRolSeleccionado.value.id_usuario,
-          rol_id: nuevoRolId.value
-        })
-      }
-    )
+    const response = await RolAsignar({usuario_id:usuarioRolSeleccionado.value.id_usuario,rol_id: nuevoRolId.value})
 
-    if (!response.ok) {
+    if (!response) {
       throw new Error()
     }
 
@@ -385,20 +373,9 @@ async function quitarRol() {
 
     cargando.value = true
 
-    const response = await fetch(
-      '/api/usuarios/quitar-rol',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          usuario_id: usuarioRolSeleccionado.value.id_usuario
-        })
-      }
-    )
+    const response = await rolQuitar({usuario_id: usuarioRolSeleccionado.value.id_usuario})
 
-    if (!response.ok) {
+    if (!response) {
       throw new Error()
     }
 

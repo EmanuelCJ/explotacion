@@ -191,7 +191,7 @@ def update_usuario(id):
 #     success = UsuarioService.delete(data['usuario_id'], admin_id)
 #     return jsonify({'message': 'Usuario eliminado'}), 200
 
-@usuario_bp.route('/asignar-rol', methods=['POST'])
+@usuario_bp.route('/rol/asignar', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('asignar_roles')
 @require_role('admin')
@@ -207,7 +207,7 @@ def asignar_rol():
         return jsonify({'error': 'No se pudo asignar el rol'}), 500
 
 #Se rol_id por que no era necesario, cada usuario debe tener un rol asignado
-@usuario_bp.route('/quitar-rol', methods=['POST'])
+@usuario_bp.route('/rol/quitar', methods=['POST'])
 @jwt_required_cookie()
 @require_permiso('asignar_roles')
 @require_role('admin')

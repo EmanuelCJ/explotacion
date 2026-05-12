@@ -17,7 +17,9 @@ import type {
   Usuario_Model,
   UpdateResponse,
   Usuario_Create,
-  get_roles,
+  GetRoles,
+  RespondeRol,
+  RolData,
   Resumen,
   Producto,
   ProductoSugerencia,
@@ -188,10 +190,21 @@ export async function obtenerLocalidades(): Promise<localidadesResponse> {
 }
 
 // ─── roles del sistema ───────────────────────────────────────────────────────────
-export async function obtenerRoles(): Promise<get_roles> {
+export async function obtenerRoles(): Promise<GetRoles> {
 
-  const { data } = await http.get<get_roles>('/api/roles/')
+  const { data } = await http.get<GetRoles>('/api/roles/')
 
   return data
 
 }
+export async function rolAsignar(payload: RolData) : Promise<RespondeRol>  {
+  const { data } = await http.post<RespondeRol>('/api/usuarios/rol/asignar', payload)
+  return data
+}
+
+export async function rolQuitar(payload: RolData) : Promise<RespondeRol>  {
+  const { data } = await http.post<RespondeRol>('/api/usuarios/rol/quitar', payload)
+  return data
+}
+
+// ─── roles del sistema ───────────────────────────────────────────────────────────

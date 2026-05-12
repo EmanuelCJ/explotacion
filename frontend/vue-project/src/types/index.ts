@@ -305,9 +305,9 @@ interface localidadesError {
 export type localidadesResponse = localidad[] | localidadesError
 
 export interface roles {
-  'id_rol':number,
-  'nombre': string,
-  'descripcion': string,
+  id_rol:number,
+  nombre: string,
+  descripcion: string,
 }
 
 interface rolesError {
@@ -315,4 +315,21 @@ interface rolesError {
   detail?: string
 }
 
-export type get_roles = roles[] | rolesError
+export type GetRoles = roles[] | rolesError
+
+interface RolSuccess{
+  message: string
+}
+
+interface RolError {
+  error: string,
+  detail?: string
+}
+
+
+export type RespondeRol = RolSuccess | RolError
+
+export interface RolData{
+  usuario_id : number,
+  rol_id?: number
+}
