@@ -20,6 +20,8 @@ import type {
   GetRoles,
   RespondeRol,
   RolData,
+  RespondePassword,
+  PasswordData,
   Resumen,
   Producto,
   ProductoSugerencia,
@@ -198,13 +200,17 @@ export async function obtenerRoles(): Promise<GetRoles> {
 
 }
 export async function rolAsignar(payload: RolData) : Promise<RespondeRol>  {
-  const { data } = await http.post<RespondeRol>('/api/usuarios/rol/asignar', payload)
+  const { data } = await http.put<RespondeRol>('/api/usuarios/rol/asignar', payload)
   return data
 }
 
 export async function rolQuitar(payload: RolData) : Promise<RespondeRol>  {
-  const { data } = await http.post<RespondeRol>('/api/usuarios/rol/quitar', payload)
+  const { data } = await http.put<RespondeRol>('/api/usuarios/rol/quitar', payload)
   return data
 }
 
-// ─── roles del sistema ───────────────────────────────────────────────────────────
+// ─── cambio password ───────────────────────────────────────────────────────────
+export async function newPassword(payload: PasswordData ) : Promise <RespondePassword> {
+  const {data} = await http.patch<RespondePassword>('api/usuarios/password', payload)
+  return data
+}

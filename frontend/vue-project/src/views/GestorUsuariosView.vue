@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import AppMessage from '@/components/AppMessage.vue'
-import { obtenerUsuarios, updateUsuario, obtenerLocalidades, obtenerRoles, crearUsuarios, rolAsignar as RolAsignar, rolQuitar } from '@/api/inventario'
+import { obtenerUsuarios, updateUsuario, obtenerLocalidades, obtenerRoles, crearUsuarios, rolAsignar as RolAsignar, rolQuitar, newPassword } from '@/api/inventario'
 import type { UsuarioData, Usuario_Model, AppMessage as Msg, localidad, roles } from '@/types'
 import RoleGuard from '@/components/RoleGuard.vue'
 
@@ -440,21 +440,11 @@ async function cambiarPassword() {
 
     cargando.value = true
 
-    const response = await fetch(
-      '/api/usuarios/cambiar-password',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          usuario_id: usuarioPasswordSeleccionado.value.id_usuario,
-          new_password: nuevaPassword.value
-        })
-      }
-    )
+    const response = await newPassword({usuario_id:usuarioPasswordSeleccionado.value.id_usuario,new_password: nuevaPassword.value}) 
+      
+    
 
-    if (!response.ok) {
+    if (!response) {
       throw new Error()
     }
 

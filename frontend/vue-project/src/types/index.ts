@@ -326,10 +326,25 @@ interface RolError {
   detail?: string
 }
 
-
 export type RespondeRol = RolSuccess | RolError
 
 export interface RolData{
   usuario_id : number,
   rol_id?: number
 }
+
+export interface PasswordData{
+  usuario_id: number,
+  new_password: string
+}
+
+interface PasswordError {
+  error: string,
+  detail?: string
+}
+
+interface PasswordSuccess {
+  message: string
+}
+
+export type RespondePassword = PasswordError | PasswordSuccess
